@@ -1499,7 +1499,7 @@ tr:hover td { background: #F8FAF9; }
           </select>
         </div>
         <div class="field"><label>เบอร์โทร (10 หลัก) <span class="req">*</span></label><input name="phone" required maxlength="10"></div>
-        <div class="field"><label>เลขพื้นที่ (ล็อก)</label><input name="slots" placeholder="ปล่อยว่างได้"></div>
+        <div class="field"><label>เลขพื้นที่ (ล็อก)</label><input name="slots" id="add-slots" placeholder="ปล่อยว่างได้"></div>
         <div class="field"><label>สถานะ <span class="req">*</span></label>
           <select name="status" required>
             <option value="active">เปิดขายปกติ (Active)</option>
@@ -1791,8 +1791,11 @@ tr:hover td { background: #F8FAF9; }
           window.openEditShop(s.id);
         });
       } else if (window.adminMode && !s) {
-        div.style.cursor = 'crosshair';
-        div.title = 'พื้นที่ว่าง';
+        div.style.cursor = 'pointer';
+        div.title = 'คลิกเพื่อเพิ่มร้านค้าใหม่ในพื้นที่นี้';
+        div.addEventListener('click', () => {
+          window.openAddShop(i);
+        });
       }
 
       // Tooltip
@@ -2307,8 +2310,9 @@ tr:hover td { background: #F8FAF9; }
   };
 
   /* ─── ADD SHOP (Admin) ─── */
-  window.openAddShop = () => {
+  window.openAddShop = (slotNum = '') => {
     document.getElementById('form-add-shop').reset();
+    document.getElementById('add-slots').value = slotNum;
     document.getElementById('modal-add-shop').style.display = 'block';
     document.getElementById('modal-bg').style.display = 'block';
   };
