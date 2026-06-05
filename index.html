@@ -1323,6 +1323,7 @@ tr:hover td { background: #F8FAF9; }
         <div class="card">
           <div class="search-bar">
             <input type="text" id="search-shop-admin" class="search-input" placeholder="🔍 ค้นหาชื่อร้านหรือเบอร์โทร...">
+            <button class="btn btn-primary" onclick="window.openAddShop()">➕ เพิ่มร้านค้าใหม่</button>
             <button class="btn btn-ghost" onclick="window.exportShops()">📊 Export Excel</button>
           </div>
           <div class="tbl-wrap">
@@ -1479,6 +1480,38 @@ tr:hover td { background: #F8FAF9; }
       <button class="btn btn-primary" onclick="window.actionApp('approved')">✅ อนุมัติ</button>
       <button class="btn btn-danger" onclick="window.actionApp('rejected')">❌ ไม่อนุมัติ</button>
     </div>
+  </div>
+
+  <!-- MODAL: ADD SHOP -->
+  <div id="modal-add-shop" class="modal-box">
+    <div class="modal-title">➕ เพิ่มร้านค้าใหม่ (โดยผู้ดูแล)</div>
+    <form id="form-add-shop">
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="field"><label>ชื่อจริง <span class="req">*</span></label><input name="firstName" required></div>
+        <div class="field"><label>นามสกุล <span class="req">*</span></label><input name="lastName" required></div>
+        <div class="field full"><label>ชื่อร้านค้า <span class="req">*</span></label><input name="shopName" required></div>
+        <div class="field"><label>หมวดหมู่ <span class="req">*</span></label>
+          <select name="category" required>
+            <option value="อาหาร">อาหาร</option>
+            <option value="เครื่องดื่ม">เครื่องดื่ม</option>
+            <option value="เสื้อผ้าและของใช้">เสื้อผ้าและของใช้</option>
+            <option value="รถฟู้ดทรัค (Food Truck)">รถฟู้ดทรัค (Food Truck)</option>
+          </select>
+        </div>
+        <div class="field"><label>เบอร์โทร (10 หลัก) <span class="req">*</span></label><input name="phone" required maxlength="10"></div>
+        <div class="field"><label>เลขพื้นที่ (ล็อก)</label><input name="slots" placeholder="ปล่อยว่างได้"></div>
+        <div class="field"><label>สถานะ <span class="req">*</span></label>
+          <select name="status" required>
+            <option value="active">เปิดขายปกติ (Active)</option>
+            <option value="pending">รอพิจารณา (Pending)</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="submit" class="btn btn-primary" id="btn-submit-add-shop">💾 บันทึกเพิ่มร้านค้า</button>
+        <button type="button" class="btn btn-ghost" onclick="window.closeModal()">ยกเลิก</button>
+      </div>
+    </form>
   </div>
 
   <!-- MODAL: EDIT SHOP -->
@@ -2272,6 +2305,37 @@ tr:hover td { background: #F8FAF9; }
       loadAdminData();
     } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
   };
+
+  /* ─── ADD SHOP (Admin) ─── */
+  window.openAddShop = () => {
+    document.getElementById('form-add-shop').reset();
+    document.getElementById('modal-add-shop').style.display = 'block';
+    document.getElementById('modal-bg').style.display = 'block';
+  };
+
+  document.getElementById('form-add-shop').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-add-shop');
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังบันทึก...';
+    try {
+      const data = Object.fromEntries(new FormData(e.target));
+      data.createdAt = serverTimestamp();
+      data.items = 'เพิ่มข้อมูลโดยผู้ดูแลระบบ'; 
+      data.religion = 'ไม่ระบุ';
+      data.applyType = 'new';
+      
+      await addDoc(collection(db, "shops"), data);
+      alert('✅ เพิ่มร้านค้าสำเร็จ');
+      window.closeModal();
+      loadAdminData();
+    } catch(err) {
+      alert('เกิดข้อผิดพลาด: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '💾 บันทึกเพิ่มร้านค้า';
+    }
+  });
 
   /* ─── EDIT SHOP ─── */
   window.openEditShop = async (id) => {
