@@ -1007,13 +1007,35 @@ tr:hover td { background: #F8FAF9; }
   <div id="page-apply" class="page">
     <div class="page-inner-md">
       <div class="card">
-        <div class="card-title">📝 ลงทะเบียนผู้ประกอบการใหม่</div>
+        <div class="card-title">📝 ลงทะเบียนผู้ประกอบการ</div>
 
         <div id="apply-closed-msg" class="info-box amber" style="display:none;">
           ⚠️ ขออภัย ขณะนี้ระบบปิดรับลงทะเบียนชั่วคราว กรุณาติดต่อเจ้าหน้าที่
         </div>
 
         <form id="form-apply">
+          <div class="form-section">
+            <div class="form-section-title">ประเภทการลงทะเบียน</div>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+              <label style="display:flex; align-items:center; gap:8px; background:var(--white); padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
+                <input type="radio" name="applyType" value="new" checked onchange="document.getElementById('substitute-options').style.display='none'"> 
+                <span style="font-weight:600; color:var(--text);">✨ สมัครสิทธิ์ใหม่ถาวร</span>
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; background:var(--white); padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
+                <input type="radio" name="applyType" value="substitute" onchange="document.getElementById('substitute-options').style.display='block'"> 
+                <span style="font-weight:600; color:var(--text);">🔄 สมัครขายแทนร้านที่ลา (ชั่วคราว)</span>
+              </label>
+            </div>
+            
+            <div id="substitute-options" style="display:none; margin-top:16px; background:var(--amber-l); border-left:3px solid var(--amber); padding:12px 16px; border-radius:8px;">
+              <div id="substitute-schedule-msg" style="font-size:13px; color:#7c3d0a; font-weight:600; margin-bottom:10px;"></div>
+              <div class="field">
+                <label style="color:#7c3d0a;">เลือกวันที่ต้องการขายแทน <span class="req">*</span></label>
+                <input type="date" name="substituteDate" id="substituteDateInput">
+              </div>
+            </div>
+          </div>
+
           <div class="form-section">
             <div class="form-section-title">ข้อมูลส่วนตัว</div>
             <div class="form-grid">
@@ -1345,6 +1367,19 @@ tr:hover td { background: #F8FAF9; }
               <input type="datetime-local" id="set-leave-end">
             </div>
             <button class="btn btn-primary btn-sm" onclick="window.saveConfig('leave_period')">💾 บันทึกการตั้งค่า</button>
+          </div>
+
+          <div class="settings-card">
+            <h3>🔄 ลงทะเบียนขายแทนร้านที่ลา</h3>
+            <div class="field" style="margin-bottom:12px;">
+              <label>เปิดรับลงทะเบียนตั้งแต่</label>
+              <input type="datetime-local" id="set-sub-start">
+            </div>
+            <div class="field" style="margin-bottom:14px;">
+              <label>ปิดรับลงทะเบียนเมื่อ</label>
+              <input type="datetime-local" id="set-sub-end">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.saveConfig('substitute_period')">💾 บันทึกการตั้งค่า</button>
           </div>
 
           <div class="settings-card">
@@ -1867,9 +1902,26 @@ tr:hover td { background: #F8FAF9; }
         document.getElementById('renew-deadline-label').innerText = r.deadline || '';
       }
 
+      // Substitute Schedule
+      const sub = c.substitute_period || {};
+      const subMsg = document.getElementById('substitute-schedule-msg');
+      if (sub.start && sub.end) {
+        subMsg.innerHTML = `เปิดรับลงทะเบียนขายแทน: <br>ตั้งแต่วันที่ ${new Date(sub.start).toLocaleDateString('th-TH')} ถึง ${new Date(sub.end).toLocaleDateString('th-TH')}`;
+        const now = new Date();
+        if (now >= new Date(sub.start) && now <= new Date(sub.end)) {
+          document.getElementById('substituteDateInput').disabled = false;
+        } else {
+          document.getElementById('substituteDateInput').disabled = true;
+          subMsg.innerHTML += '<br><span style="color:red;">(ขณะนี้อยู่นอกช่วงเวลาลงทะเบียน)</span>';
+        }
+      } else {
+        subMsg.innerHTML = 'ยังไม่มีการกำหนดช่วงเวลาลงทะเบียนขายแทน';
+        document.getElementById('substituteDateInput').disabled = true;
+      }
+
       // Apply closed
       document.getElementById('apply-closed-msg').style.display = v.apply ? 'none' : 'flex';
-
+      
       // Admin sync
       if (window.adminMode) {
         document.getElementById('vis-apply').checked    = !!v.apply;
@@ -1879,6 +1931,14 @@ tr:hover td { background: #F8FAF9; }
         document.getElementById('set-renew-end').value  = r.deadline || '';
         document.getElementById('set-renew-open').checked = !!r.open;
         document.getElementById('set-announcement').value = c.announcement || '';
+        if (c.leave_period) {
+          document.getElementById('set-leave-start').value = c.leave_period.start || '';
+          document.getElementById('set-leave-end').value = c.leave_period.end || '';
+        }
+        if (c.substitute_period) {
+          document.getElementById('set-sub-start').value = c.substitute_period.start || '';
+          document.getElementById('set-sub-end').value = c.substitute_period.end || '';
+        }
       }
     } catch(e) { console.warn('loadSystemConfig:', e); }
   }
@@ -1906,6 +1966,11 @@ tr:hover td { background: #F8FAF9; }
         update.leave_period = {
           start: document.getElementById('set-leave-start').value,
           end:   document.getElementById('set-leave-end').value
+        };
+      } else if (type === 'substitute_period') {
+        update.substitute_period = {
+          start: document.getElementById('set-sub-start').value,
+          end:   document.getElementById('set-sub-end').value
         };
       }
 
