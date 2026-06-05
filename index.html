@@ -40,6 +40,7 @@ body { font-family: 'Sarabun', sans-serif; background: var(--surface); color: va
 .header h1 { font-size: 15px; font-weight: 600; flex: 1; margin: 0; }
 .header .nav { display: flex; gap: 4px; flex-wrap: wrap; }
 .nav-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit; font-weight: 500; transition: background 0.2s; white-space: nowrap; }
+.nav-btn:hover { background: rgba(255,255,255,0.28); }
 .nav-btn.active { background: rgba(255,255,255,0.35); font-weight: 700; }
 
 .page { display: none; padding: 20px 16px; max-width: 900px; margin: 0 auto; width: 100%; }
@@ -58,13 +59,19 @@ body { font-family: 'Sarabun', sans-serif; background: var(--surface); color: va
 
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-family: inherit; font-weight: 600; transition: all 0.15s; white-space: nowrap; }
 .btn-primary   { background: var(--green); color: #fff; }
+.btn-ghost     { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+.btn-sm        { padding: 5px 12px; font-size: 12px; }
+
 .alert { padding: 11px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; display: none; gap: 8px; align-items: flex-start; }
 .alert.show { display: flex; }
 .alert-success { background: var(--green-l); color: #0A3D24; border: 1px solid var(--green-m); }
 .alert-error   { background: var(--red-l); color: #5A1010; border: 1px solid #E8AAAA; }
+.alert-info    { background: var(--blue-l); color: #0C3460; border: 1px solid #9DBBDE; }
 
 .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
 .badge-active { background: var(--green-l); color: var(--green-d); }
+.badge-pending { background: var(--amber-l); color: #5A3100; }
+
 .tbl-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { background: var(--surface); padding: 9px 10px; text-align: left; font-weight: 600; font-size: 11px; color: var(--muted); border-bottom: 2px solid var(--border); }
@@ -103,10 +110,11 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
 #slot-tooltip { position: fixed; background: rgba(15,30,20,0.92); color: #fff; border-radius: 8px; padding: 9px 12px; font-size: 12px; pointer-events: none; z-index: 999; max-width: 200px; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
 
 .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; }
-.modal-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 12px; padding: 24px; width: 90%; max-width: 480px; z-index: 201; }
+.modal-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 12px; padding: 24px; width: 90%; max-width: 480px; z-index: 201; box-shadow: var(--shadow-lg); }
 
 .hero-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-.hero-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; cursor: pointer; text-align: center; }
+.hero-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; cursor: pointer; text-align: center; transition: 0.2s; }
+.hero-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
 
 @media (max-width: 620px) { .hero-grid { grid-template-columns: 1fr 1fr; } }
 </style>
@@ -130,16 +138,16 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
 
 <div id="page-home" class="page active">
   <div class="card" style="background:var(--green); color:#fff; border:none;">
-    <h2 style="color:#fff; font-size:20px;">ระบบบริหารจัดการตลาดนัดในสวน</h2>
-    <div id="market-day-label">ทุกวันพฤหัสบดี</div>
+    <h2 style="color:#fff; font-size:20px; margin-bottom:4px;">ระบบบริหารจัดการตลาดนัดในสวน</h2>
+    <div id="market-day-label" style="opacity:0.8;">ทุกวันพฤหัสบดี</div>
   </div>
   <div class="hero-grid">
-    <div class="hero-card" onclick="showPage('apply')"><b>ลงทะเบียนรายใหม่</b></div>
-    <div class="hero-card" onclick="showPage('leave')"><b>แจ้งขอหยุดจำหน่าย</b></div>
-    <div class="hero-card" onclick="openCheckStatusModal()"><b>ตรวจสอบสถานะ</b></div>
+    <div class="hero-card" onclick="showPage('apply')"><b>ลงทะเบียนรายใหม่</b><br><small style="color:var(--muted)">สมัครพื้นที่จำหน่ายสินค้า</small></div>
+    <div class="hero-card" onclick="showPage('leave')"><b>แจ้งขอหยุดจำหน่าย</b><br><small style="color:var(--muted)">แจ้งหยุดล่วงหน้า</small></div>
+    <div class="hero-card" onclick="openCheckStatusModal()"><b>ตรวจสอบสถานะ</b><br><small style="color:var(--muted)">เช็คสถานะการลงทะเบียน</small></div>
   </div>
   <div class="card">
-    <h3>ข้อมูลสรุป</h3>
+    <h3>ข้อมูลสรุปภาพรวม</h3>
     <div class="stats-grid">
       <div class="stat-card"><div class="num" id="st-active">—</div><div class="lbl">ร้านปัจจุบัน</div></div>
       <div class="stat-card"><div class="num" id="st-empty">—</div><div class="lbl">พื้นที่ว่าง</div></div>
@@ -176,7 +184,7 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
         </select></div>
         <div class="field"><label>LINE ID</label><input name="lineId"></div>
       </div>
-      <button type="submit" class="btn btn-primary" style="margin-top:16px; width:100%;">ส่งข้อมูลลงทะเบียน</button>
+      <button type="submit" id="btn-submit-apply" class="btn btn-primary" style="margin-top:16px; width:100%;">ส่งข้อมูลลงทะเบียน</button>
     </form>
   </div>
 </div>
@@ -190,7 +198,7 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
       <div class="field full" style="margin-bottom:12px;"><label>ชื่อร้านค้า <span class="req">*</span></label><select id="leave-shopId" name="shopId" required><option value="">— กำลังโหลดข้อมูล... —</option></select></div>
       <div class="field full" style="margin-bottom:12px;"><label>วันที่หยุด <span class="req">*</span></label><input type="date" name="marketDate" required></div>
       <div class="field full" style="margin-bottom:12px;"><label>เหตุผล <span class="req">*</span></label><textarea name="reason" required></textarea></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;">ส่งคำขอแจ้งหยุด</button>
+      <button type="submit" id="btn-submit-leave" class="btn btn-primary" style="width:100%;">ส่งคำขอแจ้งหยุด</button>
     </form>
   </div>
 </div>
@@ -208,15 +216,19 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
 
 <!-- PAGE ADMIN -->
 <div id="page-admin" class="page">
-  <div id="admin-login-wrap" class="card" style="max-width:400px; margin:auto;">
+  <div id="admin-login-wrap" class="card" style="max-width:400px; margin:auto; text-align:center;">
     <h2>Admin Login</h2>
-    <div class="field" style="margin-bottom:12px;"><label>รหัสผ่าน</label><input type="password" id="admin-pass"></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="window.adminLogin()">เข้าสู่ระบบ</button>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">เฉพาะผู้ดูแลระบบที่มีสิทธิ์เข้าถึงเท่านั้น</p>
+    <button class="btn btn-primary" style="width:100%;" onclick="window.adminLogin()">เข้าสู่ระบบด้วย Google</button>
   </div>
+
   <div id="admin-panel" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <h2>Admin Panel</h2>
-      <button onclick="location.reload()">Logout</button>
+      <div>
+        <h2 style="margin:0;">Admin Panel</h2>
+        <small id="admin-email-display" style="color:var(--muted);"></small>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="window.adminLogout()">Logout</button>
     </div>
     <div class="tabs">
       <button class="tab-btn active" onclick="showAdminTab('pending',this)">รอพิจารณา</button>
@@ -231,10 +243,23 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
 
 <!-- MODALS -->
 <div id="modal-bg" class="modal-bg" onclick="closeModal()"></div>
+
+<!-- MODAL APPROVE -->
 <div id="modal-approve" class="modal-box">
   <h3>อนุมัติการลงทะเบียน</h3>
   <div class="field" style="margin-bottom:12px;"><label>กำหนดเลขพื้นที่ (คั่นด้วย ,)</label><input id="modal-slots" placeholder="เช่น 12,13"></div>
   <button class="btn btn-primary" onclick="window.confirmApprove()">ตกลงอนุมัติ</button>
+  <button class="btn btn-ghost" onclick="closeModal()" style="margin-top:8px; width:100%;">ยกเลิก</button>
+</div>
+
+<!-- MODAL CHECK STATUS -->
+<div id="modal-status-bg" class="modal-bg" onclick="closeCheckStatusModal()"></div>
+<div id="modal-check-status" class="modal-box">
+  <h3>ตรวจสอบสถานะ</h3>
+  <div class="field" style="margin-bottom:12px;"><label>เบอร์โทรศัพท์ที่ใช้ลงทะเบียน</label><input type="tel" id="check-phone" placeholder="ระบุเบอร์ 10 หลัก" maxlength="10"></div>
+  <button class="btn btn-primary" onclick="window.checkStatusByPhone()" style="width:100%;">ตรวจสอบ</button>
+  <div id="check-status-result" style="display:none; margin-top:16px;"></div>
+  <button class="btn btn-ghost" onclick="closeCheckStatusModal()" style="margin-top:12px; width:100%;">ปิดหน้าต่าง</button>
 </div>
 
 </div>
@@ -243,6 +268,7 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyARN_CaKaCZ6zPUHhJmeWvOrwfz8WMcLGI",
@@ -256,10 +282,67 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
+  const ADMIN_EMAIL = "rutswalkingstreet@gmail.com";
   let currentAppId = null;
 
-  // --- Map Layout Logic (Original Version) ---
+  // --- Core Functions Exposed to Window ---
+  window.showPage = (name, btn) => {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    if(btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    if(name === 'home') loadStats();
+    if(name === 'map') loadMap();
+    if(name === 'leave') loadShopDropdown();
+  };
+
+  window.closeModal = () => {
+    document.querySelectorAll('.modal-box, .modal-bg').forEach(el => el.style.display = 'none');
+  };
+
+  window.openCheckStatusModal = () => {
+    document.getElementById('modal-check-status').style.display = 'block';
+    document.getElementById('modal-status-bg').style.display = 'block';
+    document.getElementById('check-status-result').style.display = 'none';
+    document.getElementById('check-phone').value = '';
+  };
+
+  window.closeCheckStatusModal = () => {
+    document.getElementById('modal-check-status').style.display = 'none';
+    document.getElementById('modal-status-bg').style.display = 'none';
+  };
+
+  window.checkStatusByPhone = async () => {
+    const phone = document.getElementById('check-phone').value.trim();
+    if(!phone) return alert('ระบุเบอร์โทรศัพท์');
+    const resEl = document.getElementById('check-status-result');
+    resEl.style.display = 'block';
+    resEl.innerHTML = '<div style="text-align:center; color:var(--muted);">กำลังค้นหา...</div>';
+    
+    const q = query(collection(db, "shops"), where("phone", "==", phone));
+    const snap = await getDocs(q);
+    
+    if(snap.empty) {
+      resEl.innerHTML = '<div class="alert alert-error show">ไม่พบข้อมูลการลงทะเบียนจากเบอร์นี้</div>';
+    } else {
+      const d = snap.docs[0].data();
+      const statusLabel = d.status === 'active' ? 'อนุมัติแล้ว' : (d.status === 'pending' ? 'รอพิจารณา' : d.status);
+      resEl.innerHTML = `
+        <div style="background:var(--surface); border:1px solid var(--border); padding:12px; border-radius:8px;">
+          <div style="font-size:14px;">ร้าน: <b>${d.shopName}</b></div>
+          <div style="font-size:14px;">สถานะ: <span class="badge badge-${d.status}">${statusLabel}</span></div>
+          <div style="font-size:14px;">พื้นที่: ${d.slots || 'ยังไม่ระบุ'}</div>
+        </div>
+      `;
+    }
+  };
+
+  // --- Map Logic ---
   function getSlotClass(slotNo, shop) {
     if (!shop) return 's-empty';
     if (shop.status === 'T2') return 's-t2';
@@ -277,18 +360,15 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
     const shop = shopsBySlot[slotNo];
     const cell = document.createElement('div');
     cell.className = `slot-cell ${getSlotClass(slotNo, shop)}`;
-    
     let innerHtml = `<span class="slot-no">${slotNo}</span>`;
     if (shop) {
       innerHtml += `<span class="slot-name">${shop.shopName}</span>`;
       if (shop.religion === 'อิสลาม') innerHtml += `<span class="slot-halal"></span>`;
-      if (shop.status === 'T2') innerHtml += `<span class="slot-t2-mark">[T2]</span>`;
     }
     cell.innerHTML = innerHtml;
-
     cell.onmouseenter = (e) => {
       const tt = document.getElementById('slot-tooltip');
-      tt.innerHTML = `<b>พื้นที่ ${slotNo}</b><br>` + (shop ? `<b>${shop.shopName}</b><br>${shop.category}<br>ศาสนา: ${shop.religion || '-'}` : `<span style="color:#aaa;">พื้นที่ว่าง</span>`);
+      tt.innerHTML = `<b>พื้นที่ ${slotNo}</b><br>` + (shop ? `<b>${shop.shopName}</b><br>${shop.category}` : `<span style="color:#aaa;">พื้นที่ว่าง</span>`);
       tt.style.display = 'block';
     };
     cell.onmousemove = (e) => {
@@ -297,7 +377,6 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
       tt.style.top = (e.clientY + 15) + 'px';
     };
     cell.onmouseleave = () => document.getElementById('slot-tooltip').style.display = 'none';
-    
     if (editable && window.adminMode) {
       cell.onclick = () => window.openApproveBySlot(slotNo, shop);
     }
@@ -306,84 +385,70 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
 
   window.renderComplexMap = (canvasId, shopsBySlot, editable) => {
     const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    canvas.innerHTML = '';
-    
+    if (!canvas) return; canvas.innerHTML = '';
     const wrapper = document.createElement('div');
     wrapper.style.cssText = 'display:inline-grid; grid-template-columns: auto 16px auto 1fr; grid-template-rows: auto 16px auto 16px auto; gap: 4px; align-items: end;';
-
-    const leftCol = document.createElement('div');
-    leftCol.style.cssText = 'grid-column: 1; display: flex; flex-direction: column; gap: 3px;';
+    const leftCol = document.createElement('div'); leftCol.style.cssText = 'grid-column: 1; display: flex; flex-direction: column; gap: 3px;';
     for(let i=185; i>=146; i--) leftCol.appendChild(makeSlotCell(i, shopsBySlot, editable));
-
-    const aisleVert = document.createElement('div');
-    aisleVert.style.cssText = 'grid-column: 2; height: 100%; background: #eee; border-radius: 4px; writing-mode: vertical-rl; text-align: center; font-size: 10px; color: #999;';
-    aisleVert.innerText = 'ทางเดิน';
-
-    const rightCol = document.createElement('div');
-    rightCol.style.cssText = 'grid-column: 3; display: flex; flex-direction: column; gap: 3px;';
+    const aisleVert = document.createElement('div'); aisleVert.style.cssText = 'grid-column: 2; height: 100%; background: #eee; border-radius: 4px; writing-mode: vertical-rl; text-align: center; font-size: 10px; color: #999;'; aisleVert.innerText = 'ทางเดิน';
+    const rightCol = document.createElement('div'); rightCol.style.cssText = 'grid-column: 3; display: flex; flex-direction: column; gap: 3px;';
     for(let i=1; i<=42; i++) rightCol.appendChild(makeSlotCell(i, shopsBySlot, editable));
-
-    const centerPark = document.createElement('div');
-    centerPark.style.cssText = 'grid-column: 4; display: flex; align-items: flex-end; padding: 20px;';
+    const centerPark = document.createElement('div'); centerPark.style.cssText = 'grid-column: 4; display: flex; align-items: flex-end; padding: 20px;';
     centerPark.innerHTML = `<div style="background:#f0fff0; border:2px dashed #8dc; border-radius:12px; width:100%; height:200px; display:flex; align-items:center; justify-content:center; color:#274; font-weight:bold;">ลานกิจกรรม / พื้นที่สีเขียว</div>`;
-
-    const botRow = document.createElement('div');
-    botRow.style.cssText = 'grid-column: 1 / span 4; grid-row: 3; display: flex; gap: 3px;';
+    const botRow = document.createElement('div'); botRow.style.cssText = 'grid-column: 1 / span 4; grid-row: 3; display: flex; gap: 3px;';
     for(let i=42; i<=92; i++) botRow.appendChild(makeSlotCell(i, shopsBySlot, editable));
-
-    const aisleHoriz = document.createElement('div');
-    aisleHoriz.style.cssText = 'grid-column: 1 / span 4; grid-row: 4; height: 16px; background: #eee; border-radius: 4px;';
-
-    const topRow = document.createElement('div');
-    topRow.style.cssText = 'grid-column: 1 / span 4; grid-row: 5; display: flex; gap: 3px;';
+    const aisleHoriz = document.createElement('div'); aisleHoriz.style.cssText = 'grid-column: 1 / span 4; grid-row: 4; height: 16px; background: #eee; border-radius: 4px;';
+    const topRow = document.createElement('div'); topRow.style.cssText = 'grid-column: 1 / span 4; grid-row: 5; display: flex; gap: 3px;';
     for(let i=93; i<=145; i++) topRow.appendChild(makeSlotCell(i, shopsBySlot, editable));
-
     wrapper.appendChild(leftCol); wrapper.appendChild(aisleVert); wrapper.appendChild(rightCol);
     wrapper.appendChild(centerPark); wrapper.appendChild(botRow); wrapper.appendChild(aisleHoriz);
-    wrapper.appendChild(topRow);
-    canvas.appendChild(wrapper);
+    wrapper.appendChild(topRow); canvas.appendChild(wrapper);
   };
 
-  // --- Firebase Data Integration ---
+  // --- Data Loading ---
+  async function loadStats() {
+    const snap = await getDocs(collection(db, "shops"));
+    const shops = snap.docs.map(d => d.data());
+    const activeShops = shops.filter(s => s.status === 'active');
+    document.getElementById('st-active').innerText = activeShops.length;
+    document.getElementById('st-pending').innerText = shops.filter(s => s.status === 'pending').length;
+    document.getElementById('st-empty').innerText = 185 - activeShops.length;
+  }
+
   async function loadMap() {
     document.getElementById('map-loading').style.display = 'block';
     const snap = await getDocs(collection(db, "shops"));
     const shopsBySlot = {};
     snap.forEach(d => {
       const data = d.data();
-      if (data.status === 'active' || data.status === 'leave' || data.status === 'T2') {
-        const slotList = String(data.slots || '').split(',').map(s => s.trim());
-        slotList.forEach(sNo => { if(sNo) shopsBySlot[sNo] = data; });
+      if (['active', 'leave', 'T2'].includes(data.status)) {
+        String(data.slots || '').split(',').forEach(sNo => { if(sNo.trim()) shopsBySlot[sNo.trim()] = data; });
       }
     });
     document.getElementById('map-loading').style.display = 'none';
     window.renderComplexMap('map-canvas', shopsBySlot, false);
   }
 
-  // --- Admin Logic (Google Auth) ---
+  async function loadShopDropdown() {
+    const q = query(collection(db, "shops"), where("status", "==", "active"));
+    const snap = await getDocs(q);
+    const html = '<option value="">— เลือกชื่อร้านค้า —</option>' + snap.docs.map(d => `<option value="${d.id}">${d.data().shopName}</option>`).join('');
+    document.getElementById('leave-shopId').innerHTML = html;
+  }
+
+  // --- Admin Logic ---
   window.adminLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      if (user.email === ADMIN_EMAIL) {
-        // Success
-        loadAdminData();
-      } else {
+      if (result.user.email !== ADMIN_EMAIL) {
         await signOut(auth);
-        alert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้ (Unauthorized Email)');
+        alert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');
       }
-    } catch (error) {
-      alert('Login Error: ' + error.message);
-    }
+    } catch (error) { alert('Login Error: ' + error.message); }
   };
 
-  window.adminLogout = async () => {
-    await signOut(auth);
-    location.reload();
-  };
+  window.adminLogout = async () => { await signOut(auth); location.reload(); };
 
-  // Listen for Auth State
   onAuthStateChanged(auth, (user) => {
     if (user && user.email === ADMIN_EMAIL) {
       window.adminMode = true;
@@ -411,8 +476,7 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
     const shopsBySlot = {};
     snap.forEach(d => {
       const data = d.data();
-      const slotList = String(data.slots || '').split(',').map(s => s.trim());
-      slotList.forEach(sNo => { if(sNo) shopsBySlot[sNo] = data; });
+      String(data.slots || '').split(',').forEach(sNo => { if(sNo.trim()) shopsBySlot[sNo.trim()] = data; });
     });
     window.renderComplexMap('map-canvas-admin', shopsBySlot, true);
   }
@@ -423,11 +487,11 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
     snap.forEach(d => {
       const a = d.data(); a.id = d.id;
       if(a.status === 'pending') {
-        pendingHtml += `<tr><td>${a.shopName}</td><td>${a.phone}</td><td><button onclick="window.openApprove('${a.id}')">อนุมัติ</button></td></tr>`;
+        pendingHtml += `<tr><td>${a.shopName}</td><td>${a.phone}</td><td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}')">อนุมัติ</button></td></tr>`;
       }
-      shopsHtml += `<tr><td>${a.id.slice(0,5)}</td><td>${a.shopName}</td><td>${a.status}</td><td>${a.slots || '-'}</td></tr>`;
+      shopsHtml += `<tr><td>${a.id.slice(0,5)}</td><td>${a.shopName}</td><td><span class="badge badge-${a.status}">${a.status}</span></td><td>${a.slots || '-'}</td></tr>`;
     });
-    document.getElementById('tbody-pending').innerHTML = pendingHtml || '<tr><td colspan="3">ไม่มีรายการ</td></tr>';
+    document.getElementById('tbody-pending').innerHTML = pendingHtml || '<tr><td colspan="3" style="text-align:center;">ไม่มีรายการค้าง</td></tr>';
     document.getElementById('tbody-shops').innerHTML = shopsHtml;
   }
 
@@ -440,45 +504,38 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
   window.confirmApprove = async () => {
     const slots = document.getElementById('modal-slots').value;
     if(!slots) return alert('ระบุพื้นที่');
-    await updateDoc(doc(db, "shops", currentAppId), { status: 'active', slots: slots });
-    alert('อนุมัติสำเร็จ');
-    closeModal();
-    loadAdminData();
-  };
-
-  window.closeModal = () => {
-    document.getElementById('modal-approve').style.display = 'none';
-    document.getElementById('modal-bg').style.display = 'none';
+    const btn = document.getElementById('btn-submit-apply'); // Reuse logic
+    try {
+      await updateDoc(doc(db, "shops", currentAppId), { status: 'active', slots: slots });
+      alert('อนุมัติสำเร็จ'); window.closeModal(); loadAdminData();
+    } catch(e) { alert('Error: ' + e.message); }
   };
 
   // --- Forms ---
   document.getElementById('form-apply').onsubmit = async (e) => {
     e.preventDefault();
+    const btn = document.getElementById('btn-submit-apply'); btn.disabled = true;
     const data = Object.fromEntries(new FormData(e.target));
     data.status = 'pending';
     data.createdAt = serverTimestamp();
-    await addDoc(collection(db, "shops"), data);
-    alert('ส่งข้อมูลสำเร็จ'); e.target.reset(); window.showPage('home');
+    try {
+      await addDoc(collection(db, "shops"), data);
+      alert('ส่งข้อมูลสำเร็จ กรุณารอการพิจารณา'); e.target.reset(); window.showPage('home');
+    } catch(err) { alert('Error: ' + err.message); } finally { btn.disabled = false; }
   };
 
-  window.showPage = (name, btn) => {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + name).classList.add('active');
-    if(btn) {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-    if(name === 'map') loadMap();
-    if(name === 'home') loadStats();
+  document.getElementById('form-leave').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-leave'); btn.disabled = true;
+    const data = Object.fromEntries(new FormData(e.target));
+    data.status = 'pending';
+    data.type = 'leave';
+    data.createdAt = serverTimestamp();
+    try {
+      await addDoc(collection(db, "leaves"), data);
+      alert('แจ้งหยุดจำหน่ายสำเร็จ'); e.target.reset(); window.showPage('home');
+    } catch(err) { alert('Error: ' + err.message); } finally { btn.disabled = false; }
   };
-
-  async function loadStats() {
-    const snap = await getDocs(collection(db, "shops"));
-    const shops = snap.docs.map(d => d.data());
-    document.getElementById('st-active').innerText = shops.filter(s => s.status === 'active').length;
-    document.getElementById('st-pending').innerText = shops.filter(s => s.status === 'pending').length;
-    document.getElementById('st-empty').innerText = 185 - shops.filter(s => s.status === 'active').length;
-  }
 
   // Init
   loadStats();
