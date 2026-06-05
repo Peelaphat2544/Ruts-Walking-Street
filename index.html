@@ -1828,15 +1828,31 @@ tr:hover td { background: #F8FAF9; }
       const paySnap   = await getDocs(query(collection(db, "payments"), where("date", "==", date)));
       const paidIds   = paySnap.docs.map(d => d.data().shopId);
 
-      let rows = '';
+      const shopsData = [];
       shopsSnap.forEach(d => {
-        const s = d.data(); const id = d.id;
-        const isPaid = paidIds.includes(id);
+        const s = d.data();
+        s.id = d.id;
+        shopsData.push(s);
+      });
+
+      // Sort shops by slot number (numerically)
+      shopsData.sort((a, b) => {
+        const getFirstSlot = (slots) => {
+          if (!slots) return 9999;
+          const first = String(slots).split(',')[0].trim();
+          return parseInt(first) || 9999;
+        };
+        return getFirstSlot(a.slots) - getFirstSlot(b.slots);
+      });
+
+      let rows = '';
+      shopsData.forEach(s => {
+        const isPaid = paidIds.includes(s.id);
         rows += `<tr>
           <td>${s.slots || '—'}</td>
           <td>${s.shopName}</td>
           <td>${isPaid ? '<span class="badge badge-active">✅ จ่ายแล้ว</span>' : '<span class="badge badge-t2">❌ ยังไม่จ่าย</span>'}</td>
-          <td>${isPaid ? '' : `<button class="btn btn-primary btn-sm" onclick="window.confirmPay('${id}','${date}')">บันทึกรับเงิน</button>`}</td>
+          <td>${isPaid ? '' : `<button class="btn btn-primary btn-sm" onclick="window.confirmPay('${s.id}','${date}')">บันทึกรับเงิน</button>`}</td>
         </tr>`;
       });
 
