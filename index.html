@@ -1749,6 +1749,19 @@ tr:hover td { background: #F8FAF9; }
         }
       }
       div.innerHTML = `<span class="slot-no">${i}</span><span class="slot-name">${s?.shopName || ''}</span>`;
+      
+      // Interactive Editing for Admin
+      if (window.adminMode && s) {
+        div.style.cursor = 'pointer';
+        div.title = 'คลิกเพื่อแก้ไขข้อมูลร้าน';
+        div.addEventListener('click', () => {
+          window.openEditShop(s.id);
+        });
+      } else if (window.adminMode && !s) {
+        div.style.cursor = 'crosshair';
+        div.title = 'พื้นที่ว่าง';
+      }
+
       // Tooltip
       div.addEventListener('mouseenter', (e) => {
         const tt = document.getElementById('slot-tooltip');
@@ -1808,6 +1821,7 @@ tr:hover td { background: #F8FAF9; }
       const map  = {};
       snap.forEach(d => {
         const data = d.data();
+        data.id = d.id; // Store ID for editing
         String(data.slots || '').split(',').forEach(s => {
           const n = s.trim();
           if (n) map[n] = data;
