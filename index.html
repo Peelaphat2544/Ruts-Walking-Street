@@ -1607,7 +1607,13 @@ tr:hover td { background: #F8FAF9; }
       if (!data.shopId) { alert('กรุณาเลือกร้านค้า'); return; }
       data.createdAt = serverTimestamp();
       await addDoc(collection(db, "renewals"), data);
-      alert('✅ บันทึกผลการยืนยันสิทธิ์เรียบร้อย');
+      
+      if (data.response === 'no') {
+        await updateDoc(doc(db, "shops", data.shopId), { status: 'pending' });
+        alert('✅ ระบบได้รับแจ้งการสละสิทธิ์ของท่านแล้ว และได้ส่งเรื่องให้คณะกรรมการพิจารณา');
+      } else {
+        alert('✅ บันทึกผลการยืนยันสิทธิ์เรียบร้อย');
+      }
       e.target.reset();
     } catch(err) {
       alert('เกิดข้อผิดพลาด: ' + err.message);
