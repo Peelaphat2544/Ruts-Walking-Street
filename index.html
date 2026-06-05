@@ -3,284 +3,1306 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RUTS Walking Street Management (v3.0 Professional)</title>
+<title>RUTS Walking Street — ระบบบริหารจัดการตลาดนัดในสวน</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Mitr:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   DESIGN SYSTEM v3.0
-============================================================ */
+/* ================================================================
+   DESIGN SYSTEM v4.0 — RUTS Walking Street
+   เพิ่ม: Mitr font สำหรับหัวข้อ, ออกแบบใหม่ทั้ง Home + Admin
+================================================================ */
 :root {
-  --green:     #1A7A52; --green-d:   #0F5538; --green-l:   #E8F5EE; --green-m:   #5CB88A;
-  --amber:     #D4820A; --amber-l:   #FDF3DC; --red:       #C0392B; --red-l:     #FDECEA;
-  --blue:      #2471A3; --blue-l:    #EAF2FB; --purple:    #7D3C98; --purple-l:  #F4ECF7;
-  --surface:   #F3F5F2; --border:    #D1D9D4; --text:      #1C2B22; --muted:     #6B7C72;
-  --white:     #FFFFFF; --radius:    12px;    --shadow:    0 4px 12px rgba(0,0,0,0.05);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);   --header-h:  64px;
+  /* Brand Colors */
+  --green:     #1A7A52;
+  --green-d:   #0F5538;
+  --green-m:   #2E9E6B;
+  --green-l:   #E4F5EE;
+  --green-xl:  #F0FAF5;
+  --amber:     #D4820A;
+  --amber-l:   #FDF3DC;
+  --red:       #C0392B;
+  --red-l:     #FDECEA;
+  --blue:      #1A6EA3;
+  --blue-l:    #E6F2FB;
+  --teal:      #0D8A7A;
 
-  /* Slot colors */
-  --slot-food:     #FFF8E1; --slot-food-b:   #F59E0B;
-  --slot-drink:    #EFF6FF; --slot-drink-b:  #3B82F6;
-  --slot-fashion:  #F5F3FF; --slot-fashion-b:#8B5CF6;
-  --slot-truck:    #F0FDF4; --slot-truck-b:  #22C55E;
-  --slot-student:  #EEF2FF; --slot-student-b:#6366F1;
-  --slot-leave:    #FEF9C3; --slot-leave-b:  #CA8A04;
-  --slot-t2:       #FEF2F2; --slot-t2-b:     #EF4444;
-  --slot-empty:    #F9FAFB; --slot-empty-b:  #D1D5DB;
+  /* Neutrals */
+  --surface:   #F2F5F3;
+  --surface-2: #E8EDE9;
+  --border:    #D0D9D3;
+  --border-l:  #E5EBE7;
+  --text:      #1A2820;
+  --text-2:    #3D5046;
+  --muted:     #697D72;
+  --white:     #FFFFFF;
+
+  /* Slots */
+  --slot-food-bg:    #FFF8E1; --slot-food-b:    #F59E0B;
+  --slot-drink-bg:   #EFF6FF; --slot-drink-b:   #3B82F6;
+  --slot-fashion-bg: #F5F3FF; --slot-fashion-b: #8B5CF6;
+  --slot-truck-bg:   #F0FDF4; --slot-truck-b:   #22C55E;
+  --slot-leave-bg:   #FEF9C3; --slot-leave-b:   #CA8A04;
+  --slot-t2-bg:      #FEF2F2; --slot-t2-b:      #EF4444;
+  --slot-empty-bg:   #F9FAFB; --slot-empty-b:   #D1D5DB;
+
+  /* Misc */
+  --radius:    10px;
+  --radius-lg: 16px;
+  --shadow:    0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+  --shadow-lg: 0 10px 32px rgba(0,0,0,0.12);
+  --header-h:  60px;
+  --transition: 0.2s ease;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Sarabun', sans-serif; background: var(--surface); color: var(--text); font-size: 15px; line-height: 1.6; }
 
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .mitr { font-family: 'Mitr', 'Sarabun', sans-serif; }
+
+/* ── HEADER ── */
 #app { min-height: 100vh; display: flex; flex-direction: column; }
-.header { background: var(--green); color: #fff; height: var(--header-h); display: flex; align-items: center; padding: 0 20px; gap: 12px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-.header h1 { font-size: 18px; font-weight: 700; flex: 1; }
-.header .nav { display: flex; gap: 8px; }
-.nav-btn { background: rgba(255,255,255,0.12); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.2s; }
-.nav-btn:hover { background: rgba(255,255,255,0.22); }
-.nav-btn.active { background: #fff; color: var(--green); font-weight: 700; }
 
-.page { display: none; padding: 24px; width: 100%; max-width: 100%; margin: 0 auto; animation: fadeIn 0.3s ease; }
+.header {
+  background: var(--green-d);
+  color: #fff;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+
+.header-logo {
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+
+.header h1 {
+  font-family: 'Mitr', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  flex: 1;
+  letter-spacing: 0.01em;
+}
+
+.header h1 small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.65;
+  font-family: 'Sarabun', sans-serif;
+  margin-top: -2px;
+}
+
+.nav { display: flex; gap: 4px; flex-wrap: nowrap; }
+
+.nav-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.85);
+  padding: 7px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Sarabun', sans-serif;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.16); color: #fff; }
+.nav-btn.active {
+  background: var(--green-m);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* ── PAGE LAYOUT ── */
+.page { display: none; padding: 24px 20px; animation: fadeIn 0.25s ease; }
 .page.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-.card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); position: relative; }
-.card h2 { font-size: 20px; font-weight: 700; color: var(--green-d); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-/* Dashboard Widgets */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px; }
-.stat-item { background: #fff; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); text-align: center; }
-.stat-num { font-size: 32px; font-weight: 800; color: var(--green); }
-.stat-lbl { font-size: 13px; color: var(--muted); font-weight: 600; }
+/* ── CARD ── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-l);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
 
-/* Announcement Banner */
-.banner { background: #FFF9C4; border: 1px solid #FBC02D; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: none; font-size: 14px; font-weight: 500; color: #5D4037; }
+.card-title {
+  font-family: 'Mitr', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--green-d);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-/* Forms */
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+/* ── ANNOUNCEMENT ── */
+.banner {
+  display: none;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fbbf24;
+  border-left: 4px solid #f59e0b;
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin: 0 20px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #78350f;
+}
+
+/* ── HOME HERO ── */
+.hero {
+  background: linear-gradient(135deg, var(--green-d) 0%, var(--green) 50%, var(--green-m) 100%);
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
+  color: #fff;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.hero-content { position: relative; z-index: 1; }
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  backdrop-filter: blur(4px);
+}
+
+.hero h2 {
+  font-family: 'Mitr', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.hero p { opacity: 0.85; font-size: 14px; }
+
+.hero-emoji {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 80px;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* ── STATS GRID ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-l);
+  padding: 20px 18px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stat-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+
+.stat-icon.green  { background: var(--green-l); }
+.stat-icon.amber  { background: var(--amber-l); }
+.stat-icon.blue   { background: var(--blue-l); }
+
+.stat-body {}
+.stat-num  { font-family: 'Mitr', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; color: var(--text); }
+.stat-lbl  { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 3px; }
+
+/* ── SERVICE MENU ── */
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.service-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  border: 1.5px solid var(--border-l);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+  font-family: 'Sarabun', sans-serif;
+  box-shadow: var(--shadow);
+}
+
+.service-card:hover {
+  border-color: var(--green-m);
+  background: var(--green-xl);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.service-card.primary {
+  background: linear-gradient(135deg, var(--green), var(--green-m));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(26,122,82,0.3);
+}
+
+.service-card.primary:hover {
+  background: linear-gradient(135deg, var(--green-d), var(--green));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26,122,82,0.4);
+}
+
+.svc-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  background: rgba(255,255,255,0.18);
+}
+
+.service-card:not(.primary) .svc-icon {
+  background: var(--green-l);
+}
+
+.svc-body {}
+.svc-title { font-size: 14px; font-weight: 700; font-family: 'Mitr', sans-serif; }
+.svc-desc  { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+
+/* ── FORM STYLES ── */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .full { grid-column: 1 / -1; }
-.field { display: flex; flex-direction: column; gap: 8px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 13px; font-weight: 700; color: var(--muted); }
-.field input, .field select, .field textarea { border: 1.5px solid var(--border); border-radius: 10px; padding: 12px; font-family: inherit; font-size: 15px; background: #fafafa; }
-.field input:focus { border-color: var(--green); outline: none; background: #fff; box-shadow: 0 0 0 4px rgba(26,122,82,0.1); }
+.field label .req { color: var(--red); }
 
-/* Buttons */
-.btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; font-family: inherit; transition: 0.2s; gap: 8px; font-size: 14px; }
-.btn-primary { background: var(--green); color: #fff; }
-.btn-primary:hover { background: var(--green-d); box-shadow: 0 4px 12px rgba(26,122,82,0.3); }
-.btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
-.btn-ghost:hover { background: var(--surface); color: var(--text); }
+.field input,
+.field select,
+.field textarea {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 15px;
+  background: #fafafa;
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--green-m);
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(26,122,82,0.12);
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 7px;
+  padding: 11px 22px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--green);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--green-d);
+  box-shadow: 0 4px 14px rgba(26,122,82,0.35);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border: 1.5px solid var(--border);
+}
+.btn-ghost:hover { background: var(--surface); border-color: var(--border); }
+
 .btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #a93226; }
+
 .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 6px; }
+.btn-icon { padding: 8px; border-radius: 7px; }
 
-/* Table */
-.tbl-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+/* ── TABLE ── */
+.tbl-wrap {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border-l);
+}
+
 table { width: 100%; border-collapse: collapse; background: #fff; }
-th { background: #F8FAF9; text-align: left; padding: 14px; font-size: 12px; color: var(--muted); border-bottom: 2px solid var(--border); }
-td { padding: 14px; border-bottom: 1px solid #EDF1EE; font-size: 14px; }
+thead tr { background: #F4F8F5; }
+th {
+  text-align: left;
+  padding: 13px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  border-bottom: 2px solid var(--border-l);
+  white-space: nowrap;
+}
+td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #EDF1EE;
+  font-size: 14px;
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #F8FAF9; }
 
-/* Map */
-#map-wrap { background: #fff; padding: 30px; border-radius: var(--radius); border: 1px solid var(--border); overflow: auto; display: flex; justify-content: center; }
-.slot-cell { width: 80px; height: 60px; border-radius: 8px; border: 2px solid var(--slot-empty-b); background: var(--slot-empty); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: 0.1s; }
-.slot-cell:hover { transform: scale(1.05); z-index: 10; box-shadow: var(--shadow-lg); border-color: var(--green-m); }
-.slot-no { font-size: 11px; font-weight: 900; opacity: 0.4; position: absolute; top: 4px; left: 6px; }
-.slot-name { font-size: 11px; font-weight: 700; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-top: 10px; padding: 0 4px; }
+.td-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
 
-/* Modal */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(15,30,20,0.6); z-index: 2000; backdrop-filter: blur(4px); }
-.modal-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 16px; padding: 32px; width: 95%; max-width: 600px; z-index: 2001; box-shadow: var(--shadow-lg); }
+/* ── BADGE ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.badge-active   { background: #DCFCE7; color: #15803D; }
+.badge-pending  { background: #FEF3C7; color: #B45309; }
+.badge-leave    { background: #FEF9C3; color: #854D0E; }
+.badge-t2       { background: #FEE2E2; color: #B91C1C; }
+.badge-cancelled{ background: #F3F4F6; color: #6B7280; }
 
-/* Badge */
-.badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; }
-.bg-active { background: #E8F5E9; color: #2E7D32; }
-.bg-pending { background: #FFF3E0; color: #EF6C00; }
-.bg-t2 { background: #FFEBEE; color: #C62828; }
+/* backward compat */
+.bg-active   { background: #DCFCE7; color: #15803D; }
+.bg-pending  { background: #FEF3C7; color: #B45309; }
+.bg-t2       { background: #FEE2E2; color: #B91C1C; }
 
-#slot-tooltip { position: fixed; background: #000; color: #fff; border-radius: 8px; padding: 14px; font-size: 13px; pointer-events: none; z-index: 3000; display: none; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+/* ── ADMIN LAYOUT ── */
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
 
-.tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 20px; gap: 4px; }
-.tab-btn { padding: 10px 20px; border: none; background: none; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.admin-header-info h2 {
+  font-family: 'Mitr', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
 
-/* Responsive */
-@media (max-width: 768px) {
-  .header h1 { font-size: 15px; }
+.admin-header-info .admin-sub {
+  font-size: 13px;
+  color: var(--green-m);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ── ADMIN STATS (top row) ── */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.admin-stat {
+  background: var(--white);
+  border: 1px solid var(--border-l);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+
+.admin-stat .num {
+  font-family: 'Mitr', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.admin-stat .lbl {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.admin-stat .indicator {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+/* ── ADMIN TABS ── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Sarabun', sans-serif;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 7px;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.tab-btn:hover { background: rgba(26,122,82,0.08); color: var(--green); }
+
+.tab-btn.active {
+  background: var(--white);
+  color: var(--green-d);
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+/* ── TAB PANEL ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+/* ── SECTION HEADER (inside tabs) ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.section-title {
+  font-family: 'Mitr', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── SETTINGS GRID ── */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.settings-card {
+  background: var(--white);
+  border: 1px solid var(--border-l);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.settings-card h3 {
+  font-family: 'Mitr', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green-d);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-l);
+}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-l);
+}
+
+.toggle-row:last-of-type { border-bottom: none; }
+
+.toggle-label { font-size: 14px; font-weight: 600; color: var(--text-2); }
+.toggle-label small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+
+.toggle {
+  position: relative;
+  width: 42px; height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle input { opacity: 0; width: 0; height: 0; }
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 24px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  left: 3px; top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.3s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.toggle input:checked + .toggle-slider { background: var(--green-m); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+/* ── MAP ── */
+#map-wrap {
+  background: #F9FBF9;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-l);
+  overflow: auto;
+}
+
+.slot-cell {
+  width: 78px; height: 58px;
+  border-radius: 7px;
+  border: 2px solid var(--slot-empty-b);
+  background: var(--slot-empty-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: 0.12s;
+}
+
+.slot-cell:hover {
+  transform: scale(1.07);
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+  border-color: var(--green-m);
+}
+
+.slot-no {
+  font-size: 10px;
+  font-weight: 900;
+  opacity: 0.45;
+  position: absolute;
+  top: 3px; left: 5px;
+}
+
+.slot-name {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  margin-top: 10px;
+  padding: 0 4px;
+  text-align: center;
+}
+
+/* ── MAP LEGEND ── */
+.map-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+/* ── MODAL ── */
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,25,15,0.55);
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-box {
+  display: none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px;
+  width: 95%;
+  max-width: 560px;
+  z-index: 2001;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-title {
+  font-family: 'Mitr', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-l);
+}
+
+/* ── TOOLTIP ── */
+#slot-tooltip {
+  position: fixed;
+  background: rgba(15,30,20,0.92);
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 3000;
+  display: none;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(4px);
+  min-width: 150px;
+}
+
+/* ── LOGIN CARD ── */
+.login-card {
+  max-width: 420px;
+  margin: 40px auto;
+  text-align: center;
+  padding: 48px 36px;
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  border: 1px solid var(--border-l);
+  box-shadow: var(--shadow-md);
+}
+
+.login-card .lock-icon {
+  width: 64px; height: 64px;
+  background: var(--green-l);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 20px;
+}
+
+.login-card h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.login-card p { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+/* ── GOOGLE SIGN IN ── */
+.btn-google {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 24px;
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: 'Sarabun', sans-serif;
+  width: 100%;
+  justify-content: center;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+
+.btn-google:hover {
+  border-color: var(--green-m);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-google svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* ── SEARCH BAR ── */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
+  background: var(--white);
+  transition: var(--transition);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--green-m);
+  box-shadow: 0 0 0 3px rgba(26,122,82,0.1);
+}
+
+/* ── PAGE CONTENT MAX WIDTH ── */
+.page-inner { max-width: 1200px; margin: 0 auto; }
+.page-inner-sm { max-width: 700px; margin: 0 auto; }
+.page-inner-md { max-width: 900px; margin: 0 auto; }
+
+/* ── INFO BOX ── */
+.info-box {
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.info-box.blue { background: var(--blue-l); border-left: 3px solid var(--blue); color: #1e4976; }
+.info-box.green { background: var(--green-l); border-left: 3px solid var(--green-m); color: var(--green-d); }
+.info-box.amber { background: var(--amber-l); border-left: 3px solid var(--amber); color: #7c3d0a; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .admin-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .header h1 small { display: none; }
   .nav-btn { padding: 6px 10px; font-size: 12px; }
+  .hero { padding: 28px 20px; }
+  .hero h2 { font-size: 20px; }
+  .hero-emoji { display: none; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .service-grid { grid-template-columns: 1fr; }
+  .admin-stats { grid-template-columns: repeat(2, 1fr); }
+  .tabs { overflow-x: auto; }
+  .tab-btn { font-size: 12px; padding: 8px 10px; }
   .card { padding: 16px; }
-  .slot-cell { width: 65px; height: 50px; }
+  .slot-cell { width: 62px; height: 48px; }
+}
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: var(--border-l);
+  margin: 20px 0;
+}
+
+/* ── FORM SECTION CARD ── */
+.form-section {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.form-section-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 14px;
 }
 </style>
 </head>
 <body>
-
 <div id="app">
+
+  <!-- HEADER -->
   <header class="header">
-    <h1 id="market-title">RUTS Walking Street</h1>
+    <div class="header-logo">🏪</div>
+    <h1 id="market-title">
+      RUTS Walking Street
+      <small>ระบบบริหารจัดการตลาดนัด</small>
+    </h1>
     <nav class="nav">
-      <button class="nav-btn active" id="btn-m-home" onclick="showPage('home',this)">หน้าหลัก</button>
-      <button class="nav-btn" id="btn-m-apply" onclick="showPage('apply',this)">ลงทะเบียน</button>
-      <button class="nav-btn" id="btn-m-leave" onclick="showPage('leave',this)">แจ้งหยุด</button>
-      <button class="nav-btn" id="btn-m-renew" onclick="showPage('renew',this)">ยืนยันสิทธิ์</button>
-      <button class="nav-btn" id="btn-m-map" onclick="showPage('map',this)">แผนผัง</button>
-      <button class="nav-btn" onclick="showPage('admin',this)">ผู้ดูแล</button>
+      <button class="nav-btn active" id="btn-m-home" onclick="showPage('home',this)">🏠 หน้าหลัก</button>
+      <button class="nav-btn" id="btn-m-apply" onclick="showPage('apply',this)">📝 ลงทะเบียน</button>
+      <button class="nav-btn" id="btn-m-leave" onclick="showPage('leave',this)">🗓️ แจ้งหยุด</button>
+      <button class="nav-btn" id="btn-m-renew" onclick="showPage('renew',this)">✅ ยืนยันสิทธิ์</button>
+      <button class="nav-btn" id="btn-m-map" onclick="showPage('map',this)">🗺️ แผนผัง</button>
+      <button class="nav-btn" onclick="showPage('admin',this)">🔐 ผู้ดูแล</button>
     </nav>
   </header>
 
+  <!-- TOOLTIP & ANNOUNCEMENT -->
   <div id="slot-tooltip"></div>
-  <div id="announcement-banner" class="banner"></div>
+  <div id="announcement-banner" class="banner">📢 <span id="announcement-text"></span></div>
 
-  <!-- HOME PAGE -->
+  <!-- ══════════════════════════════
+       HOME PAGE
+  ══════════════════════════════ -->
   <div id="page-home" class="page active">
-    <div class="card" style="background:var(--green); color:#fff; border:none; padding:40px; text-align:center; position:relative; overflow:hidden;">
-      <div style="position:relative; z-index:2;">
-        <h2 style="color:#fff; font-size:28px; margin-bottom:10px;">ระบบบริหารจัดการตลาดนัดในสวน</h2>
-        <p style="opacity:0.9;">มหาวิทยาลัยเทคโนโลยีราชมงคลศรีวิชัย | เปิดจำหน่ายทุกวันพุธ</p>
-      </div>
-      <div style="position:absolute; top:-20px; right:-20px; font-size:150px; opacity:0.1;">🏫</div>
-    </div>
+    <div class="page-inner">
 
-    <div class="stats-grid" id="public-stats-grid">
-      <div class="stat-item"><div id="st-active" class="stat-num">—</div><div class="stat-lbl">ร้านค้าที่เปิดจำหน่าย</div></div>
-      <div class="stat-item"><div id="st-empty" class="stat-num">—</div><div class="stat-lbl">พื้นที่ว่างพร้อมจอง</div></div>
-      <div class="stat-item"><div id="st-pending" class="stat-num">—</div><div class="stat-lbl">รอผลการพิจารณา</div></div>
-    </div>
-
-    <div class="card" style="border-left: 5px solid var(--green);">
-      <h2>เมนูบริการ</h2>
-      <div class="form-grid">
-        <button class="btn btn-primary" onclick="showPage('apply')">✨ ลงทะเบียนผู้ประกอบการรายใหม่</button>
-        <button class="btn btn-ghost" onclick="showPage('renew')">✅ ยืนยันสิทธิ์ประจำภาคการศึกษา</button>
-        <button class="btn btn-ghost" onclick="openCheckStatusModal()">🔍 ตรวจสอบสถานะ/ค้นหาร้าน</button>
-        <button class="btn btn-ghost" onclick="showPage('leave')">🗓️ แจ้งขอหยุดจำหน่ายชั่วคราว</button>
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-content">
+          <div class="hero-badge">🗓️ เปิดจำหน่ายทุกวันพุธ</div>
+          <h2>ระบบบริหารจัดการตลาดนัดในสวน</h2>
+          <p>มหาวิทยาลัยเทคโนโลยีราชมงคลศรีวิชัย — ชมรมผู้ประกอบการฐานเทคโนโลยี</p>
+        </div>
+        <div class="hero-emoji">🏫</div>
       </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="public-stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon green">🏪</div>
+          <div class="stat-body">
+            <div id="st-active" class="stat-num">—</div>
+            <div class="stat-lbl">ร้านค้าที่เปิดจำหน่าย</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">📍</div>
+          <div class="stat-body">
+            <div id="st-empty" class="stat-num">—</div>
+            <div class="stat-lbl">พื้นที่ว่างพร้อมจอง</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">⏳</div>
+          <div class="stat-body">
+            <div id="st-pending" class="stat-num">—</div>
+            <div class="stat-lbl">รอผลการพิจารณา</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services -->
+      <div class="card">
+        <div class="card-title">🛎️ เมนูบริการ</div>
+        <div class="service-grid">
+          <button class="service-card primary" onclick="showPage('apply', document.getElementById('btn-m-apply'))">
+            <div class="svc-icon">✨</div>
+            <div class="svc-body">
+              <div class="svc-title">ลงทะเบียนผู้ประกอบการรายใหม่</div>
+              <div class="svc-desc">สมัครเข้าร่วมตลาดนัด RUTS</div>
+            </div>
+          </button>
+          <button class="service-card" onclick="showPage('renew', document.getElementById('btn-m-renew'))">
+            <div class="svc-icon">✅</div>
+            <div class="svc-body">
+              <div class="svc-title">ยืนยันสิทธิ์ประจำภาคการศึกษา</div>
+              <div class="svc-desc">สำหรับร้านค้าที่มีสิทธิ์อยู่แล้ว</div>
+            </div>
+          </button>
+          <button class="service-card" onclick="window.openCheckStatusModal()">
+            <div class="svc-icon">🔍</div>
+            <div class="svc-body">
+              <div class="svc-title">ตรวจสอบสถานะ / ค้นหาร้านค้า</div>
+              <div class="svc-desc">ค้นหาด้วยเบอร์โทรศัพท์</div>
+            </div>
+          </button>
+          <button class="service-card" onclick="showPage('leave', document.getElementById('btn-m-leave'))">
+            <div class="svc-icon">🗓️</div>
+            <div class="svc-body">
+              <div class="svc-title">แจ้งขอหยุดจำหน่ายชั่วคราว</div>
+              <div class="svc-desc">แจ้งลาในวันที่ไม่สะดวกจำหน่าย</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- APPLY PAGE -->
+  <!-- ══════════════════════════════
+       APPLY PAGE
+  ══════════════════════════════ -->
   <div id="page-apply" class="page">
-    <div class="card" style="max-width: 900px; margin: auto;">
-      <h2>ลงทะเบียนผู้ประกอบการใหม่</h2>
-      <div id="apply-closed-msg" style="display:none; color:red; padding:20px; text-align:center;">ขออภัย ขณะนี้ระบบปิดรับลงทะเบียนชั่วคราว</div>
-      <form id="form-apply">
-        <div class="form-grid">
-          <div class="field"><label>ชื่อจริง <span style="color:red">*</span></label><input name="firstName" required></div>
-          <div class="field"><label>นามสกุล <span style="color:red">*</span></label><input name="lastName" required></div>
-          <div class="field full"><label>ชื่อร้านค้า / สถานประกอบการ <span style="color:red">*</span></label><input name="shopName" required></div>
-          <div class="field full"><label>สินค้าหรือบริการที่จำหน่าย (โปรดระบุรายละเอียด) <span style="color:red">*</span></label><textarea name="items" rows="2" required></textarea></div>
-          <div class="field"><label>หมวดหมู่สินค้า <span style="color:red">*</span></label>
-            <select name="category" required>
-              <option value="">— เลือก —</option><option>อาหาร</option><option>เครื่องดื่ม</option><option>เสื้อผ้าและของใช้</option><option>รถฟู้ดทรัค (Food Truck)</option>
-            </select>
-          </div>
-          <div class="field"><label>จำนวนพื้นที่ (ล็อก) ที่ต้องการ <span style="color:red">*</span></label><input type="number" name="slotCount" value="1" min="1" max="3" required></div>
-          <div class="field"><label>เบอร์โทรศัพท์ (10 หลัก) <span style="color:red">*</span></label><input name="phone" maxlength="10" required></div>
-          <div class="field"><label>ศาสนา <span style="color:red">*</span></label>
-            <select name="religion" required><option value="">— เลือก —</option><option>พุทธ</option><option>อิสลาม</option><option>คริสต์</option></select>
-          </div>
-          <div class="field full"><label>LINE ID</label><input name="lineId"></div>
-        </div>
-        <button type="submit" id="btn-submit-apply" class="btn btn-primary" style="width:100%; margin-top:24px;">ส่งข้อมูลลงทะเบียน</button>
-      </form>
-    </div>
-  </div>
+    <div class="page-inner-md">
+      <div class="card">
+        <div class="card-title">📝 ลงทะเบียนผู้ประกอบการใหม่</div>
 
-  <!-- LEAVE PAGE -->
-  <div id="page-leave" class="page">
-    <div class="card" style="max-width: 600px; margin: auto;">
-      <h2>แจ้งขอหยุดจำหน่าย (แจ้งลา)</h2>
-      <p id="leave-notice" style="font-size:13px; color:var(--muted); margin-bottom:20px;"></p>
-      <form id="form-leave">
-        <div class="field full" style="margin-bottom:15px;"><label>ค้นหาร้านค้าของคุณ <span style="color:red">*</span></label>
-          <select id="leave-shopId" name="shopId" required><option value="">— กำลังโหลดรายชื่อร้าน... —</option></select>
+        <div id="apply-closed-msg" class="info-box amber" style="display:none;">
+          ⚠️ ขออภัย ขณะนี้ระบบปิดรับลงทะเบียนชั่วคราว กรุณาติดต่อเจ้าหน้าที่
         </div>
-        <div class="field full" style="margin-bottom:15px;"><label>วันที่ประสงค์จะหยุดจำหน่าย <span style="color:red">*</span></label><input type="date" name="marketDate" required></div>
-        <div class="field full" style="margin-bottom:15px;"><label>ระบุเหตุผลความจำเป็น <span style="color:red">*</span></label><textarea name="reason" rows="3" required></textarea></div>
-        <button type="submit" id="btn-submit-leave" class="btn btn-primary" style="width:100%;">ส่งคำขอแจ้งหยุดจำหน่าย</button>
-      </form>
-    </div>
-  </div>
 
-  <!-- RENEW PAGE -->
-  <div id="page-renew" class="page">
-    <div class="card" style="max-width: 600px; margin: auto;">
-      <h2>ทบทวนสิทธิ์ / ยืนยันสิทธิ์จำหน่ายต่อ</h2>
-      <div id="renew-box-open" style="display:none;">
-        <p style="margin-bottom:20px; padding:15px; background:var(--blue-l); border-radius:8px;">เปิดให้ยืนยันสิทธิ์ประจำภาคการศึกษา: <b id="renew-sem-label"></b><br>สิ้นสุดวันที่: <b id="renew-deadline-label"></b></p>
-        <form id="form-renew">
-          <div class="field full" style="margin-bottom:15px;"><label>เลือกร้านค้าของคุณ <span style="color:red">*</span></label>
-            <select id="renew-shopId" name="shopId" required><option value="">— กำลังโหลด... —</option></select>
+        <form id="form-apply">
+          <div class="form-section">
+            <div class="form-section-title">ข้อมูลส่วนตัว</div>
+            <div class="form-grid">
+              <div class="field">
+                <label>ชื่อจริง <span class="req">*</span></label>
+                <input name="firstName" required placeholder="ชื่อของคุณ">
+              </div>
+              <div class="field">
+                <label>นามสกุล <span class="req">*</span></label>
+                <input name="lastName" required placeholder="นามสกุลของคุณ">
+              </div>
+              <div class="field">
+                <label>เบอร์โทรศัพท์ (10 หลัก) <span class="req">*</span></label>
+                <input name="phone" maxlength="10" required placeholder="0812345678" type="tel">
+              </div>
+              <div class="field">
+                <label>ศาสนา <span class="req">*</span></label>
+                <select name="religion" required>
+                  <option value="">— เลือก —</option>
+                  <option>พุทธ</option><option>อิสลาม</option><option>คริสต์</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div class="field full" style="margin-bottom:15px;"><label>ความประสงค์ <span style="color:red">*</span></label>
-            <select name="response" required><option value="yes">✅ ยืนยันขายต่อในเทอมหน้า</option><option value="no">❌ สละสิทธิ์ ไม่ขายต่อ</option></select>
+
+          <div class="form-section">
+            <div class="form-section-title">ข้อมูลร้านค้า</div>
+            <div class="form-grid">
+              <div class="field full">
+                <label>ชื่อร้านค้า / สถานประกอบการ <span class="req">*</span></label>
+                <input name="shopName" required placeholder="ชื่อร้านที่ต้องการใช้">
+              </div>
+              <div class="field full">
+                <label>สินค้าหรือบริการที่จำหน่าย <span class="req">*</span></label>
+                <textarea name="items" rows="2" required placeholder="ระบุรายละเอียดสินค้าหรือบริการ เช่น ข้าวผัด ก๋วยเตี๋ยว น้ำผลไม้..."></textarea>
+              </div>
+              <div class="field">
+                <label>หมวดหมู่สินค้า <span class="req">*</span></label>
+                <select name="category" required>
+                  <option value="">— เลือก —</option>
+                  <option>อาหาร</option><option>เครื่องดื่ม</option>
+                  <option>เสื้อผ้าและของใช้</option><option>รถฟู้ดทรัค (Food Truck)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>จำนวนพื้นที่ (ล็อก) ที่ต้องการ <span class="req">*</span></label>
+                <input type="number" name="slotCount" value="1" min="1" max="3" required>
+              </div>
+              <div class="field">
+                <label>LINE ID</label>
+                <input name="lineId" placeholder="ระบุ LINE ID (ถ้ามี)">
+              </div>
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary" style="width:100%;">ส่งผลการยืนยันสิทธิ์</button>
+
+          <button type="submit" id="btn-submit-apply" class="btn btn-primary" style="width:100%; margin-top:8px; padding:14px;">
+            ส่งข้อมูลลงทะเบียน →
+          </button>
         </form>
       </div>
-      <div id="renew-box-closed" style="text-align:center; padding:40px;">
-        <p style="color:var(--muted)">ขณะนี้ยังไม่ถึงช่วงเวลาการทบทวนสิทธิ์</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       LEAVE PAGE
+  ══════════════════════════════ -->
+  <div id="page-leave" class="page">
+    <div class="page-inner-sm">
+      <div class="card">
+        <div class="card-title">🗓️ แจ้งขอหยุดจำหน่าย (แจ้งลา)</div>
+        <div id="leave-notice" class="info-box amber" style="display:none;"></div>
+        <form id="form-leave">
+          <div class="form-grid" style="grid-template-columns:1fr;">
+            <div class="field">
+              <label>ค้นหาร้านค้าของคุณ <span class="req">*</span></label>
+              <select id="leave-shopId" name="shopId" required>
+                <option value="">— กำลังโหลดรายชื่อร้าน... —</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>วันที่ประสงค์จะหยุดจำหน่าย <span class="req">*</span></label>
+              <input type="date" name="marketDate" required>
+            </div>
+            <div class="field">
+              <label>ระบุเหตุผลความจำเป็น <span class="req">*</span></label>
+              <textarea name="reason" rows="3" required placeholder="เช่น ป่วย, ติดภารกิจสำคัญ, ติดสอบ..."></textarea>
+            </div>
+          </div>
+          <button type="submit" id="btn-submit-leave" class="btn btn-primary" style="width:100%; margin-top:8px; padding:14px;">
+            ส่งคำขอแจ้งหยุดจำหน่าย
+          </button>
+        </form>
       </div>
     </div>
   </div>
 
-  <!-- MAP PAGE -->
-  <div id="page-map" class="page">
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2>แผนผังพื้นที่ RUTS Walking Street</h2>
-        <div style="display:flex; gap:12px; font-size:12px; font-weight:700;">
-           <span style="color:#F59E0B;">● อาหาร</span> <span style="color:#3B82F6;">● เครื่องดื่ม</span> <span style="color:#8B5CF6;">● เสื้อผ้า</span> <span style="color:#EF4444;">● T2</span>
+  <!-- ══════════════════════════════
+       RENEW PAGE
+  ══════════════════════════════ -->
+  <div id="page-renew" class="page">
+    <div class="page-inner-sm">
+      <div class="card">
+        <div class="card-title">🔄 ทบทวนสิทธิ์ / ยืนยันสิทธิ์จำหน่ายต่อ</div>
+
+        <div id="renew-box-open" style="display:none;">
+          <div class="info-box blue" style="margin-bottom:20px;">
+            <div>📅 เปิดให้ยืนยันสิทธิ์ประจำภาคการศึกษา: <strong id="renew-sem-label"></strong><br>
+            สิ้นสุดวันที่: <strong id="renew-deadline-label"></strong></div>
+          </div>
+          <form id="form-renew">
+            <div class="form-grid" style="grid-template-columns:1fr;">
+              <div class="field">
+                <label>เลือกร้านค้าของคุณ <span class="req">*</span></label>
+                <select id="renew-shopId" name="shopId" required>
+                  <option value="">— กำลังโหลด... —</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>ความประสงค์ <span class="req">*</span></label>
+                <select name="response" required>
+                  <option value="yes">✅ ยืนยันขายต่อในเทอมหน้า</option>
+                  <option value="no">❌ สละสิทธิ์ ไม่ขายต่อ</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:8px; padding:14px;">
+              ส่งผลการยืนยันสิทธิ์
+            </button>
+          </form>
+        </div>
+
+        <div id="renew-box-closed" style="text-align:center; padding:48px 20px;">
+          <div style="font-size:48px; margin-bottom:16px;">🔒</div>
+          <p style="color:var(--muted); font-size:15px;">ขณะนี้ยังไม่ถึงช่วงเวลาการทบทวนสิทธิ์<br>กรุณาติดตามประกาศจากเจ้าหน้าที่</p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       MAP PAGE
+  ══════════════════════════════ -->
+  <div id="page-map" class="page">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+        <div class="card-title" style="margin:0;">🗺️ แผนผังพื้นที่ RUTS Walking Street</div>
+        <div class="map-legend">
+          <span><span class="legend-dot" style="background:#F59E0B;"></span>อาหาร</span>
+          <span><span class="legend-dot" style="background:#3B82F6;"></span>เครื่องดื่ม</span>
+          <span><span class="legend-dot" style="background:#8B5CF6;"></span>เสื้อผ้า</span>
+          <span><span class="legend-dot" style="background:#22C55E;"></span>Food Truck</span>
+          <span><span class="legend-dot" style="background:#EF4444;"></span>ระงับ (T2)</span>
+          <span><span class="legend-dot" style="background:#D1D5DB;"></span>ว่าง</span>
+        </div>
+      </div>
+      <div id="map-loading" style="text-align:center; padding:40px; color:var(--muted);">⏳ กำลังโหลดแผนผัง...</div>
       <div id="map-wrap"><div id="map-canvas"></div></div>
     </div>
   </div>
 
-  <!-- ADMIN PAGE -->
+  <!-- ══════════════════════════════
+       ADMIN PAGE
+  ══════════════════════════════ -->
   <div id="page-admin" class="page">
-    <div id="admin-login-wrap" class="card" style="max-width:450px; margin:auto; text-align:center; padding:50px;">
-      <h2 style="justify-content:center;">Admin Login</h2>
-      <p style="margin-bottom:30px; color:var(--muted)">เฉพาะคณะกรรมการตลาดที่ได้รับอนุญาต</p>
-      <button class="btn btn-primary" style="width:100%;" onclick="window.adminLogin()">Sign in with Google</button>
+
+    <!-- LOGIN -->
+    <div id="admin-login-wrap" class="login-card">
+      <div class="lock-icon">🔐</div>
+      <h2>เข้าสู่ระบบผู้ดูแล</h2>
+      <p>เฉพาะคณะกรรมการตลาด RUTS Walking Street ที่ได้รับอนุญาต</p>
+      <button class="btn-google" onclick="window.adminLogin()">
+        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.6 2.1 30.1 0 24 0 14.7 0 6.8 5.4 2.8 13.3l7.8 6c1.9-5.6 7.1-9.8 13.4-9.8z"/><path fill="#4A90D9" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.6-4.8 7.3l7.5 5.8c4.4-4.1 7.2-10.1 7.2-17.1z"/><path fill="#FBBC05" d="M10.6 28.6A14.4 14.4 0 0 1 9.5 24c0-1.6.3-3.1.7-4.6l-7.8-6A24 24 0 0 0 0 24c0 3.8.9 7.5 2.5 10.7l8.1-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-4.2-13.5-9.9l-8 6.2C6.7 42.6 14.7 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        Sign in with Google
+      </button>
     </div>
 
+    <!-- ADMIN PANEL -->
     <div id="admin-panel" style="display:none;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px; border-bottom:1px solid var(--border); padding-bottom:15px;">
-        <div><h2 style="margin:0;">Dashboard Management</h2><small id="admin-email-display" style="color:var(--green); font-weight:700;"></small></div>
-        <button class="btn btn-ghost btn-sm" onclick="window.adminLogout()">Logout</button>
+
+      <!-- Admin Header -->
+      <div class="admin-header">
+        <div class="admin-header-info">
+          <h2>Dashboard Management</h2>
+          <div class="admin-sub" id="admin-email-display"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="window.adminLogout()">🚪 ออกจากระบบ</button>
       </div>
 
+      <!-- Admin Quick Stats -->
+      <div class="admin-stats" id="admin-stats-row">
+        <div class="admin-stat">
+          <div class="num" id="adm-st-active">—</div>
+          <div class="lbl"><span class="indicator" style="background:#22C55E;"></span>ร้านเปิดขายปกติ</div>
+        </div>
+        <div class="admin-stat">
+          <div class="num" id="adm-st-pending">—</div>
+          <div class="lbl"><span class="indicator" style="background:#F59E0B;"></span>รออนุมัติ</div>
+        </div>
+        <div class="admin-stat">
+          <div class="num" id="adm-st-leave">—</div>
+          <div class="lbl"><span class="indicator" style="background:#CA8A04;"></span>แจ้งลา</div>
+        </div>
+        <div class="admin-stat">
+          <div class="num" id="adm-st-t2">—</div>
+          <div class="lbl"><span class="indicator" style="background:#EF4444;"></span>ระงับ (T2)</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
       <div class="tabs">
         <button class="tab-btn active" onclick="showAdminTab('pending',this)">📋 รออนุมัติ</button>
         <button class="tab-btn" onclick="showAdminTab('shops',this)">🏪 ร้านค้า</button>
         <button class="tab-btn" onclick="showAdminTab('payments',this)">💰 การเงิน</button>
         <button class="tab-btn" onclick="showAdminTab('settings',this)">⚙️ ตั้งค่าระบบ</button>
-        <button class="tab-btn" onclick="showAdminTab('logs',this)">📝 Log</button>
+        <button class="tab-btn" onclick="showAdminTab('logs',this)">📝 บันทึก</button>
       </div>
 
       <!-- TAB: PENDING -->
       <div id="admin-tab-pending" class="tab-panel active">
-        <h3>คำขอสมัครใหม่</h3>
-        <div class="tbl-wrap"><table><thead><tr><th>วันที่</th><th>ร้านค้า</th><th>ผู้สมัคร</th><th>เบอร์โทร</th><th>จัดการ</th></tr></thead><tbody id="tbody-pending"></tbody></table></div>
-        <h3 style="margin-top:30px;">คำขอแจ้งลา</h3>
-        <div class="tbl-wrap"><table><thead><tr><th>ร้านค้า</th><th>วันที่ลา</th><th>เหตุผล</th><th>จัดการ</th></tr></thead><tbody id="tbody-admin-leaves"></tbody></table></div>
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">📋 คำขอสมัครใหม่</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>วันที่สมัคร</th>
+                  <th>ร้านค้า</th>
+                  <th>ผู้สมัคร</th>
+                  <th>เบอร์โทร</th>
+                  <th>หมวดหมู่</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-pending">
+                <tr><td colspan="6" class="td-empty">ไม่มีคำขอรออนุมัติ</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">🗓️ คำขอแจ้งลา (รออนุมัติ)</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>ร้านค้า</th><th>วันที่ลา</th><th>เหตุผล</th><th>จัดการ</th></tr>
+              </thead>
+              <tbody id="tbody-admin-leaves">
+                <tr><td colspan="4" class="td-empty">ไม่มีคำขอแจ้งลา</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- TAB: SHOPS -->
       <div id="admin-tab-shops" class="tab-panel">
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-           <input type="text" id="search-shop-admin" placeholder="ค้นหาชื่อร้านหรือเบอร์โทร..." style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--border);">
-           <button class="btn btn-ghost" onclick="window.exportShops()">Export Excel</button>
+        <div class="card">
+          <div class="search-bar">
+            <input type="text" id="search-shop-admin" class="search-input" placeholder="🔍 ค้นหาชื่อร้านหรือเบอร์โทร...">
+            <button class="btn btn-ghost" onclick="window.exportShops()">📊 Export Excel</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>ชื่อร้าน</th><th>พื้นที่</th><th>หมวดหมู่</th><th>สถานะ</th><th>เบอร์โทร</th><th>จัดการ</th></tr>
+              </thead>
+              <tbody id="tbody-admin-shops">
+                <tr><td colspan="6" class="td-empty">ไม่มีข้อมูล</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="tbl-wrap"><table><thead><tr><th>ชื่อร้าน</th><th>พื้นที่</th><th>สถานะ</th><th>เบอร์โทร</th><th>จัดการ</th></tr></thead><tbody id="tbody-admin-shops"></tbody></table></div>
       </div>
 
       <!-- TAB: PAYMENTS -->
       <div id="admin-tab-payments" class="tab-panel">
         <div class="card">
-          <div class="form-grid" style="grid-template-columns: 1fr auto;">
-            <div class="field"><label>เลือกวันพุธที่ต้องการบันทึกการชำระเงิน</label><input type="date" id="pay-date"></div>
-            <button class="btn btn-primary" onclick="window.loadPaymentGrid()" style="align-self:flex-end;">ดึงรายชื่อ</button>
+          <div class="card-title">💰 บันทึกการชำระเงิน</div>
+          <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+            <div class="field" style="flex:1; min-width:200px;">
+              <label>เลือกวันพุธที่ต้องการบันทึก</label>
+              <input type="date" id="pay-date">
+            </div>
+            <button class="btn btn-primary" onclick="window.loadPaymentGrid()">ดึงรายชื่อ →</button>
           </div>
         </div>
         <div id="payment-grid-wrap" class="tbl-wrap"></div>
@@ -288,91 +1310,182 @@ td { padding: 14px; border-bottom: 1px solid #EDF1EE; font-size: 14px; }
 
       <!-- TAB: SETTINGS -->
       <div id="admin-tab-settings" class="tab-panel">
-        <div class="form-grid">
-          <div class="card">
-            <h3>ตั้งค่าช่วงเวลาแจ้งลา</h3>
-            <div class="field"><label>เปิดให้แจ้งลาได้ตั้งแต่</label><input type="datetime-local" id="set-leave-start"></div>
-            <div class="field"><label>ปิดรับแจ้งลาเมื่อ</label><input type="datetime-local" id="set-leave-end"></div>
-            <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="window.saveConfig('leave_period')">บันทึก</button>
-          </div>
-          <div class="card">
-            <h3>ตั้งค่าการทบทวนสิทธิ์</h3>
-            <div class="field"><label>เทอม/ช่วงเวลา</label><input id="set-renew-sem" placeholder="เช่น 1/2567"></div>
-            <div class="field"><label>สิ้นสุดวันที่</label><input type="date" id="set-renew-end"></div>
-            <div style="margin-top:10px;"><label><input type="checkbox" id="set-renew-open"> เปิดระบบให้ร้านค้ากดยืนยัน</label></div>
-            <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="window.saveConfig('renew_period')">บันทึก</button>
-          </div>
-          <div class="card">
-            <h3>เปิด/ปิด เมนูผู้ใช้งาน</h3>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <label><input type="checkbox" id="vis-apply"> เปิดรับลงทะเบียน (สมัครใหม่)</label>
-              <label><input type="checkbox" id="vis-map"> แสดงแผนผังตลาด</label>
-              <label><input type="checkbox" id="vis-stats"> แสดงจำนวนร้านค้าหน้าแรก</label>
+        <div class="settings-grid">
+
+          <div class="settings-card">
+            <h3>⏰ ช่วงเวลาแจ้งลา</h3>
+            <div class="field" style="margin-bottom:12px;">
+              <label>เปิดให้แจ้งลาได้ตั้งแต่</label>
+              <input type="datetime-local" id="set-leave-start">
             </div>
-            <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="window.saveConfig('visibility')">บันทึก</button>
+            <div class="field" style="margin-bottom:14px;">
+              <label>ปิดรับแจ้งลาเมื่อ</label>
+              <input type="datetime-local" id="set-leave-end">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.saveConfig('leave_period')">💾 บันทึกการตั้งค่า</button>
           </div>
-          <div class="card">
-            <h3>ประกาศข่าวสาร</h3>
-            <div class="field"><label>ข้อความประกาศ (ทิ้งว่างเพื่อปิด)</label><textarea id="set-announcement" rows="3"></textarea></div>
-            <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="window.saveConfig('announcement')">ประกาศ</button>
+
+          <div class="settings-card">
+            <h3>🔄 การทบทวนสิทธิ์</h3>
+            <div class="field" style="margin-bottom:12px;">
+              <label>เทอม/ช่วงเวลา</label>
+              <input id="set-renew-sem" placeholder="เช่น 1/2567">
+            </div>
+            <div class="field" style="margin-bottom:12px;">
+              <label>สิ้นสุดวันที่</label>
+              <input type="date" id="set-renew-end">
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-label">เปิดให้ร้านค้ายืนยันสิทธิ์<small>แสดงปุ่มให้ร้านค้ากด</small></div>
+              <label class="toggle">
+                <input type="checkbox" id="set-renew-open">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <button class="btn btn-primary btn-sm" style="margin-top:14px;" onclick="window.saveConfig('renew_period')">💾 บันทึกการตั้งค่า</button>
           </div>
+
+          <div class="settings-card">
+            <h3>👁️ การแสดงเมนู</h3>
+            <div class="toggle-row">
+              <div class="toggle-label">เปิดรับลงทะเบียน<small>แสดงเมนูสมัครใหม่</small></div>
+              <label class="toggle">
+                <input type="checkbox" id="vis-apply">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-label">แผนผังตลาด<small>แสดงหน้าแผนผัง</small></div>
+              <label class="toggle">
+                <input type="checkbox" id="vis-map">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-label">สถิติร้านค้า<small>แสดงตัวเลขหน้าแรก</small></div>
+              <label class="toggle">
+                <input type="checkbox" id="vis-stats">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <button class="btn btn-primary btn-sm" style="margin-top:14px;" onclick="window.saveConfig('visibility')">💾 บันทึกการตั้งค่า</button>
+          </div>
+
+          <div class="settings-card">
+            <h3>📢 ประกาศข่าวสาร</h3>
+            <div class="field" style="margin-bottom:14px;">
+              <label>ข้อความประกาศ (ทิ้งว่างเพื่อปิด)</label>
+              <textarea id="set-announcement" rows="4" placeholder="พิมพ์ข้อความที่ต้องการประกาศ..."></textarea>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.saveConfig('announcement')">📣 บันทึกและประกาศ</button>
+          </div>
+
         </div>
       </div>
 
       <!-- TAB: LOGS -->
       <div id="admin-tab-logs" class="tab-panel">
-        <div class="tbl-wrap"><table><thead><tr><th>เวลา</th><th>ผู้ทำรายการ</th><th>กิจกรรม</th><th>รายละเอียด</th></tr></thead><tbody id="tbody-admin-logs"></tbody></table></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODALS -->
-  <div id="modal-bg" class="modal-bg" onclick="window.closeModal()"></div>
-  
-  <div id="modal-approve" class="modal-box">
-    <h3>พิจารณาการสมัคร</h3>
-    <div id="app-detail" style="font-size:14px; margin-bottom:20px; color:var(--muted)"></div>
-    <div class="field" style="margin-bottom:20px;"><label>กำหนดเลขพื้นที่ (เช่น 4,5,6)</label><input id="modal-slots" placeholder="เลขพื้นที่"></div>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-      <button class="btn btn-primary" onclick="window.actionApp('approved')">อนุมัติ</button>
-      <button class="btn btn-danger" onclick="window.actionApp('rejected')">ไม่อนุมัติ</button>
-    </div>
-  </div>
-
-  <div id="modal-edit-shop" class="modal-box">
-    <h3>แก้ไขข้อมูลร้านค้า</h3>
-    <form id="form-edit-shop">
-      <div class="form-grid">
-        <div class="field"><label>ชื่อร้าน</label><input name="shopName" id="edit-shopName"></div>
-        <div class="field"><label>เลขพื้นที่</label><input name="slots" id="edit-slots"></div>
-        <div class="field"><label>เบอร์โทร</label><input name="phone" id="edit-phone"></div>
-        <div class="field"><label>สถานะ</label>
-          <select name="status" id="edit-status"><option value="active">เปิดขายปกติ</option><option value="leave">แจ้งลา</option><option value="T2">ระงับ (T2)</option><option value="cancelled">ยกเลิกสิทธิ์</option></select>
+        <div class="card">
+          <div class="card-title">📝 บันทึกกิจกรรมระบบ</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr><th>เวลา</th><th>ผู้ทำรายการ</th><th>กิจกรรม</th><th>รายละเอียด</th></tr>
+              </thead>
+              <tbody id="tbody-admin-logs">
+                <tr><td colspan="4" class="td-empty">ไม่มีบันทึกกิจกรรม</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div style="margin-top:20px; display:flex; gap:10px;">
-        <button type="button" class="btn btn-primary" onclick="window.updateShopData()">บันทึกการแก้ไข</button>
-        <button type="button" class="btn btn-danger" onclick="window.deleteShop()">ลบร้านค้า</button>
-        <button type="button" class="btn btn-ghost" onclick="window.closeModal()">ปิด</button>
+
+    </div><!-- /admin-panel -->
+  </div><!-- /page-admin -->
+
+  <!-- ══════════════════════════════
+       MODALS
+  ══════════════════════════════ -->
+  <div id="modal-bg" class="modal-bg" onclick="window.closeModal()"></div>
+
+  <!-- MODAL: APPROVE -->
+  <div id="modal-approve" class="modal-box">
+    <div class="modal-title">📋 พิจารณาคำขอสมัคร</div>
+    <div id="app-detail" style="font-size:14px; margin-bottom:18px; color:var(--text-2); background:var(--surface); padding:14px; border-radius:8px;"></div>
+    <div class="field" style="margin-bottom:18px;">
+      <label>กำหนดเลขพื้นที่ (เช่น 4,5,6)</label>
+      <input id="modal-slots" placeholder="ระบุเลขล็อก คั่นด้วยจุลภาค">
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <button class="btn btn-primary" onclick="window.actionApp('approved')">✅ อนุมัติ</button>
+      <button class="btn btn-danger" onclick="window.actionApp('rejected')">❌ ไม่อนุมัติ</button>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT SHOP -->
+  <div id="modal-edit-shop" class="modal-box">
+    <div class="modal-title">✏️ แก้ไขข้อมูลร้านค้า</div>
+    <form id="form-edit-shop">
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="field">
+          <label>ชื่อร้าน</label>
+          <input name="shopName" id="edit-shopName">
+        </div>
+        <div class="field">
+          <label>เลขพื้นที่</label>
+          <input name="slots" id="edit-slots">
+        </div>
+        <div class="field">
+          <label>เบอร์โทร</label>
+          <input name="phone" id="edit-phone">
+        </div>
+        <div class="field">
+          <label>สถานะ</label>
+          <select name="status" id="edit-status">
+            <option value="active">เปิดขายปกติ</option>
+            <option value="leave">แจ้งลา</option>
+            <option value="T2">ระงับ (T2)</option>
+            <option value="cancelled">ยกเลิกสิทธิ์</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-primary" onclick="window.updateShopData()">💾 บันทึก</button>
+        <button type="button" class="btn btn-danger" onclick="window.deleteShop()">🗑️ ลบร้าน</button>
+        <button type="button" class="btn btn-ghost" onclick="window.closeModal()">ยกเลิก</button>
       </div>
     </form>
   </div>
 
+  <!-- MODAL: CHECK STATUS -->
   <div id="modal-check-status" class="modal-box">
-    <h3>ตรวจสอบสถานะ / ค้นหาข้อมูลร้าน</h3>
-    <div class="field" style="margin-bottom:15px;"><label>เบอร์โทรศัพท์ 10 หลัก</label><input type="tel" id="check-phone" maxlength="10"></div>
+    <div class="modal-title">🔍 ตรวจสอบสถานะ / ค้นหาร้านค้า</div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>เบอร์โทรศัพท์ 10 หลัก</label>
+      <input type="tel" id="check-phone" maxlength="10" placeholder="0812345678">
+    </div>
     <button class="btn btn-primary" style="width:100%;" onclick="window.checkStatus()">ค้นหา</button>
-    <div id="check-res" style="margin-top:20px;"></div>
+    <div id="check-res" style="margin-top:18px;"></div>
   </div>
 
-</div>
+</div><!-- /app -->
 
-<!-- FIREBASE SDK -->
+<!-- ══════════════════════════════
+     FIREBASE SDK + APP LOGIC
+══════════════════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, serverTimestamp, orderBy, limit, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, doc,
+    updateDoc, query, where, serverTimestamp, orderBy,
+    limit, deleteDoc, getDoc, setDoc
+  } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+  import {
+    getAuth, signInWithPopup, GoogleAuthProvider,
+    onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
+  /* ─── CONFIG ─── */
   const firebaseConfig = {
     apiKey: "AIzaSyARN_CaKaCZ6zPUHhJmeWvOrwfz8WMcLGI",
     authDomain: "ruts-walking-street.firebaseapp.com",
@@ -384,228 +1497,412 @@ td { padding: 14px; border-bottom: 1px solid #EDF1EE; font-size: 14px; }
   };
 
   const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  const db  = getFirestore(app);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
   const ADMIN_EMAIL = "rutswalkingstreet@gmail.com";
   let currentId = null;
 
-  // --- CONFIG & VISIBILITY ---
-  async function loadSystemConfig() {
-    const snap = await getDoc(doc(db, "config", "system"));
-    if(!snap.exists()) return;
-    const c = snap.data();
-    
-    // Visibility
-    const v = c.visibility || {};
-    
-    // Nav Buttons
-    const navApply = document.getElementById('btn-m-apply');
-    if (navApply) navApply.style.display = v.apply ? '' : 'none';
-    const navMap = document.getElementById('btn-m-map');
-    if (navMap) navMap.style.display = v.map ? '' : 'none';
-    
-    // Stats Grid
-    const statsGrid = document.getElementById('public-stats-grid');
-    if (statsGrid) statsGrid.style.display = v.stats ? 'grid' : 'none';
-
-    // Home Page Action Buttons
-    const homeBtns = document.querySelectorAll('.card button.btn');
-    homeBtns.forEach(btn => {
-      if(btn.getAttribute('onclick') === "showPage('apply')") btn.style.display = v.apply ? 'inline-flex' : 'none';
-      if(btn.getAttribute('onclick') === "showPage('map')") btn.style.display = v.map ? 'inline-flex' : 'none';
-    });
-    
-    // Announcement
-    if(c.announcement) {
-      document.getElementById('announcement-banner').innerText = c.announcement;
-      document.getElementById('announcement-banner').style.display = 'block';
-    } else {
-      document.getElementById('announcement-banner').style.display = 'none';
-    }
-
-    // Renewal
-    const r = c.renew_period || {};
-    if(r.open) {
-      document.getElementById('renew-box-open').style.display = 'block';
-      document.getElementById('renew-box-closed').style.display = 'none';
-      document.getElementById('renew-sem-label').innerText = r.semester || '';
-      document.getElementById('renew-deadline-label').innerText = r.deadline || '';
-    } else {
-      document.getElementById('renew-box-open').style.display = 'none';
-      document.getElementById('renew-box-closed').style.display = 'block';
-    }
-
-    // Admin Inputs Sync
-    if(window.adminMode) {
-      document.getElementById('vis-apply').checked = v.apply || false;
-      document.getElementById('vis-map').checked = v.map || false;
-      document.getElementById('vis-stats').checked = v.stats || false;
-      document.getElementById('set-renew-sem').value = r.semester || '';
-      document.getElementById('set-renew-end').value = r.deadline || '';
-      document.getElementById('set-renew-open').checked = r.open || false;
-      document.getElementById('set-announcement').value = c.announcement || '';
-    }
-  }
-
-  window.saveConfig = async (type) => {
-    const ref = doc(db, "config", "system");
-    let update = {};
-    if(type === 'visibility') {
-      update.visibility = {
-        apply: document.getElementById('vis-apply').checked,
-        map: document.getElementById('vis-map').checked,
-        stats: document.getElementById('vis-stats').checked
-      };
-    } else if(type === 'renew_period') {
-      update.renew_period = {
-        semester: document.getElementById('set-renew-sem').value,
-        deadline: document.getElementById('set-renew-end').value,
-        open: document.getElementById('set-renew-open').checked
-      };
-    } else if(type === 'announcement') {
-      update.announcement = document.getElementById('set-announcement').value;
-    }
-    await setDoc(ref, update, { merge: true });
-    alert('บันทึกการตั้งค่าสำเร็จ');
-    loadSystemConfig();
-  };
-
-  // --- CORE UI ---
+  /* ─── NAVIGATION ─── */
   window.showPage = (name, btn) => {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + name).classList.add('active');
-    if(btn) {
+    const page = document.getElementById('page-' + name);
+    if (page) page.classList.add('active');
+
+    if (btn) {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     }
-    if(name === 'home') loadStats();
-    if(name === 'map') loadMap();
-    if(name === 'leave') loadShopDropdown('leave-shopId');
-    if(name === 'renew') loadShopDropdown('renew-shopId');
+
+    if (name === 'home')  loadStats();
+    if (name === 'map')   loadMap();
+    if (name === 'leave') loadShopDropdown('leave-shopId');
+    if (name === 'renew') loadShopDropdown('renew-shopId');
   };
 
-  window.closeModal = () => { document.querySelectorAll('.modal-box, .modal-bg').forEach(el => el.style.display = 'none'); };
+  window.closeModal = () => {
+    document.querySelectorAll('.modal-box, .modal-bg').forEach(el => el.style.display = 'none');
+  };
 
+  window.openCheckStatusModal = () => {
+    document.getElementById('modal-check-status').style.display = 'block';
+    document.getElementById('modal-bg').style.display = 'block';
+    document.getElementById('check-res').innerHTML = '';
+    document.getElementById('check-phone').value = '';
+  };
+
+  /* ─── STATS (PUBLIC) ─── */
   async function loadStats() {
-    const snap = await getDocs(collection(db, "shops"));
-    const shops = snap.docs.map(d => d.data());
-    const active = shops.filter(s => s.status === 'active' || s.status === 'leave').length;
-    document.getElementById('st-active').innerText = active;
-    document.getElementById('st-pending').innerText = shops.filter(s => s.status === 'pending').length;
-    document.getElementById('st-empty').innerText = 185 - active;
+    try {
+      const snap  = await getDocs(collection(db, "shops"));
+      const shops = snap.docs.map(d => d.data());
+      const active = shops.filter(s => s.status === 'active').length;
+      const leave  = shops.filter(s => s.status === 'leave').length;
+      document.getElementById('st-active').innerText  = active + leave;
+      document.getElementById('st-pending').innerText = shops.filter(s => s.status === 'pending').length;
+      document.getElementById('st-empty').innerText   = 185 - active - leave;
+    } catch(e) { console.warn('loadStats:', e); }
   }
 
+  /* ─── SHOP DROPDOWN ─── */
   async function loadShopDropdown(id) {
-    const q = query(collection(db, "shops"), where("status", "in", ["active", "leave", "T2"]));
-    const snap = await getDocs(q);
-    const html = '<option value="">— เลือกชื่อร้านค้า —</option>' + snap.docs.map(d => `<option value="${d.id}">${d.data().shopName}</option>`).join('');
-    document.getElementById(id).innerHTML = html;
+    try {
+      const q    = query(collection(db, "shops"), where("status", "in", ["active", "leave", "T2"]));
+      const snap = await getDocs(q);
+      const html = '<option value="">— เลือกชื่อร้านค้า —</option>'
+        + snap.docs.map(d => `<option value="${d.id}">${d.data().shopName}</option>`).join('');
+      document.getElementById(id).innerHTML = html;
+    } catch(e) { console.warn('loadShopDropdown:', e); }
   }
 
-  // --- MAP ---
+  /* ─── APPLY FORM ─── */
+  document.getElementById('form-apply').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-apply');
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังส่งข้อมูล...';
+    try {
+      const data = Object.fromEntries(new FormData(e.target));
+      data.status    = 'pending';
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, "shops"), data);
+      alert('✅ ส่งข้อมูลสำเร็จ! คณะกรรมการจะพิจารณาและแจ้งผลภายหลัง');
+      e.target.reset();
+    } catch(err) {
+      alert('เกิดข้อผิดพลาด: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
+    }
+  });
+
+  /* ─── LEAVE FORM ─── */
+  document.getElementById('form-leave').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-leave');
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังส่งคำขอ...';
+    try {
+      const data = Object.fromEntries(new FormData(e.target));
+      if (!data.shopId) { alert('กรุณาเลือกร้านค้า'); return; }
+      data.status    = 'pending';
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, "leaves"), data);
+      alert('✅ ส่งคำขอแจ้งหยุดสำเร็จ! รอคณะกรรมการอนุมัติ');
+      e.target.reset();
+    } catch(err) {
+      alert('เกิดข้อผิดพลาด: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'ส่งคำขอแจ้งหยุดจำหน่าย';
+    }
+  });
+
+  /* ─── RENEW FORM ─── */
+  document.getElementById('form-renew').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      const data = Object.fromEntries(new FormData(e.target));
+      if (!data.shopId) { alert('กรุณาเลือกร้านค้า'); return; }
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, "renewals"), data);
+      alert('✅ บันทึกผลการยืนยันสิทธิ์เรียบร้อย');
+      e.target.reset();
+    } catch(err) {
+      alert('เกิดข้อผิดพลาด: ' + err.message);
+    }
+  });
+
+  /* ─── CHECK STATUS ─── */
+  window.checkStatus = async () => {
+    const phone = document.getElementById('check-phone').value.trim();
+    const res   = document.getElementById('check-res');
+    if (phone.length < 9) { res.innerHTML = '<div class="info-box amber">⚠️ กรุณากรอกเบอร์โทรให้ครบ</div>'; return; }
+
+    res.innerHTML = '⏳ กำลังค้นหา...';
+    try {
+      const q    = query(collection(db, "shops"), where("phone", "==", phone));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        res.innerHTML = '<div class="info-box amber">❌ ไม่พบข้อมูล กรุณาตรวจสอบเบอร์โทรอีกครั้ง</div>';
+        return;
+      }
+      const statusMap = {
+        active: { label: 'เปิดขายปกติ', cls: 'badge-active' },
+        pending: { label: 'รอการอนุมัติ', cls: 'badge-pending' },
+        leave: { label: 'แจ้งลา', cls: 'badge-leave' },
+        T2: { label: 'ระงับสิทธิ์ (T2)', cls: 'badge-t2' },
+        cancelled: { label: 'ยกเลิกสิทธิ์', cls: 'badge-cancelled' }
+      };
+      res.innerHTML = snap.docs.map(d => {
+        const s  = d.data();
+        const st = statusMap[s.status] || { label: s.status, cls: '' };
+        return `<div style="background:var(--surface); padding:16px; border-radius:10px; margin-bottom:8px; border:1px solid var(--border-l);">
+          <div style="font-weight:700; font-size:15px; margin-bottom:6px;">${s.shopName}</div>
+          <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+            ${s.firstName} ${s.lastName} · ล็อก: ${s.slots || 'ยังไม่กำหนด'}
+          </div>
+          <span class="badge ${st.cls}">${st.label}</span>
+        </div>`;
+      }).join('');
+    } catch(err) {
+      res.innerHTML = '<div class="info-box amber">เกิดข้อผิดพลาด: ' + err.message + '</div>';
+    }
+  };
+
+  /* ─── MAP ─── */
   window.renderMap = (canvasId, shopsBySlot) => {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     canvas.innerHTML = '';
+
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:inline-grid; grid-template-columns: auto 20px auto 1fr; grid-template-rows: auto 20px auto 20px auto; gap:6px; align-items:end; padding: 10px;';
-    
+    wrap.style.cssText = 'display:inline-grid; grid-template-columns: auto 18px auto 1fr; grid-template-rows: auto 18px auto 18px auto; gap:6px; align-items:end; padding:10px;';
+
+    const colorMap = {
+      'อาหาร': { bg: 'var(--slot-food-bg)', b: 'var(--slot-food-b)' },
+      'เครื่องดื่ม': { bg: 'var(--slot-drink-bg)', b: 'var(--slot-drink-b)' },
+      'เสื้อผ้าและของใช้': { bg: 'var(--slot-fashion-bg)', b: 'var(--slot-fashion-b)' },
+      'รถฟู้ดทรัค (Food Truck)': { bg: 'var(--slot-truck-bg)', b: 'var(--slot-truck-b)' }
+    };
+
     const makeCell = (i) => {
-      const s = shopsBySlot[i];
+      const s   = shopsBySlot[i];
       const div = document.createElement('div');
       div.className = 'slot-cell';
-      if(s) {
-        if(s.status === 'T2') div.style.borderColor = 'var(--slot-t2-b)';
-        else if(s.category === 'อาหาร') div.style.backgroundColor = 'var(--slot-food)';
-        else if(s.category === 'เครื่องดื่ม') div.style.backgroundColor = 'var(--slot-drink)';
+      if (s) {
+        if (s.status === 'T2') {
+          div.style.backgroundColor = 'var(--slot-t2-bg)';
+          div.style.borderColor     = 'var(--slot-t2-b)';
+        } else if (s.status === 'leave') {
+          div.style.backgroundColor = 'var(--slot-leave-bg)';
+          div.style.borderColor     = 'var(--slot-leave-b)';
+        } else if (colorMap[s.category]) {
+          div.style.backgroundColor = colorMap[s.category].bg;
+          div.style.borderColor     = colorMap[s.category].b;
+        }
       }
       div.innerHTML = `<span class="slot-no">${i}</span><span class="slot-name">${s?.shopName || ''}</span>`;
+      // Tooltip
+      div.addEventListener('mouseenter', (e) => {
+        const tt = document.getElementById('slot-tooltip');
+        tt.innerHTML = s
+          ? `<strong>${s.shopName}</strong><br>ล็อก: ${i} · ${s.category || '—'}<br>สถานะ: ${s.status}`
+          : `<strong>ล็อก ${i}</strong><br>ว่าง`;
+        tt.style.display = 'block';
+      });
+      div.addEventListener('mousemove', (e) => {
+        const tt = document.getElementById('slot-tooltip');
+        tt.style.left = (e.clientX + 14) + 'px';
+        tt.style.top  = (e.clientY + 14) + 'px';
+      });
+      div.addEventListener('mouseleave', () => {
+        document.getElementById('slot-tooltip').style.display = 'none';
+      });
       return div;
     };
 
-    const left = document.createElement('div'); left.style.cssText = 'grid-column:1; display:flex; flex-direction:column; gap:4px;';
-    for(let i=185; i>=146; i--) left.appendChild(makeCell(i));
+    const left = document.createElement('div');
+    left.style.cssText = 'grid-column:1; display:flex; flex-direction:column; gap:4px;';
+    for (let i = 185; i >= 146; i--) left.appendChild(makeCell(i));
 
-    const aisleVert = document.createElement('div'); aisleVert.style.cssText = 'grid-column:2; height:100%; background:#eee; border-radius:4px; writing-mode:vertical-rl; text-align:center; font-size:10px; color:#999; display:flex; align-items:center; justify-content:center;'; aisleVert.innerText = 'ทางเดิน';
+    const aisleV = document.createElement('div');
+    aisleV.style.cssText = 'grid-column:2; height:100%; background:#e8ede9; border-radius:4px; writing-mode:vertical-rl; text-align:center; font-size:10px; color:#aaa; display:flex; align-items:center; justify-content:center;';
+    aisleV.innerText = 'ทางเดิน';
 
-    const right = document.createElement('div'); right.style.cssText = 'grid-column:3; display:flex; flex-direction:column; gap:4px;';
-    for(let i=1; i<=41; i++) right.appendChild(makeCell(i));
+    const right = document.createElement('div');
+    right.style.cssText = 'grid-column:3; display:flex; flex-direction:column; gap:4px;';
+    for (let i = 1; i <= 41; i++) right.appendChild(makeCell(i));
 
-    const centerPark = document.createElement('div'); centerPark.style.cssText = 'grid-column:4; display:flex; align-items:flex-end; padding:20px;';
-    centerPark.innerHTML = `<div style="background:#f0fff0; border:2px dashed #8dc; border-radius:12px; width:100%; min-width:300px; height:200px; display:flex; align-items:center; justify-content:center; color:#274; font-weight:bold;">ลานกิจกรรม / พื้นที่สีเขียว</div>`;
+    const park = document.createElement('div');
+    park.style.cssText = 'grid-column:4; display:flex; align-items:flex-end; padding:20px;';
+    park.innerHTML = `<div style="background:linear-gradient(135deg,#f0fff7,#e4faf0); border:2px dashed #6dcf9e; border-radius:14px; width:100%; min-width:260px; height:200px; display:flex; align-items:center; justify-content:center; color:#1a6640; font-weight:bold; font-size:15px; font-family:'Mitr',sans-serif;">🌳 ลานกิจกรรม<br>พื้นที่สีเขียว</div>`;
 
-    const botRow = document.createElement('div'); botRow.style.cssText = 'grid-column:1/span 4; grid-row:3; display:flex; gap:4px; overflow-x:auto; padding-bottom:5px;';
-    for(let i=42; i<=92; i++) botRow.appendChild(makeCell(i));
+    const botRow = document.createElement('div');
+    botRow.style.cssText = 'grid-column:1/span 4; grid-row:3; display:flex; gap:4px; overflow-x:auto; padding-bottom:4px;';
+    for (let i = 42; i <= 92; i++) botRow.appendChild(makeCell(i));
 
-    const aisleHoriz = document.createElement('div'); aisleHoriz.style.cssText = 'grid-column:1/span 4; grid-row:4; height:20px; background:#eee; border-radius:4px;';
+    const aisleH = document.createElement('div');
+    aisleH.style.cssText = 'grid-column:1/span 4; grid-row:4; height:18px; background:#e8ede9; border-radius:4px; display:flex; align-items:center; padding:0 10px; font-size:10px; color:#aaa;';
+    aisleH.innerText = 'ทางเดินหลัก';
 
-    const topRow = document.createElement('div'); topRow.style.cssText = 'grid-column:1/span 4; grid-row:5; display:flex; gap:4px; overflow-x:auto; padding-bottom:5px;';
-    for(let i=93; i<=145; i++) topRow.appendChild(makeCell(i));
+    const topRow = document.createElement('div');
+    topRow.style.cssText = 'grid-column:1/span 4; grid-row:5; display:flex; gap:4px; overflow-x:auto; padding-bottom:4px;';
+    for (let i = 93; i <= 145; i++) topRow.appendChild(makeCell(i));
 
-    wrap.appendChild(left);
-    wrap.appendChild(aisleVert);
-    wrap.appendChild(right);
-    wrap.appendChild(centerPark);
-    wrap.appendChild(botRow);
-    wrap.appendChild(aisleHoriz);
-    wrap.appendChild(topRow);
+    wrap.append(left, aisleV, right, park, botRow, aisleH, topRow);
     canvas.appendChild(wrap);
   };
 
-
   async function loadMap() {
-    const snap = await getDocs(collection(db, "shops"));
-    const map = {};
-    snap.forEach(d => {
-      const data = d.data();
-      String(data.slots || '').split(',').forEach(s => { if(s.trim()) map[s.trim()] = data; });
-    });
-    window.renderMap('map-canvas', map);
-    document.getElementById('map-loading').style.display = 'none';
+    const loading = document.getElementById('map-loading');
+    if (loading) loading.style.display = 'block';
+    try {
+      const snap = await getDocs(collection(db, "shops"));
+      const map  = {};
+      snap.forEach(d => {
+        const data = d.data();
+        String(data.slots || '').split(',').forEach(s => {
+          const n = s.trim();
+          if (n) map[n] = data;
+        });
+      });
+      window.renderMap('map-canvas', map);
+    } catch(e) { console.warn('loadMap:', e); }
+    finally { if (loading) loading.style.display = 'none'; }
   }
 
-  // --- PAYMENTS ---
+  /* ─── PAYMENTS ─── */
   window.loadPaymentGrid = async () => {
     const date = document.getElementById('pay-date').value;
-    if(!date) return alert('เลือกวันที่');
-    const shopsSnap = await getDocs(query(collection(db, "shops"), where("status", "==", "active")));
-    const paySnap = await getDocs(query(collection(db, "payments"), where("date", "==", date)));
-    const paidIds = paySnap.docs.map(d => d.data().shopId);
+    if (!date) { alert('กรุณาเลือกวันที่'); return; }
 
-    let html = `<table><thead><tr><th>พื้นที่</th><th>ร้านค้า</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody>`;
-    shopsSnap.forEach(d => {
-      const s = d.data(); const id = d.id;
-      const isPaid = paidIds.includes(id);
-      html += `<tr><td>${s.slots}</td><td>${s.shopName}</td><td>${isPaid ? '✅ จ่ายแล้ว' : '❌ ยังไม่จ่าย'}</td>
-      <td>${isPaid ? '' : `<button class="btn btn-primary btn-sm" onclick="window.confirmPay('${id}','${date}')">บันทึกรับเงิน</button>`}</td></tr>`;
-    });
-    html += `</tbody></table>`;
-    document.getElementById('payment-grid-wrap').innerHTML = html;
+    try {
+      const shopsSnap = await getDocs(query(collection(db, "shops"), where("status", "==", "active")));
+      const paySnap   = await getDocs(query(collection(db, "payments"), where("date", "==", date)));
+      const paidIds   = paySnap.docs.map(d => d.data().shopId);
+
+      let rows = '';
+      shopsSnap.forEach(d => {
+        const s = d.data(); const id = d.id;
+        const isPaid = paidIds.includes(id);
+        rows += `<tr>
+          <td>${s.slots || '—'}</td>
+          <td>${s.shopName}</td>
+          <td>${isPaid ? '<span class="badge badge-active">✅ จ่ายแล้ว</span>' : '<span class="badge badge-t2">❌ ยังไม่จ่าย</span>'}</td>
+          <td>${isPaid ? '' : `<button class="btn btn-primary btn-sm" onclick="window.confirmPay('${id}','${date}')">บันทึกรับเงิน</button>`}</td>
+        </tr>`;
+      });
+
+      document.getElementById('payment-grid-wrap').innerHTML = `
+        <table>
+          <thead><tr><th>พื้นที่</th><th>ร้านค้า</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="4" class="td-empty">ไม่มีร้านค้า</td></tr>'}</tbody>
+        </table>`;
+    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
   };
 
   window.confirmPay = async (shopId, date) => {
-    await addDoc(collection(db, "payments"), { shopId, date, timestamp: serverTimestamp(), admin: auth.currentUser.email });
-    alert('บันทึกสำเร็จ'); window.loadPaymentGrid();
+    try {
+      await addDoc(collection(db, "payments"), {
+        shopId, date,
+        timestamp: serverTimestamp(),
+        admin: auth.currentUser?.email || 'unknown'
+      });
+      alert('✅ บันทึกสำเร็จ');
+      window.loadPaymentGrid();
+    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
   };
 
-  // --- ADMIN AUTH ---
-  window.adminLogin = () => signInWithPopup(auth, provider);
+  /* ─── SYSTEM CONFIG ─── */
+  async function loadSystemConfig() {
+    try {
+      const snap = await getDoc(doc(db, "config", "system"));
+      if (!snap.exists()) return;
+      const c = snap.data();
+      const v = c.visibility || {};
+
+      // Nav visibility
+      const applyBtn = document.getElementById('btn-m-apply');
+      const mapBtn   = document.getElementById('btn-m-map');
+      if (applyBtn) applyBtn.style.display = v.apply ? '' : 'none';
+      if (mapBtn)   mapBtn.style.display   = v.map   ? '' : 'none';
+
+      // Stats grid
+      const statsGrid = document.getElementById('public-stats-grid');
+      if (statsGrid) statsGrid.style.display = v.stats ? 'grid' : 'none';
+
+      // Home service cards
+      document.querySelectorAll('.service-card').forEach(card => {
+        const oc = card.getAttribute('onclick') || '';
+        if (oc.includes("showPage('apply'")) card.style.display = v.apply ? '' : 'none';
+        if (oc.includes("showPage('map'"))   card.style.display = v.map   ? '' : 'none';
+      });
+
+      // Announcement
+      const banner     = document.getElementById('announcement-banner');
+      const annText    = document.getElementById('announcement-text');
+      if (c.announcement) {
+        annText.innerText    = c.announcement;
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
+
+      // Renewal
+      const r = c.renew_period || {};
+      document.getElementById('renew-box-open').style.display   = r.open ? 'block' : 'none';
+      document.getElementById('renew-box-closed').style.display = r.open ? 'none'  : 'block';
+      if (r.open) {
+        document.getElementById('renew-sem-label').innerText      = r.semester || '';
+        document.getElementById('renew-deadline-label').innerText = r.deadline || '';
+      }
+
+      // Apply closed
+      document.getElementById('apply-closed-msg').style.display = v.apply ? 'none' : 'flex';
+
+      // Admin sync
+      if (window.adminMode) {
+        document.getElementById('vis-apply').checked    = !!v.apply;
+        document.getElementById('vis-map').checked      = !!v.map;
+        document.getElementById('vis-stats').checked    = !!v.stats;
+        document.getElementById('set-renew-sem').value  = r.semester || '';
+        document.getElementById('set-renew-end').value  = r.deadline || '';
+        document.getElementById('set-renew-open').checked = !!r.open;
+        document.getElementById('set-announcement').value = c.announcement || '';
+      }
+    } catch(e) { console.warn('loadSystemConfig:', e); }
+  }
+
+  window.saveConfig = async (type) => {
+    try {
+      const ref = doc(db, "config", "system");
+      let update = {};
+
+      if (type === 'visibility') {
+        update.visibility = {
+          apply: document.getElementById('vis-apply').checked,
+          map:   document.getElementById('vis-map').checked,
+          stats: document.getElementById('vis-stats').checked
+        };
+      } else if (type === 'renew_period') {
+        update.renew_period = {
+          semester: document.getElementById('set-renew-sem').value,
+          deadline: document.getElementById('set-renew-end').value,
+          open:     document.getElementById('set-renew-open').checked
+        };
+      } else if (type === 'announcement') {
+        update.announcement = document.getElementById('set-announcement').value;
+      } else if (type === 'leave_period') {
+        update.leave_period = {
+          start: document.getElementById('set-leave-start').value,
+          end:   document.getElementById('set-leave-end').value
+        };
+      }
+
+      await setDoc(ref, update, { merge: true });
+      alert('✅ บันทึกการตั้งค่าสำเร็จ');
+      loadSystemConfig();
+    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+  };
+
+  /* ─── ADMIN AUTH ─── */
+  window.adminLogin  = () => signInWithPopup(auth, provider);
   window.adminLogout = () => signOut(auth);
 
   onAuthStateChanged(auth, (user) => {
     if (user && user.email === ADMIN_EMAIL) {
       window.adminMode = true;
       document.getElementById('admin-login-wrap').style.display = 'none';
-      document.getElementById('admin-panel').style.display = 'block';
-      document.getElementById('admin-email-display').innerText = user.email;
+      document.getElementById('admin-panel').style.display      = 'block';
+      document.getElementById('admin-email-display').innerText  = user.email;
       loadAdminData();
       loadSystemConfig();
     } else {
       window.adminMode = false;
       document.getElementById('admin-login-wrap').style.display = 'block';
-      document.getElementById('admin-panel').style.display = 'none';
+      document.getElementById('admin-panel').style.display      = 'none';
       loadSystemConfig();
     }
   });
@@ -617,49 +1914,150 @@ td { padding: 14px; border-bottom: 1px solid #EDF1EE; font-size: 14px; }
     btn.classList.add('active');
   };
 
+  /* ─── ADMIN DATA ─── */
   async function loadAdminData() {
-    const snap = await getDocs(collection(db, "shops"));
-    let p = '', s = '';
-    snap.forEach(d => {
-      const a = d.data(); const id = d.id;
-      if(a.status === 'pending') p += `<tr><td>${a.createdAt?.toDate().toLocaleDateString('th-TH')||'-'}</td><td>${a.shopName}</td><td>${a.firstName}</td><td>${a.phone}</td><td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${id}','${a.shopName}')">จัดการ</button></td></tr>`;
-      s += `<tr><td>${a.shopName}</td><td>${a.slots||'-'}</td><td><span class="badge bg-${a.status}">${a.status}</span></td><td>${a.category}</td><td><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${id}')">แก้ไข</button></td></tr>`;
-    });
-    document.getElementById('tbody-pending').innerHTML = p || '<tr><td colspan="5" align="center">ไม่มีข้อมูล</td></tr>';
-    document.getElementById('tbody-admin-shops').innerHTML = s;
+    try {
+      const snap = await getDocs(collection(db, "shops"));
+      let pending = '', shops = '';
+      let cntActive = 0, cntPending = 0, cntLeave = 0, cntT2 = 0;
 
-    const lSnap = await getDocs(query(collection(db, "leaves"), where("status", "==", "pending")));
-    document.getElementById('tbody-admin-leaves').innerHTML = lSnap.docs.map(d => {
-      const l = d.data();
-      return `<tr><td>${l.shopId}</td><td>${l.marketDate}</td><td>${l.reason}</td><td><button class="btn btn-primary btn-sm" onclick="window.approveLeave('${d.id}','${l.shopId}')">อนุมัติ</button></td></tr>`;
-    }).join('') || '<tr><td colspan="4" align="center">ไม่มีคำขอลา</td></tr>';
+      snap.forEach(d => {
+        const a = d.data(); const id = d.id;
+        const statusLabel = {
+          active: '<span class="badge badge-active">เปิดขายปกติ</span>',
+          pending: '<span class="badge badge-pending">รออนุมัติ</span>',
+          leave: '<span class="badge badge-leave">แจ้งลา</span>',
+          T2: '<span class="badge badge-t2">ระงับ T2</span>',
+          cancelled: '<span class="badge badge-cancelled">ยกเลิก</span>'
+        }[a.status] || `<span class="badge">${a.status}</span>`;
+
+        if (a.status === 'active')  cntActive++;
+        if (a.status === 'pending') cntPending++;
+        if (a.status === 'leave')   cntLeave++;
+        if (a.status === 'T2')      cntT2++;
+
+        if (a.status === 'pending') {
+          pending += `<tr>
+            <td>${a.createdAt?.toDate().toLocaleDateString('th-TH') || '—'}</td>
+            <td><strong>${a.shopName}</strong></td>
+            <td>${a.firstName} ${a.lastName}</td>
+            <td>${a.phone}</td>
+            <td>${a.category || '—'}</td>
+            <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${id}','${a.shopName}')">จัดการ</button></td>
+          </tr>`;
+        }
+
+        shops += `<tr>
+          <td><strong>${a.shopName}</strong></td>
+          <td>${a.slots || '—'}</td>
+          <td>${a.category || '—'}</td>
+          <td>${statusLabel}</td>
+          <td>${a.phone || '—'}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${id}')">แก้ไข</button></td>
+        </tr>`;
+      });
+
+      document.getElementById('tbody-pending').innerHTML      = pending || '<tr><td colspan="6" class="td-empty">ไม่มีคำขอรออนุมัติ</td></tr>';
+      document.getElementById('tbody-admin-shops').innerHTML  = shops   || '<tr><td colspan="6" class="td-empty">ไม่มีข้อมูล</td></tr>';
+
+      // Admin quick stats
+      document.getElementById('adm-st-active').innerText  = cntActive;
+      document.getElementById('adm-st-pending').innerText = cntPending;
+      document.getElementById('adm-st-leave').innerText   = cntLeave;
+      document.getElementById('adm-st-t2').innerText      = cntT2;
+
+      // Leaves
+      const lSnap = await getDocs(query(collection(db, "leaves"), where("status", "==", "pending")));
+      document.getElementById('tbody-admin-leaves').innerHTML = lSnap.docs.map(d => {
+        const l = d.data();
+        return `<tr>
+          <td>${l.shopId}</td>
+          <td>${l.marketDate}</td>
+          <td>${l.reason}</td>
+          <td><button class="btn btn-primary btn-sm" onclick="window.approveLeave('${d.id}','${l.shopId}')">อนุมัติ</button></td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="4" class="td-empty">ไม่มีคำขอแจ้งลา</td></tr>';
+
+    } catch(e) { console.warn('loadAdminData:', e); }
   }
 
+  /* ─── APPROVE APPLICATION ─── */
+  window.openApprove = (id, name) => {
+    currentId = id;
+    document.getElementById('app-detail').innerHTML = `<strong>${name}</strong>`;
+    document.getElementById('modal-slots').value    = '';
+    document.getElementById('modal-approve').style.display = 'block';
+    document.getElementById('modal-bg').style.display      = 'block';
+  };
+
+  window.actionApp = async (action) => {
+    try {
+      const slots = document.getElementById('modal-slots').value;
+      const update = { status: action };
+      if (action === 'approved' && slots) update.slots = slots;
+      await updateDoc(doc(db, "shops", currentId), update);
+      alert(action === 'approved' ? '✅ อนุมัติเรียบร้อย' : '❌ ไม่อนุมัติเรียบร้อย');
+      window.closeModal();
+      loadAdminData();
+    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+  };
+
+  /* ─── APPROVE LEAVE ─── */
+  window.approveLeave = async (leaveId, shopId) => {
+    try {
+      await updateDoc(doc(db, "leaves", leaveId), { status: 'approved' });
+      await updateDoc(doc(db, "shops", shopId), { status: 'leave' });
+      alert('✅ อนุมัติการแจ้งลาเรียบร้อย');
+      loadAdminData();
+    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+  };
+
+  /* ─── EDIT SHOP ─── */
   window.openEditShop = async (id) => {
     currentId = id;
-    const snap = await getDoc(doc(db, "shops", id));
-    const d = snap.data();
-    document.getElementById('edit-shopName').value = d.shopName;
-    document.getElementById('edit-slots').value = d.slots || '';
-    document.getElementById('edit-phone').value = d.phone;
-    document.getElementById('edit-status').value = d.status;
-    document.getElementById('modal-edit-shop').style.display = 'block';
-    document.getElementById('modal-bg').style.display = 'block';
+    try {
+      const snap = await getDoc(doc(db, "shops", id));
+      const d    = snap.data();
+      document.getElementById('edit-shopName').value = d.shopName || '';
+      document.getElementById('edit-slots').value    = d.slots    || '';
+      document.getElementById('edit-phone').value    = d.phone    || '';
+      document.getElementById('edit-status').value   = d.status   || 'active';
+      document.getElementById('modal-edit-shop').style.display = 'block';
+      document.getElementById('modal-bg').style.display        = 'block';
+    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
   };
 
   window.updateShopData = async () => {
-    const data = Object.fromEntries(new FormData(document.getElementById('form-edit-shop')));
-    await updateDoc(doc(db, "shops", currentId), data);
-    alert('บันทึกสำเร็จ'); window.closeModal(); loadAdminData();
+    try {
+      const data = Object.fromEntries(new FormData(document.getElementById('form-edit-shop')));
+      await updateDoc(doc(db, "shops", currentId), data);
+      alert('✅ บันทึกสำเร็จ');
+      window.closeModal();
+      loadAdminData();
+    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
   };
 
   window.deleteShop = async () => {
-    if(!confirm('ยืนยันลบร้านค้า?')) return;
-    await deleteDoc(doc(db, "shops", currentId));
-    window.closeModal(); loadAdminData();
+    if (!confirm('⚠️ ยืนยันการลบร้านค้า? การกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+    try {
+      await deleteDoc(doc(db, "shops", currentId));
+      window.closeModal();
+      loadAdminData();
+    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
   };
 
-  // Init
+  /* ─── EXPORT (stub) ─── */
+  window.exportShops = () => alert('ฟีเจอร์ Export Excel กำลังพัฒนา');
+
+  /* ─── SEARCH SHOPS (admin) ─── */
+  document.getElementById('search-shop-admin').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#tbody-admin-shops tr').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+
+  /* ─── INIT ─── */
   loadStats();
   loadSystemConfig();
 </script>
