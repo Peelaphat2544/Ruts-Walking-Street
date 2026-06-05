@@ -387,14 +387,14 @@ td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
     const canvas = document.getElementById(canvasId);
     if (!canvas) return; canvas.innerHTML = '';
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'display:inline-grid; grid-template-columns: auto 16px auto 1fr; grid-template-rows: auto 16px auto 16px auto; gap: 4px; align-items: end;';
+    wrapper.style.cssText = 'display:inline-grid; grid-template-columns: auto 16px auto 1fr; grid-template-rows: auto 16px auto 16px auto; gap: 4px; align-items: end; padding: 10px;';
     const leftCol = document.createElement('div'); leftCol.style.cssText = 'grid-column: 1; display: flex; flex-direction: column; gap: 3px;';
     for(let i=185; i>=146; i--) leftCol.appendChild(makeSlotCell(i, shopsBySlot, editable));
     const aisleVert = document.createElement('div'); aisleVert.style.cssText = 'grid-column: 2; height: 100%; background: #eee; border-radius: 4px; writing-mode: vertical-rl; text-align: center; font-size: 10px; color: #999;'; aisleVert.innerText = 'ทางเดิน';
     const rightCol = document.createElement('div'); rightCol.style.cssText = 'grid-column: 3; display: flex; flex-direction: column; gap: 3px;';
-    for(let i=1; i<=42; i++) rightCol.appendChild(makeSlotCell(i, shopsBySlot, editable));
+    for(let i=1; i<=41; i++) rightCol.appendChild(makeSlotCell(i, shopsBySlot, editable));
     const centerPark = document.createElement('div'); centerPark.style.cssText = 'grid-column: 4; display: flex; align-items: flex-end; padding: 20px;';
-    centerPark.innerHTML = `<div style="background:#f0fff0; border:2px dashed #8dc; border-radius:12px; width:100%; height:200px; display:flex; align-items:center; justify-content:center; color:#274; font-weight:bold;">ลานกิจกรรม / พื้นที่สีเขียว</div>`;
+    centerPark.innerHTML = `<div style="background:#f0fff0; border:2px dashed #8dc; border-radius:12px; width:100%; min-width:300px; height:200px; display:flex; align-items:center; justify-content:center; color:#274; font-weight:bold;">ลานกิจกรรม / พื้นที่สีเขียว</div>`;
     const botRow = document.createElement('div'); botRow.style.cssText = 'grid-column: 1 / span 4; grid-row: 3; display: flex; gap: 3px;';
     for(let i=42; i<=92; i++) botRow.appendChild(makeSlotCell(i, shopsBySlot, editable));
     const aisleHoriz = document.createElement('div'); aisleHoriz.style.cssText = 'grid-column: 1 / span 4; grid-row: 4; height: 16px; background: #eee; border-radius: 4px;';
