@@ -2014,6 +2014,10 @@ tr:hover td { background: #F8FAF9; }
       let pending = '', shops = '', resign = '';
       let cntActive = 0, cntPending = 0, cntLeave = 0, cntT2 = 0;
 
+      // Pre-fetch leave slots for substitutes
+      const leaveSnap = await getDocs(query(collection(db, "shops"), where("status", "==", "leave")));
+      window.availableLeaveSlots = leaveSnap.docs.map(doc => doc.data().slots).filter(s => s).join(', ');
+
       snap.forEach(d => {
         const a = d.data(); const id = d.id;
         const statusLabel = {
@@ -2036,16 +2040,18 @@ tr:hover td { background: #F8FAF9; }
               <td>${a.slots || '—'}</td>
               <td>${a.firstName} ${a.lastName}</td>
               <td>${a.phone}</td>
-              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${id}','${a.shopName}')">พิจารณา</button></td>
+              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${id}','${a.shopName}', false)">พิจารณา</button></td>
             </tr>`;
           } else {
+            const isSub = a.applyType === 'substitute';
+            const subDate = isSub && a.substituteDate ? `<br><small style="color:var(--amber);">ขายแทนวันที่: ${a.substituteDate}</small>` : '';
             pending += `<tr>
               <td>${a.createdAt?.toDate().toLocaleDateString('th-TH') || '—'}</td>
-              <td><strong>${a.shopName}</strong></td>
+              <td><strong>${a.shopName}</strong>${subDate}</td>
               <td>${a.firstName} ${a.lastName}</td>
               <td>${a.phone}</td>
               <td>${a.category || '—'}</td>
-              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${id}','${a.shopName}')">จัดการ</button></td>
+              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${id}','${a.shopName}', ${isSub})">จัดการ</button></td>
             </tr>`;
           }
         }
@@ -2087,9 +2093,16 @@ tr:hover td { background: #F8FAF9; }
   }
 
   /* ─── APPROVE APPLICATION ─── */
-  window.openApprove = (id, name) => {
+  window.openApprove = (id, name, isSubstitute) => {
     currentId = id;
-    document.getElementById('app-detail').innerHTML = `<strong>${name}</strong>`;
+    let detailHtml = `<strong>${name}</strong>`;
+    
+    if (isSubstitute) {
+      const availSlots = window.availableLeaveSlots || 'ไม่มีพื้นที่ที่แจ้งลาในขณะนี้';
+      detailHtml += `<br><span style="color:var(--amber); font-weight:600; font-size:12px;">(สมัครขายแทน) พื้นที่ลาปัจจุบัน: ${availSlots}</span>`;
+    }
+    
+    document.getElementById('app-detail').innerHTML = detailHtml;
     document.getElementById('modal-slots').value    = '';
     document.getElementById('modal-approve').style.display = 'block';
     document.getElementById('modal-bg').style.display      = 'block';
