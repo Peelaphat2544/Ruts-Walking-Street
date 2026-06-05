@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบบริหารจัดการตลาดนัดในสวน (Firebase Version)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN SYSTEM & CSS
+============================================================ */
+:root {
+  --green:     #1A7A52; --green-d:   #0F5538; --green-l:   #E8F5EE; --green-m:   #5CB88A;
+  --amber:     #D4820A; --amber-l:   #FDF3DC; --red:       #C0392B; --red-l:     #FDECEA;
+  --blue:      #2471A3; --blue-l:    #EAF2FB; --purple:    #7D3C98; --purple-l:  #F4ECF7;
+  --surface:   #F7F9F7; --border:    #D9E4DC; --text:      #1C2B22; --muted:     #6B7C72;
+  --white:     #FFFFFF; --radius:    10px;    --shadow:    0 2px 10px rgba(0,0,0,0.08);
+  --shadow-lg: 0 6px 24px rgba(0,0,0,0.12);   --header-h:  56px;
+
+  /* Slot colors */
+  --slot-food:     #FFF8E1; --slot-food-b:   #F59E0B;
+  --slot-drink:    #EFF6FF; --slot-drink-b:  #3B82F6;
+  --slot-fashion:  #F5F3FF; --slot-fashion-b:#8B5CF6;
+  --slot-truck:    #F0FDF4; --slot-truck-b:  #22C55E;
+  --slot-student:  #EEF2FF; --slot-student-b:#6366F1;
+  --slot-new:      #FFFBEB; --slot-new-b:    #F59E0B;
+  --slot-leave:    #FEF9C3; --slot-leave-b:  #CA8A04;
+  --slot-t2:       #FEF2F2; --slot-t2-b:     #EF4444;
+  --slot-empty:    #F9FAFB; --slot-empty-b:  #D1D5DB;
+  --slot-disabled: #F3F4F6; --slot-disabled-b:#9CA3AF;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Sarabun', sans-serif; background: var(--surface); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+#app { min-height: 100vh; display: flex; flex-direction: column; }
+.header { background: var(--green); color: #fff; height: var(--header-h); display: flex; align-items: center; padding: 0 16px; gap: 8px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.header-logo { width: 12px; height: 12px; background: #fff; border-radius: 50%; margin-right: 6px; }
+.header h1 { font-size: 15px; font-weight: 600; flex: 1; margin: 0; }
+.header .nav { display: flex; gap: 4px; flex-wrap: wrap; }
+.nav-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit; font-weight: 500; transition: background 0.2s; white-space: nowrap; }
+.nav-btn.active { background: rgba(255,255,255,0.35); font-weight: 700; }
+
+.page { display: none; padding: 20px 16px; max-width: 900px; margin: 0 auto; width: 100%; }
+.page.active { display: block; }
+
+.card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.card h2 { font-size: 16px; font-weight: 700; color: var(--green-d); margin-bottom: 14px; }
+.card h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--text); }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid .full { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+.field label .req { color: var(--red); }
+.field input, .field select, .field textarea { border: 1.5px solid var(--border); border-radius: 7px; padding: 8px 11px; font-size: 14px; font-family: inherit; background: var(--white); color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-family: inherit; font-weight: 600; transition: all 0.15s; white-space: nowrap; }
+.btn-primary   { background: var(--green); color: #fff; }
+.alert { padding: 11px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; display: none; gap: 8px; align-items: flex-start; }
+.alert.show { display: flex; }
+.alert-success { background: var(--green-l); color: #0A3D24; border: 1px solid var(--green-m); }
+.alert-error   { background: var(--red-l); color: #5A1010; border: 1px solid #E8AAAA; }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-active { background: var(--green-l); color: var(--green-d); }
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--surface); padding: 9px 10px; text-align: left; font-weight: 600; font-size: 11px; color: var(--muted); border-bottom: 2px solid var(--border); }
+td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
+
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px 16px; text-align: center; }
+.stat-card .num { font-size: 26px; font-weight: 700; color: var(--green); }
+
+.tabs { display: flex; gap: 2px; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+.tab-btn { padding: 7px 14px; border: none; background: none; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; }
+.tab-btn.active { color: var(--green); border-bottom-color: var(--green); font-weight: 700; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* MARKET MAP STYLES */
+#map-wrap { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; padding: 12px; }
+.slot-cell { width: 68px; height: 50px; border-radius: 5px; border: 1.5px solid var(--slot-empty-b); background: var(--slot-empty); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.12s; padding: 2px 3px; text-align: center; position: relative; overflow: hidden; }
+.slot-cell:hover { transform: scale(1.06); z-index: 5; box-shadow: 0 3px 12px rgba(0,0,0,0.18); }
+.slot-no { font-size: 9px; font-weight: 700; opacity: 0.55; line-height: 1; }
+.slot-name { font-size: 9px; line-height: 1.2; overflow: hidden; max-height: 30px; word-break: break-all; }
+.slot-halal { position: absolute; top: 2px; right: 2px; width: 6px; height: 6px; background: #16A34A; border-radius: 50%; }
+.slot-t2-mark { position: absolute; top: 2px; left: 2px; font-size: 8px; font-weight: bold; color: var(--red); }
+
+.s-food     { background: var(--slot-food);     border-color: var(--slot-food-b); }
+.s-drink    { background: var(--slot-drink);    border-color: var(--slot-drink-b); }
+.s-fashion  { background: var(--slot-fashion);  border-color: var(--slot-fashion-b); }
+.s-truck    { background: var(--slot-truck);    border-color: var(--slot-truck-b); }
+.s-student  { background: var(--slot-student);  border-color: var(--slot-student-b); }
+.s-new      { background: var(--slot-new);      border-color: var(--slot-new-b); }
+.s-leave    { background: var(--slot-leave);    border-color: var(--slot-leave-b); opacity: 0.8; }
+.s-t2       { background: var(--slot-t2);       border-color: var(--slot-t2-b); }
+.s-empty    { background: var(--slot-empty);    border-color: var(--slot-empty-b); }
+.s-disabled { background: var(--slot-disabled); border-color: var(--slot-disabled-b); cursor: default; }
+
+#slot-tooltip { position: fixed; background: rgba(15,30,20,0.92); color: #fff; border-radius: 8px; padding: 9px 12px; font-size: 12px; pointer-events: none; z-index: 999; max-width: 200px; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; }
+.modal-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 12px; padding: 24px; width: 90%; max-width: 480px; z-index: 201; }
+
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.hero-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; cursor: pointer; text-align: center; }
+
+@media (max-width: 620px) { .hero-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div id="app">
+
+<header class="header">
+  <span class="header-logo"></span>
+  <h1 id="market-title">ตลาดนัดในสวน</h1>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('home',this)">หน้าหลัก</button>
+    <button class="nav-btn" onclick="showPage('apply',this)">ลงทะเบียน</button>
+    <button class="nav-btn" onclick="showPage('leave',this)">แจ้งหยุด</button>
+    <button class="nav-btn" id="nav-map" onclick="showPage('map',this)">แผนผัง</button>
+    <button class="nav-btn" onclick="showPage('admin',this)">ผู้ดูแล</button>
+  </nav>
+</header>
+
+<div id="slot-tooltip"></div>
+
+<div id="page-home" class="page active">
+  <div class="card" style="background:var(--green); color:#fff; border:none;">
+    <h2 style="color:#fff; font-size:20px;">ระบบบริหารจัดการตลาดนัดในสวน</h2>
+    <div id="market-day-label">ทุกวันพฤหัสบดี</div>
+  </div>
+  <div class="hero-grid">
+    <div class="hero-card" onclick="showPage('apply')"><b>ลงทะเบียนรายใหม่</b></div>
+    <div class="hero-card" onclick="showPage('leave')"><b>แจ้งขอหยุดจำหน่าย</b></div>
+    <div class="hero-card" onclick="openCheckStatusModal()"><b>ตรวจสอบสถานะ</b></div>
+  </div>
+  <div class="card">
+    <h3>ข้อมูลสรุป</h3>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="num" id="st-active">—</div><div class="lbl">ร้านปัจจุบัน</div></div>
+      <div class="stat-card"><div class="num" id="st-empty">—</div><div class="lbl">พื้นที่ว่าง</div></div>
+      <div class="stat-card"><div class="num" id="st-pending">—</div><div class="lbl">รอพิจารณา</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE APPLY -->
+<div id="page-apply" class="page">
+  <div class="card">
+    <h2>ลงทะเบียนผู้ประกอบการ</h2>
+    <div id="alert-apply" class="alert"></div>
+    <form id="form-apply">
+      <div class="form-grid">
+        <div class="field"><label>ชื่อ <span class="req">*</span></label><input name="firstName" required></div>
+        <div class="field"><label>นามสกุล <span class="req">*</span></label><input name="lastName" required></div>
+        <div class="field full"><label>ชื่อร้านค้า <span class="req">*</span></label><input name="shopName" required></div>
+        <div class="field full"><label>ประเภทสินค้า <span class="req">*</span></label><input name="items" required></div>
+        <div class="field"><label>หมวดหมู่ <span class="req">*</span></label><select name="category" required>
+          <option value="">— เลือก —</option>
+          <option>อาหาร</option>
+          <option>เครื่องดื่ม</option>
+          <option>เสื้อผ้าและของใช้</option>
+          <option>รถฟู้ดทรัค (Food Truck)</option>
+        </select></div>
+        <div class="field"><label>จำนวนพื้นที่ <span class="req">*</span></label><input type="number" name="slotCount" value="1" min="1" max="3" required></div>
+        <div class="field"><label>เบอร์โทรศัพท์ <span class="req">*</span></label><input name="phone" maxlength="10" required></div>
+        <div class="field"><label>ศาสนา <span class="req">*</span></label><select name="religion" required>
+          <option value="">— เลือก —</option>
+          <option>พุทธ</option>
+          <option>อิสลาม</option>
+          <option>คริสต์</option>
+        </select></div>
+        <div class="field"><label>LINE ID</label><input name="lineId"></div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:16px; width:100%;">ส่งข้อมูลลงทะเบียน</button>
+    </form>
+  </div>
+</div>
+
+<!-- PAGE LEAVE -->
+<div id="page-leave" class="page">
+  <div class="card">
+    <h2>แจ้งขอหยุดจำหน่าย</h2>
+    <div id="alert-leave" class="alert"></div>
+    <form id="form-leave">
+      <div class="field full" style="margin-bottom:12px;"><label>ชื่อร้านค้า <span class="req">*</span></label><select id="leave-shopId" name="shopId" required><option value="">— กำลังโหลดข้อมูล... —</option></select></div>
+      <div class="field full" style="margin-bottom:12px;"><label>วันที่หยุด <span class="req">*</span></label><input type="date" name="marketDate" required></div>
+      <div class="field full" style="margin-bottom:12px;"><label>เหตุผล <span class="req">*</span></label><textarea name="reason" required></textarea></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">ส่งคำขอแจ้งหยุด</button>
+    </form>
+  </div>
+</div>
+
+<!-- PAGE MAP -->
+<div id="page-map" class="page">
+  <div class="card">
+    <h2>แผนผังพื้นที่ตลาดนัดในสวน</h2>
+    <div id="map-wrap">
+      <div id="map-loading" style="padding:40px; text-align:center; color:var(--muted);">กำลังโหลดข้อมูล...</div>
+      <div id="map-canvas"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE ADMIN -->
+<div id="page-admin" class="page">
+  <div id="admin-login-wrap" class="card" style="max-width:400px; margin:auto;">
+    <h2>Admin Login</h2>
+    <div class="field" style="margin-bottom:12px;"><label>รหัสผ่าน</label><input type="password" id="admin-pass"></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="window.adminLogin()">เข้าสู่ระบบ</button>
+  </div>
+  <div id="admin-panel" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2>Admin Panel</h2>
+      <button onclick="location.reload()">Logout</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showAdminTab('pending',this)">รอพิจารณา</button>
+      <button class="tab-btn" onclick="showAdminTab('shops',this)">ร้านค้าทั้งหมด</button>
+      <button class="tab-btn" onclick="showAdminTab('map-admin',this)">จัดการแผนผัง</button>
+    </div>
+    <div id="admin-tab-pending" class="tab-panel active"><div class="tbl-wrap"><table><thead><tr><th>ร้านค้า</th><th>เบอร์โทร</th><th>จัดการ</th></tr></thead><tbody id="tbody-pending"></tbody></table></div></div>
+    <div id="admin-tab-shops" class="tab-panel"><div class="tbl-wrap"><table><thead><tr><th>รหัส</th><th>ร้านค้า</th><th>สถานะ</th><th>พื้นที่</th></tr></thead><tbody id="tbody-shops"></tbody></table></div></div>
+    <div id="admin-tab-map-admin" class="tab-panel"><div id="map-canvas-admin"></div></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div id="modal-bg" class="modal-bg" onclick="closeModal()"></div>
+<div id="modal-approve" class="modal-box">
+  <h3>อนุมัติการลงทะเบียน</h3>
+  <div class="field" style="margin-bottom:12px;"><label>กำหนดเลขพื้นที่ (คั่นด้วย ,)</label><input id="modal-slots" placeholder="เช่น 12,13"></div>
+  <button class="btn btn-primary" onclick="window.confirmApprove()">ตกลงอนุมัติ</button>
+</div>
+
+</div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyARN_CaKaCZ6zPUHhJmeWvOrwfz8WMcLGI",
+    authDomain: "ruts-walking-street.firebaseapp.com",
+    projectId: "ruts-walking-street",
+    storageBucket: "ruts-walking-street.firebasestorage.app",
+    messagingSenderId: "600846308323",
+    appId: "1:600846308323:web:9cfae5100824f2ed6b86d6",
+    measurementId: "G-2T6D49EDVP"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let currentAppId = null;
+
+  // --- Map Layout Logic (Original Version) ---
+  function getSlotClass(slotNo, shop) {
+    if (!shop) return 's-empty';
+    if (shop.status === 'T2') return 's-t2';
+    if (shop.status === 'leave') return 's-leave';
+    if (shop.memberType?.includes('นักศึกษา')) return 's-student';
+    const cat = shop.category || '';
+    if (cat === 'อาหาร') return 's-food';
+    if (cat === 'เครื่องดื่ม') return 's-drink';
+    if (cat.includes('เสื้อผ้า')) return 's-fashion';
+    if (cat.includes('ทรัค')) return 's-truck';
+    return 's-empty';
+  }
+
+  function makeSlotCell(slotNo, shopsBySlot, editable) {
+    const shop = shopsBySlot[slotNo];
+    const cell = document.createElement('div');
+    cell.className = `slot-cell ${getSlotClass(slotNo, shop)}`;
+    
+    let innerHtml = `<span class="slot-no">${slotNo}</span>`;
+    if (shop) {
+      innerHtml += `<span class="slot-name">${shop.shopName}</span>`;
+      if (shop.religion === 'อิสลาม') innerHtml += `<span class="slot-halal"></span>`;
+      if (shop.status === 'T2') innerHtml += `<span class="slot-t2-mark">[T2]</span>`;
+    }
+    cell.innerHTML = innerHtml;
+
+    cell.onmouseenter = (e) => {
+      const tt = document.getElementById('slot-tooltip');
+      tt.innerHTML = `<b>พื้นที่ ${slotNo}</b><br>` + (shop ? `<b>${shop.shopName}</b><br>${shop.category}<br>ศาสนา: ${shop.religion || '-'}` : `<span style="color:#aaa;">พื้นที่ว่าง</span>`);
+      tt.style.display = 'block';
+    };
+    cell.onmousemove = (e) => {
+      const tt = document.getElementById('slot-tooltip');
+      tt.style.left = (e.clientX + 15) + 'px';
+      tt.style.top = (e.clientY + 15) + 'px';
+    };
+    cell.onmouseleave = () => document.getElementById('slot-tooltip').style.display = 'none';
+    
+    if (editable && window.adminMode) {
+      cell.onclick = () => window.openApproveBySlot(slotNo, shop);
+    }
+    return cell;
+  }
+
+  window.renderComplexMap = (canvasId, shopsBySlot, editable) => {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    canvas.innerHTML = '';
+    
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:inline-grid; grid-template-columns: auto 16px auto 1fr; grid-template-rows: auto 16px auto 16px auto; gap: 4px; align-items: end;';
+
+    const leftCol = document.createElement('div');
+    leftCol.style.cssText = 'grid-column: 1; display: flex; flex-direction: column; gap: 3px;';
+    for(let i=185; i>=146; i--) leftCol.appendChild(makeSlotCell(i, shopsBySlot, editable));
+
+    const aisleVert = document.createElement('div');
+    aisleVert.style.cssText = 'grid-column: 2; height: 100%; background: #eee; border-radius: 4px; writing-mode: vertical-rl; text-align: center; font-size: 10px; color: #999;';
+    aisleVert.innerText = 'ทางเดิน';
+
+    const rightCol = document.createElement('div');
+    rightCol.style.cssText = 'grid-column: 3; display: flex; flex-direction: column; gap: 3px;';
+    for(let i=1; i<=42; i++) rightCol.appendChild(makeSlotCell(i, shopsBySlot, editable));
+
+    const centerPark = document.createElement('div');
+    centerPark.style.cssText = 'grid-column: 4; display: flex; align-items: flex-end; padding: 20px;';
+    centerPark.innerHTML = `<div style="background:#f0fff0; border:2px dashed #8dc; border-radius:12px; width:100%; height:200px; display:flex; align-items:center; justify-content:center; color:#274; font-weight:bold;">ลานกิจกรรม / พื้นที่สีเขียว</div>`;
+
+    const botRow = document.createElement('div');
+    botRow.style.cssText = 'grid-column: 1 / span 4; grid-row: 3; display: flex; gap: 3px;';
+    for(let i=42; i<=92; i++) botRow.appendChild(makeSlotCell(i, shopsBySlot, editable));
+
+    const aisleHoriz = document.createElement('div');
+    aisleHoriz.style.cssText = 'grid-column: 1 / span 4; grid-row: 4; height: 16px; background: #eee; border-radius: 4px;';
+
+    const topRow = document.createElement('div');
+    topRow.style.cssText = 'grid-column: 1 / span 4; grid-row: 5; display: flex; gap: 3px;';
+    for(let i=93; i<=145; i++) topRow.appendChild(makeSlotCell(i, shopsBySlot, editable));
+
+    wrapper.appendChild(leftCol); wrapper.appendChild(aisleVert); wrapper.appendChild(rightCol);
+    wrapper.appendChild(centerPark); wrapper.appendChild(botRow); wrapper.appendChild(aisleHoriz);
+    wrapper.appendChild(topRow);
+    canvas.appendChild(wrapper);
+  };
+
+  // --- Firebase Data Integration ---
+  async function loadMap() {
+    document.getElementById('map-loading').style.display = 'block';
+    const snap = await getDocs(collection(db, "shops"));
+    const shopsBySlot = {};
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.status === 'active' || data.status === 'leave' || data.status === 'T2') {
+        const slotList = String(data.slots || '').split(',').map(s => s.trim());
+        slotList.forEach(sNo => { if(sNo) shopsBySlot[sNo] = data; });
+      }
+    });
+    document.getElementById('map-loading').style.display = 'none';
+    window.renderComplexMap('map-canvas', shopsBySlot, false);
+  }
+
+  // --- Admin Logic (Google Auth) ---
+  window.adminLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      if (user.email === ADMIN_EMAIL) {
+        // Success
+        loadAdminData();
+      } else {
+        await signOut(auth);
+        alert('คุณไม่มีสิทธิ์เข้าถึงส่วนนี้ (Unauthorized Email)');
+      }
+    } catch (error) {
+      alert('Login Error: ' + error.message);
+    }
+  };
+
+  window.adminLogout = async () => {
+    await signOut(auth);
+    location.reload();
+  };
+
+  // Listen for Auth State
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.email === ADMIN_EMAIL) {
+      window.adminMode = true;
+      document.getElementById('admin-login-wrap').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      document.getElementById('admin-email-display').innerText = user.email;
+      loadAdminData();
+    } else {
+      window.adminMode = false;
+      document.getElementById('admin-login-wrap').style.display = 'block';
+      document.getElementById('admin-panel').style.display = 'none';
+    }
+  });
+
+  window.showAdminTab = (tab, btn) => {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('admin-tab-' + tab).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (tab === 'map-admin') loadAdminMap();
+  };
+
+  async function loadAdminMap() {
+    const snap = await getDocs(collection(db, "shops"));
+    const shopsBySlot = {};
+    snap.forEach(d => {
+      const data = d.data();
+      const slotList = String(data.slots || '').split(',').map(s => s.trim());
+      slotList.forEach(sNo => { if(sNo) shopsBySlot[sNo] = data; });
+    });
+    window.renderComplexMap('map-canvas-admin', shopsBySlot, true);
+  }
+
+  async function loadAdminData() {
+    const snap = await getDocs(collection(db, "shops"));
+    let pendingHtml = '', shopsHtml = '';
+    snap.forEach(d => {
+      const a = d.data(); a.id = d.id;
+      if(a.status === 'pending') {
+        pendingHtml += `<tr><td>${a.shopName}</td><td>${a.phone}</td><td><button onclick="window.openApprove('${a.id}')">อนุมัติ</button></td></tr>`;
+      }
+      shopsHtml += `<tr><td>${a.id.slice(0,5)}</td><td>${a.shopName}</td><td>${a.status}</td><td>${a.slots || '-'}</td></tr>`;
+    });
+    document.getElementById('tbody-pending').innerHTML = pendingHtml || '<tr><td colspan="3">ไม่มีรายการ</td></tr>';
+    document.getElementById('tbody-shops').innerHTML = shopsHtml;
+  }
+
+  window.openApprove = (id) => {
+    currentAppId = id;
+    document.getElementById('modal-approve').style.display = 'block';
+    document.getElementById('modal-bg').style.display = 'block';
+  };
+
+  window.confirmApprove = async () => {
+    const slots = document.getElementById('modal-slots').value;
+    if(!slots) return alert('ระบุพื้นที่');
+    await updateDoc(doc(db, "shops", currentAppId), { status: 'active', slots: slots });
+    alert('อนุมัติสำเร็จ');
+    closeModal();
+    loadAdminData();
+  };
+
+  window.closeModal = () => {
+    document.getElementById('modal-approve').style.display = 'none';
+    document.getElementById('modal-bg').style.display = 'none';
+  };
+
+  // --- Forms ---
+  document.getElementById('form-apply').onsubmit = async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    data.status = 'pending';
+    data.createdAt = serverTimestamp();
+    await addDoc(collection(db, "shops"), data);
+    alert('ส่งข้อมูลสำเร็จ'); e.target.reset(); window.showPage('home');
+  };
+
+  window.showPage = (name, btn) => {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    if(btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    if(name === 'map') loadMap();
+    if(name === 'home') loadStats();
+  };
+
+  async function loadStats() {
+    const snap = await getDocs(collection(db, "shops"));
+    const shops = snap.docs.map(d => d.data());
+    document.getElementById('st-active').innerText = shops.filter(s => s.status === 'active').length;
+    document.getElementById('st-pending').innerText = shops.filter(s => s.status === 'pending').length;
+    document.getElementById('st-empty').innerText = 185 - shops.filter(s => s.status === 'active').length;
+  }
+
+  // Init
+  loadStats();
+</script>
+</body>
+</html>
