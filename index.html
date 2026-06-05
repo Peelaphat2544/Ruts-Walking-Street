@@ -399,14 +399,30 @@ td { padding: 14px; border-bottom: 1px solid #EDF1EE; font-size: 14px; }
     
     // Visibility
     const v = c.visibility || {};
-    document.getElementById('btn-m-apply').style.display = v.apply ? '' : 'none';
-    document.getElementById('btn-m-map').style.display = v.map ? '' : 'none';
-    document.getElementById('public-stats-grid').style.display = v.stats ? 'grid' : 'none';
+    
+    // Nav Buttons
+    const navApply = document.getElementById('btn-m-apply');
+    if (navApply) navApply.style.display = v.apply ? '' : 'none';
+    const navMap = document.getElementById('btn-m-map');
+    if (navMap) navMap.style.display = v.map ? '' : 'none';
+    
+    // Stats Grid
+    const statsGrid = document.getElementById('public-stats-grid');
+    if (statsGrid) statsGrid.style.display = v.stats ? 'grid' : 'none';
+
+    // Home Page Action Buttons
+    const homeBtns = document.querySelectorAll('.card button.btn');
+    homeBtns.forEach(btn => {
+      if(btn.getAttribute('onclick') === "showPage('apply')") btn.style.display = v.apply ? 'inline-flex' : 'none';
+      if(btn.getAttribute('onclick') === "showPage('map')") btn.style.display = v.map ? 'inline-flex' : 'none';
+    });
     
     // Announcement
     if(c.announcement) {
       document.getElementById('announcement-banner').innerText = c.announcement;
       document.getElementById('announcement-banner').style.display = 'block';
+    } else {
+      document.getElementById('announcement-banner').style.display = 'none';
     }
 
     // Renewal
@@ -414,15 +430,18 @@ td { padding: 14px; border-bottom: 1px solid #EDF1EE; font-size: 14px; }
     if(r.open) {
       document.getElementById('renew-box-open').style.display = 'block';
       document.getElementById('renew-box-closed').style.display = 'none';
-      document.getElementById('renew-sem-label').innerText = r.semester;
-      document.getElementById('renew-deadline-label').innerText = r.deadline;
+      document.getElementById('renew-sem-label').innerText = r.semester || '';
+      document.getElementById('renew-deadline-label').innerText = r.deadline || '';
+    } else {
+      document.getElementById('renew-box-open').style.display = 'none';
+      document.getElementById('renew-box-closed').style.display = 'block';
     }
 
-    // Admin Inputs
+    // Admin Inputs Sync
     if(window.adminMode) {
-      document.getElementById('vis-apply').checked = v.apply;
-      document.getElementById('vis-map').checked = v.map;
-      document.getElementById('vis-stats').checked = v.stats;
+      document.getElementById('vis-apply').checked = v.apply || false;
+      document.getElementById('vis-map').checked = v.map || false;
+      document.getElementById('vis-stats').checked = v.stats || false;
       document.getElementById('set-renew-sem').value = r.semester || '';
       document.getElementById('set-renew-end').value = r.deadline || '';
       document.getElementById('set-renew-open').checked = r.open || false;
