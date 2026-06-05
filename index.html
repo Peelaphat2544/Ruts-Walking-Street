@@ -1980,16 +1980,55 @@ tr:hover td { background: #F8FAF9; }
     } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
   };
 
+  /* ─── AUTOMATED TASKS ─── */
+  async function autoResetSubstitutes() {
+    try {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const q = query(collection(db, "shops"), where("applyType", "==", "substitute"), where("status", "==", "active"));
+      const snap = await getDocs(q);
+      
+      for (const d of snap.docs) {
+        const sub = d.data();
+        if (sub.substituteDate && sub.substituteDate < todayStr) {
+          // 1. ยกเลิกสิทธิ์ร้านขายแทนเพราะหมดเวลาแล้ว
+          await updateDoc(doc(db, "shops", d.id), { status: 'cancelled' });
+          
+          // 2. หาร้านตัวจริงที่ลาในพื้นที่นั้น แล้วคืนสถานะให้เปิดขายปกติ
+          if (sub.slots) {
+            const slotArray = sub.slots.split(',').map(s => s.trim());
+            // ค้นหาร้านทั้งหมดที่กำลังลา
+            const leaveSnap = await getDocs(query(collection(db, "shops"), where("status", "==", "leave")));
+            leaveSnap.forEach(async (ld) => {
+              const origShop = ld.data();
+              if (origShop.slots) {
+                const origSlots = origShop.slots.split(',').map(s => s.trim());
+                // ถ้าพื้นที่ทับซ้อนกัน แปลว่าเป็นร้านตัวจริง
+                const hasOverlap = origSlots.some(s => slotArray.includes(s));
+                if (hasOverlap) {
+                  await updateDoc(doc(db, "shops", ld.id), { status: 'active' });
+                }
+              }
+            });
+          }
+        }
+      }
+    } catch(e) { console.warn('autoResetSubstitutes error:', e); }
+  }
+
   /* ─── ADMIN AUTH ─── */
   window.adminLogin  = () => signInWithPopup(auth, provider);
   window.adminLogout = () => signOut(auth);
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user && user.email === ADMIN_EMAIL) {
       window.adminMode = true;
       document.getElementById('admin-login-wrap').style.display = 'none';
       document.getElementById('admin-panel').style.display      = 'block';
       document.getElementById('admin-email-display').innerText  = user.email;
+      
+      // ให้ระบบจัดการร้านขายแทนที่หมดอายุให้อัตโนมัติเมื่อ Admin เข้าสู่ระบบ
+      await autoResetSubstitutes();
+      
       loadAdminData();
       loadSystemConfig();
     } else {
