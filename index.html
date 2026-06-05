@@ -1905,8 +1905,9 @@ tr:hover td { background: #F8FAF9; }
       margin:       10,
       filename:     `Payment_Report_${date}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' }
     };
     
     html2pdf().set(opt).from(tempDiv).save();
@@ -2292,8 +2293,39 @@ tr:hover td { background: #F8FAF9; }
     } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
   };
 
-  /* ─── EXPORT (stub) ─── */
-  window.exportShops = () => alert('ฟีเจอร์ Export Excel กำลังพัฒนา');
+  /* ─── EXPORT (CSV) ─── */
+  window.exportShops = async () => {
+    try {
+      const snap = await getDocs(collection(db, "shops"));
+      let csv = "ชื่อร้าน,พื้นที่,สถานะ,เบอร์โทร,หมวดหมู่\n";
+      
+      const shopsData = [];
+      snap.forEach(d => shopsData.push(d.data()));
+      
+      // Sort before exporting
+      shopsData.sort((a, b) => {
+        const getFirstSlot = (slots) => {
+          if (!slots) return 9999;
+          const first = String(slots).split(',')[0].trim();
+          return parseInt(first) || 9999;
+        };
+        return getFirstSlot(a.slots) - getFirstSlot(b.slots);
+      });
+
+      shopsData.forEach(a => {
+        const slotsStr = a.slots ? `"${a.slots}"` : '""';
+        const nameStr = a.shopName ? `"${a.shopName}"` : '""';
+        const phoneStr = a.phone ? `="${a.phone}"` : '""'; // Force Excel to treat as text
+        csv += `${nameStr},${slotsStr},"${a.status}",${phoneStr},"${a.category || ''}"\n`;
+      });
+      
+      const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `shops_export_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+  };
 
   /* ─── SEARCH SHOPS (admin) ─── */
   document.getElementById('search-shop-admin').addEventListener('input', function() {
