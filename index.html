@@ -1707,15 +1707,17 @@ tr:hover td { background: #F8FAF9; }
       const data = Object.fromEntries(new FormData(e.target));
       if (!data.shopId) { alert('กรุณาเลือกร้านค้า'); return; }
       data.createdAt = serverTimestamp();
+
+      // บันทึกข้อมูลการยืนยันสิทธิ์ลงตาราง renewals อย่างเดียว (เพื่อไม่ให้ติด Permission ของตาราง shops)
       await addDoc(collection(db, "renewals"), data);
-      
+
       if (data.response === 'no') {
-        await updateDoc(doc(db, "shops", data.shopId), { status: 'pending', isResign: true });
-        alert('✅ ระบบได้รับแจ้งการสละสิทธิ์ของท่านแล้ว และได้ส่งเรื่องให้คณะกรรมการพิจารณา');
+        alert('✅ ระบบได้รับแจ้งการสละสิทธิ์ของท่านแล้ว คณะกรรมการจะดำเนินการในขั้นตอนต่อไป');
       } else {
-        alert('✅ บันทึกผลการยืนยันสิทธิ์เรียบร้อย');
+        alert('✅ บันทึกผลการยืนยันสิทธิ์เรียบร้อย ขอบคุณครับ');
       }
       e.target.reset();
+      window.showPage('home');
     } catch(err) {
       alert('เกิดข้อผิดพลาด: ' + err.message);
     }
@@ -2432,6 +2434,6 @@ tr:hover td { background: #F8FAF9; }
 </script>
 </body>
 </html>
-< ! - -   F o r c e   d e p l o y   - - >  
- < ! - -   M a p   f i x   f o r c e   t r i g g e r   - - >  
+ 
+ 
  
