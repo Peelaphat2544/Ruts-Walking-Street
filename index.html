@@ -1794,7 +1794,7 @@ tr:hover td { background: #F8FAF9; }
 
     const topRow = document.createElement('div');
     topRow.style.cssText = 'grid-column:1/span 4; grid-row:5; display:flex; gap:4px; overflow-x:auto; padding-bottom:4px;';
-    for (let i = 93; i <= 145; i++) topRow.appendChild(makeCell(i));
+    for (let i = 145; i >= 93; i--) topRow.appendChild(makeCell(i));
 
     wrap.append(left, aisleV, right, park, botRow, aisleH, topRow);
     canvas.appendChild(wrap);
