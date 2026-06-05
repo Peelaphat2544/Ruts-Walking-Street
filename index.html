@@ -2050,22 +2050,19 @@ tr:hover td { background: #F8FAF9; }
   async function loadAdminData() {
     try {
       const snap = await getDocs(collection(db, "shops"));
-      let pending = '', shops = '', resign = '';
+      let pending = '', resign = '';
       let cntActive = 0, cntPending = 0, cntLeave = 0, cntT2 = 0;
+      
+      const shopsData = [];
 
       // Pre-fetch leave slots for substitutes
       const leaveSnap = await getDocs(query(collection(db, "shops"), where("status", "==", "leave")));
       window.availableLeaveSlots = leaveSnap.docs.map(doc => doc.data().slots).filter(s => s).join(', ');
 
       snap.forEach(d => {
-        const a = d.data(); const id = d.id;
-        const statusLabel = {
-          active: '<span class="badge badge-active">เปิดขายปกติ</span>',
-          pending: '<span class="badge badge-pending">รออนุมัติ</span>',
-          leave: '<span class="badge badge-leave">แจ้งลา</span>',
-          T2: '<span class="badge badge-t2">ระงับ T2</span>',
-          cancelled: '<span class="badge badge-cancelled">ยกเลิก</span>'
-        }[a.status] || `<span class="badge">${a.status}</span>`;
+        const a = d.data(); 
+        a.id = d.id;
+        shopsData.push(a);
 
         if (a.status === 'active')  cntActive++;
         if (a.status === 'pending') cntPending++;
@@ -2079,7 +2076,7 @@ tr:hover td { background: #F8FAF9; }
               <td>${a.slots || '—'}</td>
               <td>${a.firstName} ${a.lastName}</td>
               <td>${a.phone}</td>
-              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${id}','${a.shopName}', false)">พิจารณา</button></td>
+              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}','${a.shopName}', false)">พิจารณา</button></td>
             </tr>`;
           } else {
             const isSub = a.applyType === 'substitute';
@@ -2090,25 +2087,63 @@ tr:hover td { background: #F8FAF9; }
               <td>${a.firstName} ${a.lastName}</td>
               <td>${a.phone}</td>
               <td>${a.category || '—'}</td>
-              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${id}','${a.shopName}', ${isSub})">จัดการ</button></td>
+              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}','${a.shopName}', ${isSub})">จัดการ</button></td>
             </tr>`;
           }
         }
+      });
+      
+      // Sort shops by slot number (numerically)
+      shopsData.sort((a, b) => {
+        const getFirstSlot = (slots) => {
+          if (!slots) return 9999;
+          const first = String(slots).split(',')[0].trim();
+          return parseInt(first) || 9999;
+        };
+        return getFirstSlot(a.slots) - getFirstSlot(b.slots);
+      });
 
-        shops += `<tr>
-          <td><strong>${a.shopName}</strong></td>
+      let shopsHtml = '';
+      shopsData.forEach(a => {
+        const statusLabel = {
+          active: '<span class="badge badge-active">เปิดขายปกติ</span>',
+          pending: '<span class="badge badge-pending">รออนุมัติ</span>',
+          leave: '<span class="badge badge-leave">แจ้งลา</span>',
+          T2: '<span class="badge badge-t2">ระงับ T2</span>',
+          cancelled: '<span class="badge badge-cancelled">ยกเลิก</span>'
+        }[a.status] || `<span class="badge">${a.status}</span>`;
+
+        shopsHtml += `<tr class="shop-row">
+          <td class="shop-name-col"><strong>${a.shopName}</strong></td>
           <td>${a.slots || '—'}</td>
           <td>${a.category || '—'}</td>
           <td>${statusLabel}</td>
-          <td>${a.phone || '—'}</td>
-          <td><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${id}')">แก้ไข</button></td>
+          <td class="shop-phone-col">${a.phone || '—'}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${a.id}')">แก้ไข</button></td>
         </tr>`;
       });
 
       document.getElementById('tbody-pending').innerHTML      = pending || '<tr><td colspan="6" class="td-empty">ไม่มีคำขอรออนุมัติ</td></tr>';
       document.getElementById('tbody-admin-resign').innerHTML = resign  || '<tr><td colspan="5" class="td-empty">ไม่มีคำขอสละสิทธิ์</td></tr>';
-      document.getElementById('tbody-admin-shops').innerHTML  = shops   || '<tr><td colspan="6" class="td-empty">ไม่มีข้อมูล</td></tr>';
+      document.getElementById('tbody-admin-shops').innerHTML  = shopsHtml   || '<tr><td colspan="6" class="td-empty">ไม่มีข้อมูล</td></tr>';
 
+      // Attach search listener
+      const searchInput = document.getElementById('search-shop-admin');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          const filter = this.value.toLowerCase();
+          const rows = document.querySelectorAll('#tbody-admin-shops .shop-row');
+          rows.forEach(row => {
+            const name = row.querySelector('.shop-name-col').textContent.toLowerCase();
+            const phone = row.querySelector('.shop-phone-col').textContent.toLowerCase();
+            if (name.includes(filter) || phone.includes(filter)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      }
 
       // Admin quick stats
       document.getElementById('adm-st-active').innerText  = cntActive;
