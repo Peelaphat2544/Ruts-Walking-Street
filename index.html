@@ -6,6 +6,7 @@
 <title>RUTS Walking Street — ระบบบริหารจัดการตลาดนัดในสวน</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Mitr:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 /* ================================================================
    DESIGN SYSTEM v4.0 — RUTS Walking Street
@@ -1347,6 +1348,7 @@ tr:hover td { background: #F8FAF9; }
               <input type="date" id="pay-date">
             </div>
             <button class="btn btn-primary" onclick="window.loadPaymentGrid()">ดึงรายชื่อ →</button>
+            <button class="btn btn-ghost" onclick="window.exportPaymentPDF()">📄 Export PDF</button>
           </div>
         </div>
         <div id="payment-grid-wrap" class="tbl-wrap"></div>
@@ -1856,6 +1858,42 @@ tr:hover td { background: #F8FAF9; }
       alert('✅ บันทึกสำเร็จ');
       window.loadPaymentGrid();
     } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+  };
+
+  window.exportPaymentPDF = () => {
+    const date = document.getElementById('pay-date').value;
+    if (!date) return alert('กรุณาเลือกวันที่และดึงรายชื่อก่อน Export');
+    
+    const element = document.getElementById('payment-grid-wrap');
+    if (!element || element.innerHTML.includes('ไม่มีร้านค้า')) return alert('ไม่มีข้อมูลสำหรับ Export');
+    
+    // Create a temporary wrapper with a title for the PDF
+    const tempDiv = document.createElement('div');
+    tempDiv.style.padding = '20px';
+    tempDiv.style.fontFamily = "'Sarabun', sans-serif";
+    tempDiv.innerHTML = `
+      <h2 style="text-align:center; font-family:'Mitr', sans-serif; color:#1A7A52; margin-bottom:20px;">
+        รายงานสถานะการชำระเงิน RUTS Walking Street
+      </h2>
+      <p style="text-align:center; font-size:14px; margin-bottom:20px;">ประจำวันที่: ${new Date(date).toLocaleDateString('th-TH')}</p>
+      ${element.outerHTML}
+    `;
+    
+    // Hide 'จัดการ' column buttons in the PDF
+    const buttons = tempDiv.querySelectorAll('button');
+    buttons.forEach(b => b.style.display = 'none');
+    const ths = tempDiv.querySelectorAll('th');
+    if (ths.length > 0) ths[ths.length - 1].innerText = 'หมายเหตุ';
+    
+    const opt = {
+      margin:       10,
+      filename:     `Payment_Report_${date}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(tempDiv).save();
   };
 
   /* ─── SYSTEM CONFIG ─── */
