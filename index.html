@@ -906,6 +906,225 @@ tr:hover td { background: #F8FAF9; }
   letter-spacing: 0.05em;
   margin-bottom: 14px;
 }
+
+/* ── TOAST NOTIFICATIONS ── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Sarabun', sans-serif;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  pointer-events: auto;
+  animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  max-width: 360px;
+  min-width: 240px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.toast.out { animation: toastOut 0.3s ease forwards; }
+
+.toast.success { background: rgba(16,185,129,0.95); color: #fff; }
+.toast.error   { background: rgba(220,38,38,0.95);  color: #fff; }
+.toast.warning { background: rgba(245,158,11,0.95); color: #fff; }
+.toast.info    { background: rgba(26,110,163,0.95); color: #fff; }
+
+.toast-icon { font-size: 18px; flex-shrink: 0; }
+.toast-msg  { flex: 1; line-height: 1.4; }
+.toast-close {
+  background: rgba(255,255,255,0.25);
+  border: none;
+  color: #fff;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(40px) scale(0.9); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(40px); }
+}
+
+/* ── CUSTOM CONFIRM DIALOG ── */
+.confirm-box {
+  display: none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px 28px;
+  width: 92%;
+  max-width: 400px;
+  z-index: 4001;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  text-align: center;
+  animation: confirmIn 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+.confirm-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,25,15,0.6);
+  z-index: 4000;
+  backdrop-filter: blur(6px);
+}
+
+@keyframes confirmIn {
+  from { opacity: 0; transform: translate(-50%,-50%) scale(0.85); }
+  to   { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+}
+
+.confirm-icon { font-size: 48px; margin-bottom: 14px; }
+.confirm-title {
+  font-family: 'Mitr', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.confirm-msg { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+.confirm-actions { display: flex; gap: 10px; }
+.confirm-actions .btn { flex: 1; justify-content: center; }
+
+/* ── SKELETON LOADING ── */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton-row td { padding: 16px; }
+.skeleton-cell { height: 14px; border-radius: 4px; }
+
+/* ── PAYMENT STATS BAR ── */
+.payment-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.pay-stat {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border-l);
+  padding: 14px 16px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.pay-stat .pn {
+  font-family: 'Mitr', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+.pay-stat .pl { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 4px; }
+.pay-stat.paid  .pn { color: #15803D; }
+.pay-stat.unpaid .pn { color: var(--red); }
+.pay-stat.total .pn { color: var(--text); }
+
+.progress-bar-wrap {
+  background: var(--surface-2);
+  border-radius: 8px;
+  height: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22C55E, #16A34A);
+  border-radius: 8px;
+  transition: width 0.6s ease;
+}
+
+/* ── SHOP STATUS FILTER ── */
+.shop-filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-select {
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 13px;
+  background: var(--white);
+  color: var(--text);
+  cursor: pointer;
+}
+.filter-count {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 6px 10px;
+  background: var(--surface-2);
+  border-radius: 6px;
+}
+
+/* ── RENEWAL ADMIN PANEL ── */
+.renewal-card {
+  background: var(--white);
+  border: 1px solid var(--border-l);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: var(--transition);
+}
+.renewal-card:hover { box-shadow: var(--shadow-md); }
+.renewal-card.resigned { border-left: 4px solid var(--red); }
+.renewal-card.confirmed { border-left: 4px solid var(--green-m); }
+
+/* ── LOGS ── */
+.log-action-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--green-l);
+  color: var(--green-d);
+}
+.log-action-badge.del { background: var(--red-l); color: var(--red); }
+.log-action-badge.warn { background: var(--amber-l); color: var(--amber); }
+
+@media (max-width: 640px) {
+  .toast-container { bottom: 16px; right: 16px; left: 16px; }
+  .toast { max-width: 100%; }
+  .payment-stats { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -929,6 +1148,21 @@ tr:hover td { background: #F8FAF9; }
   </header>
 
   <!-- TOOLTIP & ANNOUNCEMENT -->
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- CUSTOM CONFIRM DIALOG -->
+  <div class="confirm-bg" id="confirm-bg"></div>
+  <div class="confirm-box" id="confirm-box">
+    <div class="confirm-icon" id="confirm-icon">⚠️</div>
+    <div class="confirm-title" id="confirm-title">ยืนยันการดำเนินการ</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" id="confirm-cancel-btn" onclick="window._confirmResolve(false)">ยกเลิก</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="window._confirmResolve(true)">ยืนยัน</button>
+    </div>
+  </div>
+
   <div id="slot-tooltip"></div>
   <div id="announcement-banner" class="banner">📢 <span id="announcement-text"></span></div>
 
@@ -1258,6 +1492,7 @@ tr:hover td { background: #F8FAF9; }
       <div class="tabs">
         <button class="tab-btn active" onclick="showAdminTab('pending',this)">📋 รออนุมัติ</button>
         <button class="tab-btn" onclick="showAdminTab('shops',this)">🏪 ร้านค้า</button>
+        <button class="tab-btn" onclick="showAdminTab('renewals',this)">🔄 ยืนยันสิทธิ์</button>
         <button class="tab-btn" onclick="showAdminTab('payments',this)">💰 การเงิน</button>
         <button class="tab-btn" onclick="showAdminTab('settings',this)">⚙️ ตั้งค่าระบบ</button>
         <button class="tab-btn" onclick="showAdminTab('logs',this)">📝 บันทึก</button>
@@ -1330,10 +1565,19 @@ tr:hover td { background: #F8FAF9; }
       <!-- TAB: SHOPS -->
       <div id="admin-tab-shops" class="tab-panel">
         <div class="card">
-          <div class="search-bar">
-            <input type="text" id="search-shop-admin" class="search-input" placeholder="🔍 ค้นหาชื่อร้านหรือเบอร์โทร...">
+          <div class="shop-filter-bar" style="margin-bottom:12px;">
+            <input type="text" id="search-shop-admin" class="search-input" placeholder="🔍 ค้นหาชื่อร้านหรือเบอร์โทร..." style="flex:1; min-width:160px;">
+            <select id="filter-status-admin" class="filter-select" onchange="window.applyShopFilter()">
+              <option value="">ทุกสถานะ</option>
+              <option value="active">เปิดขายปกติ</option>
+              <option value="leave">แจ้งลา</option>
+              <option value="T2">ระงับ (T2)</option>
+              <option value="pending">รออนุมัติ</option>
+              <option value="cancelled">ยกเลิก</option>
+            </select>
+            <span id="filter-count" class="filter-count">ทั้งหมด 0 ร้าน</span>
             <button class="btn btn-primary" onclick="window.openAddShop()">➕ เพิ่มร้านค้าใหม่</button>
-            <button class="btn btn-ghost" onclick="window.exportShops()">📊 Export Excel</button>
+            <button class="btn btn-ghost" onclick="window.exportShops()">📊 Export</button>
           </div>
           <div class="tbl-wrap">
             <table>
@@ -1345,6 +1589,19 @@ tr:hover td { background: #F8FAF9; }
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- TAB: RENEWALS (Admin) -->
+      <div id="admin-tab-renewals" class="tab-panel">
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">🔄 รายการยืนยันสิทธิ์จากร้านค้า</div>
+            <div style="display:flex; gap:8px;">
+              <span id="renewal-stats" style="font-size:13px; color:var(--muted);"></span>
+            </div>
+          </div>
+          <div id="renewals-list"><div class="td-empty">⏳ กำลังโหลด...</div></div>
         </div>
       </div>
 
@@ -1361,7 +1618,11 @@ tr:hover td { background: #F8FAF9; }
             <button class="btn btn-ghost" onclick="window.exportPaymentPDF()">📄 Export PDF</button>
           </div>
         </div>
-        <div id="payment-grid-wrap" class="tbl-wrap"></div>
+          <div id="payment-stats-bar" class="payment-stats" style="display:none;"></div>
+          <div id="payment-progress" class="progress-bar-wrap" style="display:none;">
+            <div class="progress-bar-fill" id="payment-progress-fill" style="width:0%"></div>
+          </div>
+          <div id="payment-grid-wrap" class="tbl-wrap"></div>
       </div>
 
       <!-- TAB: SETTINGS -->
@@ -1597,13 +1858,73 @@ tr:hover td { background: #F8FAF9; }
     measurementId: "G-2T6D49EDVP"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
   const ADMIN_EMAIL = "rutswalkingstreet@gmail.com";
   let currentId = null;
+  // Cache of shops for leave table name resolution
+  let _shopsCache = {};
+
+  /* ══════════════════════════════════════════
+     TOAST NOTIFICATION SYSTEM
+  ══════════════════════════════════════════ */
+  const TOAST_ICONS = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' };
+
+  window.showToast = (msg, type = 'success', duration = 4000) => {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+      <span class="toast-icon">${TOAST_ICONS[type]}</span>
+      <span class="toast-msg">${msg}</span>
+      <button class="toast-close" onclick="this.parentElement.classList.add('out'); setTimeout(()=>this.parentElement.remove(), 300)">✕</button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('out');
+      setTimeout(() => toast.remove(), 320);
+    }, duration);
+  };
+
+  /* ══════════════════════════════════════════
+     CUSTOM CONFIRM DIALOG
+  ══════════════════════════════════════════ */
+  window._confirmResolve = null;
+
+  window.showConfirm = (msg, title = 'ยืนยันการดำเนินการ', icon = '⚠️', okLabel = 'ยืนยัน', okClass = 'btn-danger') => {
+    return new Promise(resolve => {
+      document.getElementById('confirm-msg').innerHTML   = msg;
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-icon').textContent  = icon;
+      document.getElementById('confirm-ok-btn').textContent = okLabel;
+      document.getElementById('confirm-ok-btn').className   = `btn ${okClass}`;
+      document.getElementById('confirm-box').style.display = 'block';
+      document.getElementById('confirm-bg').style.display  = 'block';
+      window._confirmResolve = (result) => {
+        document.getElementById('confirm-box').style.display = 'none';
+        document.getElementById('confirm-bg').style.display  = 'none';
+        resolve(result);
+      };
+    });
+  };
+
+  /* ══════════════════════════════════════════
+     AUDIT LOG
+  ══════════════════════════════════════════ */
+  async function logAction(action, detail, type = 'action') {
+    try {
+      await addDoc(collection(db, "logs"), {
+        admin:     auth.currentUser?.email || 'system',
+        action,
+        detail,
+        type,
+        timestamp: serverTimestamp()
+      });
+    } catch(e) { console.warn('logAction:', e); }
+  }
 
   /* ─── NAVIGATION ─── */
   window.showPage = (name, btn) => {
@@ -1657,21 +1978,42 @@ tr:hover td { background: #F8FAF9; }
     } catch(e) { console.warn('loadShopDropdown:', e); }
   }
 
-  /* ─── APPLY FORM ─── */
+  /* ─── APPLY FORM (with duplicate phone check) ─── */
   document.getElementById('form-apply').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('btn-submit-apply');
     btn.disabled = true;
-    btn.textContent = '⏳ กำลังส่งข้อมูล...';
+    btn.textContent = '⏳ กำลังตรวจสอบข้อมูล...';
     try {
       const data = Object.fromEntries(new FormData(e.target));
+
+      // Check duplicate phone
+      const dupQ    = query(collection(db, "shops"), where("phone", "==", data.phone));
+      const dupSnap = await getDocs(dupQ);
+      if (!dupSnap.empty) {
+        const existing = dupSnap.docs[0].data();
+        const ok = await window.showConfirm(
+          `พบข้อมูลเบอร์โทร <strong>${data.phone}</strong> อยู่ในระบบแล้ว<br>
+          (ร้าน: <strong>${existing.shopName}</strong> สถานะ: ${existing.status})<br><br>
+          ต้องการส่งใบสมัครใหม่ต่อไปหรือไม่?`,
+          'พบเบอร์โทรซ้ำในระบบ', '⚠️', 'ส่งต่อไป', 'btn-primary'
+        );
+        if (!ok) {
+          btn.disabled = false;
+          btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
+          return;
+        }
+      }
+
+      btn.textContent = '⏳ กำลังส่งข้อมูล...';
       data.status    = 'pending';
       data.createdAt = serverTimestamp();
       await addDoc(collection(db, "shops"), data);
-      alert('✅ ส่งข้อมูลสำเร็จ! คณะกรรมการจะพิจารณาและแจ้งผลภายหลัง');
+      window.showToast('ส่งข้อมูลสำเร็จ! คณะกรรมการจะพิจารณาและแจ้งผลภายหลัง', 'success', 6000);
       e.target.reset();
+      document.getElementById('substitute-options').style.display = 'none';
     } catch(err) {
-      alert('เกิดข้อผิดพลาด: ' + err.message);
+      window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
     } finally {
       btn.disabled = false;
       btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
@@ -1686,14 +2028,14 @@ tr:hover td { background: #F8FAF9; }
     btn.textContent = '⏳ กำลังส่งคำขอ...';
     try {
       const data = Object.fromEntries(new FormData(e.target));
-      if (!data.shopId) { alert('กรุณาเลือกร้านค้า'); return; }
+      if (!data.shopId) { window.showToast('กรุณาเลือกร้านค้า', 'warning'); return; }
       data.status    = 'pending';
       data.createdAt = serverTimestamp();
       await addDoc(collection(db, "leaves"), data);
-      alert('✅ ส่งคำขอแจ้งหยุดสำเร็จ! รอคณะกรรมการอนุมัติ');
+      window.showToast('ส่งคำขอแจ้งหยุดสำเร็จ! รอคณะกรรมการอนุมัติ', 'success', 5000);
       e.target.reset();
     } catch(err) {
-      alert('เกิดข้อผิดพลาด: ' + err.message);
+      window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
     } finally {
       btn.disabled = false;
       btn.textContent = 'ส่งคำขอแจ้งหยุดจำหน่าย';
@@ -1705,21 +2047,19 @@ tr:hover td { background: #F8FAF9; }
     e.preventDefault();
     try {
       const data = Object.fromEntries(new FormData(e.target));
-      if (!data.shopId) { alert('กรุณาเลือกร้านค้า'); return; }
+      if (!data.shopId) { window.showToast('กรุณาเลือกร้านค้า', 'warning'); return; }
       data.createdAt = serverTimestamp();
-
-      // บันทึกข้อมูลการยืนยันสิทธิ์ลงตาราง renewals อย่างเดียว (เพื่อไม่ให้ติด Permission ของตาราง shops)
       await addDoc(collection(db, "renewals"), data);
 
       if (data.response === 'no') {
-        alert('✅ ระบบได้รับแจ้งการสละสิทธิ์ของท่านแล้ว คณะกรรมการจะดำเนินการในขั้นตอนต่อไป');
+        window.showToast('ระบบได้รับแจ้งการสละสิทธิ์ของท่านแล้ว คณะกรรมการจะดำเนินการต่อไป', 'info', 6000);
       } else {
-        alert('✅ บันทึกผลการยืนยันสิทธิ์เรียบร้อย ขอบคุณครับ');
+        window.showToast('บันทึกผลการยืนยันสิทธิ์เรียบร้อย ขอบคุณครับ', 'success');
       }
       e.target.reset();
       window.showPage('home');
     } catch(err) {
-      alert('เกิดข้อผิดพลาด: ' + err.message);
+      window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
     }
   });
 
@@ -1729,7 +2069,7 @@ tr:hover td { background: #F8FAF9; }
     const res   = document.getElementById('check-res');
     if (phone.length < 9) { res.innerHTML = '<div class="info-box amber">⚠️ กรุณากรอกเบอร์โทรให้ครบ</div>'; return; }
 
-    res.innerHTML = '⏳ กำลังค้นหา...';
+    res.innerHTML = '<div style="text-align:center; padding:16px; color:var(--muted);">⏳ กำลังค้นหา...</div>';
     try {
       const q    = query(collection(db, "shops"), where("phone", "==", phone));
       const snap = await getDocs(q);
@@ -1738,11 +2078,11 @@ tr:hover td { background: #F8FAF9; }
         return;
       }
       const statusMap = {
-        active: { label: 'เปิดขายปกติ', cls: 'badge-active' },
-        pending: { label: 'รอการอนุมัติ', cls: 'badge-pending' },
-        leave: { label: 'แจ้งลา', cls: 'badge-leave' },
-        T2: { label: 'ระงับสิทธิ์ (T2)', cls: 'badge-t2' },
-        cancelled: { label: 'ยกเลิกสิทธิ์', cls: 'badge-cancelled' }
+        active:    { label: 'เปิดขายปกติ',       cls: 'badge-active' },
+        pending:   { label: 'รอการอนุมัติ',       cls: 'badge-pending' },
+        leave:     { label: 'แจ้งลา',             cls: 'badge-leave' },
+        T2:        { label: 'ระงับสิทธิ์ (T2)',   cls: 'badge-t2' },
+        cancelled: { label: 'ยกเลิกสิทธิ์',      cls: 'badge-cancelled' }
       };
       res.innerHTML = snap.docs.map(d => {
         const s  = d.data();
@@ -1750,7 +2090,7 @@ tr:hover td { background: #F8FAF9; }
         return `<div style="background:var(--surface); padding:16px; border-radius:10px; margin-bottom:8px; border:1px solid var(--border-l);">
           <div style="font-weight:700; font-size:15px; margin-bottom:6px;">${s.shopName}</div>
           <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
-            ${s.firstName} ${s.lastName} · ล็อก: ${s.slots || 'ยังไม่กำหนด'}
+            ${s.firstName} ${s.lastName} · ล็อก: ${s.slots || 'ยังไม่กำหนด'} · ${s.category || ''}
           </div>
           <span class="badge ${st.cls}">${st.label}</span>
         </div>`;
@@ -1770,10 +2110,10 @@ tr:hover td { background: #F8FAF9; }
     wrap.style.cssText = 'display:inline-grid; grid-template-columns: auto 18px auto 1fr; grid-template-rows: auto 18px auto 18px auto; gap:6px; align-items:end; padding:10px;';
 
     const colorMap = {
-      'อาหาร': { bg: 'var(--slot-food-bg)', b: 'var(--slot-food-b)' },
-      'เครื่องดื่ม': { bg: 'var(--slot-drink-bg)', b: 'var(--slot-drink-b)' },
-      'เสื้อผ้าและของใช้': { bg: 'var(--slot-fashion-bg)', b: 'var(--slot-fashion-b)' },
-      'รถฟู้ดทรัค (Food Truck)': { bg: 'var(--slot-truck-bg)', b: 'var(--slot-truck-b)' }
+      'อาหาร':                    { bg: 'var(--slot-food-bg)',    b: 'var(--slot-food-b)' },
+      'เครื่องดื่ม':              { bg: 'var(--slot-drink-bg)',   b: 'var(--slot-drink-b)' },
+      'เสื้อผ้าและของใช้':       { bg: 'var(--slot-fashion-bg)', b: 'var(--slot-fashion-b)' },
+      'รถฟู้ดทรัค (Food Truck)': { bg: 'var(--slot-truck-bg)',   b: 'var(--slot-truck-b)' }
     };
 
     const makeCell = (i) => {
@@ -1793,23 +2133,17 @@ tr:hover td { background: #F8FAF9; }
         }
       }
       div.innerHTML = `<span class="slot-no">${i}</span><span class="slot-name">${s?.shopName || ''}</span>`;
-      
-      // Interactive Editing for Admin
+
       if (window.adminMode && s) {
         div.style.cursor = 'pointer';
         div.title = 'คลิกเพื่อแก้ไขข้อมูลร้าน';
-        div.addEventListener('click', () => {
-          window.openEditShop(s.id);
-        });
+        div.addEventListener('click', () => window.openEditShop(s.id));
       } else if (window.adminMode && !s) {
         div.style.cursor = 'pointer';
-        div.title = 'คลิกเพื่อเพิ่มร้านค้าใหม่ในพื้นที่นี้';
-        div.addEventListener('click', () => {
-          window.openAddShop(i);
-        });
+        div.title = 'คลิกเพื่อเพิ่มร้านค้าใหม่';
+        div.addEventListener('click', () => window.openAddShop(i));
       }
 
-      // Tooltip
       div.addEventListener('mouseenter', (e) => {
         const tt = document.getElementById('slot-tooltip');
         tt.innerHTML = s
@@ -1868,7 +2202,7 @@ tr:hover td { background: #F8FAF9; }
       const map  = {};
       snap.forEach(d => {
         const data = d.data();
-        data.id = d.id; // Store ID for editing
+        data.id = d.id;
         String(data.slots || '').split(',').forEach(s => {
           const n = s.trim();
           if (n) map[n] = data;
@@ -1879,10 +2213,12 @@ tr:hover td { background: #F8FAF9; }
     finally { if (loading) loading.style.display = 'none'; }
   }
 
-  /* ─── PAYMENTS ─── */
+  /* ══════════════════════════════════════════
+     PAYMENTS (with stats bar)
+  ══════════════════════════════════════════ */
   window.loadPaymentGrid = async () => {
     const date = document.getElementById('pay-date').value;
-    if (!date) { alert('กรุณาเลือกวันที่'); return; }
+    if (!date) { window.showToast('กรุณาเลือกวันที่', 'warning'); return; }
 
     try {
       const shopsSnap = await getDocs(query(collection(db, "shops"), where("status", "==", "active")));
@@ -1891,27 +2227,38 @@ tr:hover td { background: #F8FAF9; }
 
       const shopsData = [];
       shopsSnap.forEach(d => {
-        const s = d.data();
-        s.id = d.id;
+        const s = d.data(); s.id = d.id;
         shopsData.push(s);
       });
-
-      // Sort shops by slot number (numerically)
       shopsData.sort((a, b) => {
-        const getFirstSlot = (slots) => {
-          if (!slots) return 9999;
-          const first = String(slots).split(',')[0].trim();
-          return parseInt(first) || 9999;
-        };
-        return getFirstSlot(a.slots) - getFirstSlot(b.slots);
+        const fn = (slots) => { if (!slots) return 9999; const f = String(slots).split(',')[0].trim(); return parseInt(f) || 9999; };
+        return fn(a.slots) - fn(b.slots);
       });
+
+      const paidCount   = shopsData.filter(s => paidIds.includes(s.id)).length;
+      const unpaidCount = shopsData.length - paidCount;
+      const pct         = shopsData.length ? Math.round(paidCount / shopsData.length * 100) : 0;
+
+      // Stats bar
+      const statsBar = document.getElementById('payment-stats-bar');
+      statsBar.style.display = 'grid';
+      statsBar.innerHTML = `
+        <div class="pay-stat paid"><div class="pn">${paidCount}</div><div class="pl">✅ จ่ายแล้ว</div></div>
+        <div class="pay-stat unpaid"><div class="pn">${unpaidCount}</div><div class="pl">❌ ยังไม่จ่าย</div></div>
+        <div class="pay-stat total"><div class="pn">${shopsData.length}</div><div class="pl">🏪 ทั้งหมด (${pct}%)</div></div>
+      `;
+      const progress = document.getElementById('payment-progress');
+      progress.style.display = 'block';
+      setTimeout(() => {
+        document.getElementById('payment-progress-fill').style.width = pct + '%';
+      }, 100);
 
       let rows = '';
       shopsData.forEach(s => {
         const isPaid = paidIds.includes(s.id);
         rows += `<tr>
           <td>${s.slots || '—'}</td>
-          <td>${s.shopName}</td>
+          <td><strong>${s.shopName}</strong></td>
           <td>${isPaid ? '<span class="badge badge-active">✅ จ่ายแล้ว</span>' : '<span class="badge badge-t2">❌ ยังไม่จ่าย</span>'}</td>
           <td>${isPaid ? '' : `<button class="btn btn-primary btn-sm" onclick="window.confirmPay('${s.id}','${date}')">บันทึกรับเงิน</button>`}</td>
         </tr>`;
@@ -1922,7 +2269,7 @@ tr:hover td { background: #F8FAF9; }
           <thead><tr><th>พื้นที่</th><th>ร้านค้า</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
           <tbody>${rows || '<tr><td colspan="4" class="td-empty">ไม่มีร้านค้า</td></tr>'}</tbody>
         </table>`;
-    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   };
 
   window.confirmPay = async (shopId, date) => {
@@ -1932,19 +2279,17 @@ tr:hover td { background: #F8FAF9; }
         timestamp: serverTimestamp(),
         admin: auth.currentUser?.email || 'unknown'
       });
-      alert('✅ บันทึกสำเร็จ');
+      await logAction('บันทึกชำระเงิน', `shopId: ${shopId}, วันที่: ${date}`);
+      window.showToast('บันทึกการชำระเงินสำเร็จ', 'success');
       window.loadPaymentGrid();
-    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   };
 
   window.exportPaymentPDF = () => {
     const date = document.getElementById('pay-date').value;
-    if (!date) return alert('กรุณาเลือกวันที่และดึงรายชื่อก่อน Export');
-    
+    if (!date) return window.showToast('กรุณาเลือกวันที่และดึงรายชื่อก่อน Export', 'warning');
     const element = document.getElementById('payment-grid-wrap');
-    if (!element || element.innerHTML.includes('ไม่มีร้านค้า')) return alert('ไม่มีข้อมูลสำหรับ Export');
-    
-    // Create a temporary wrapper with a title for the PDF
+    if (!element || element.innerHTML.includes('ไม่มีร้านค้า')) return window.showToast('ไม่มีข้อมูลสำหรับ Export', 'warning');
     const tempDiv = document.createElement('div');
     tempDiv.style.padding = '20px';
     tempDiv.style.fontFamily = "'Sarabun', sans-serif";
@@ -1955,22 +2300,18 @@ tr:hover td { background: #F8FAF9; }
       <p style="text-align:center; font-size:14px; margin-bottom:20px;">ประจำวันที่: ${new Date(date).toLocaleDateString('th-TH')}</p>
       ${element.outerHTML}
     `;
-    
-    // Hide 'จัดการ' column buttons in the PDF
     const buttons = tempDiv.querySelectorAll('button');
     buttons.forEach(b => b.style.display = 'none');
     const ths = tempDiv.querySelectorAll('th');
     if (ths.length > 0) ths[ths.length - 1].innerText = 'หมายเหตุ';
-    
     const opt = {
-      margin:       10,
-      filename:     `Payment_Report_${date}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr' }
+      margin: 10,
+      filename: `Payment_Report_${date}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
     };
-    
     html2pdf().set(opt).from(tempDiv).save();
   };
 
@@ -1982,26 +2323,22 @@ tr:hover td { background: #F8FAF9; }
       const c = snap.data();
       const v = c.visibility || {};
 
-      // Nav visibility
       const applyBtn = document.getElementById('btn-m-apply');
       const mapBtn   = document.getElementById('btn-m-map');
       if (applyBtn) applyBtn.style.display = v.apply ? '' : 'none';
       if (mapBtn)   mapBtn.style.display   = v.map   ? '' : 'none';
 
-      // Stats grid
       const statsGrid = document.getElementById('public-stats-grid');
       if (statsGrid) statsGrid.style.display = v.stats ? 'grid' : 'none';
 
-      // Home service cards
       document.querySelectorAll('.service-card').forEach(card => {
         const oc = card.getAttribute('onclick') || '';
         if (oc.includes("showPage('apply'")) card.style.display = v.apply ? '' : 'none';
         if (oc.includes("showPage('map'"))   card.style.display = v.map   ? '' : 'none';
       });
 
-      // Announcement
-      const banner     = document.getElementById('announcement-banner');
-      const annText    = document.getElementById('announcement-text');
+      const banner  = document.getElementById('announcement-banner');
+      const annText = document.getElementById('announcement-text');
       if (c.announcement) {
         annText.innerText    = c.announcement;
         banner.style.display = 'block';
@@ -2009,7 +2346,6 @@ tr:hover td { background: #F8FAF9; }
         banner.style.display = 'none';
       }
 
-      // Renewal
       const r = c.renew_period || {};
       document.getElementById('renew-box-open').style.display   = r.open ? 'block' : 'none';
       document.getElementById('renew-box-closed').style.display = r.open ? 'none'  : 'block';
@@ -2018,11 +2354,10 @@ tr:hover td { background: #F8FAF9; }
         document.getElementById('renew-deadline-label').innerText = r.deadline || '';
       }
 
-      // Substitute Schedule
-      const sub = c.substitute_period || {};
+      const sub    = c.substitute_period || {};
       const subMsg = document.getElementById('substitute-schedule-msg');
       if (sub.start && sub.end) {
-        subMsg.innerHTML = `เปิดรับลงทะเบียนขายแทน: <br>ตั้งแต่วันที่ ${new Date(sub.start).toLocaleDateString('th-TH')} ถึง ${new Date(sub.end).toLocaleDateString('th-TH')}`;
+        subMsg.innerHTML = `เปิดรับลงทะเบียนขายแทน:<br>ตั้งแต่วันที่ ${new Date(sub.start).toLocaleDateString('th-TH')} ถึง ${new Date(sub.end).toLocaleDateString('th-TH')}`;
         const now = new Date();
         if (now >= new Date(sub.start) && now <= new Date(sub.end)) {
           document.getElementById('substituteDateInput').disabled = false;
@@ -2035,10 +2370,8 @@ tr:hover td { background: #F8FAF9; }
         document.getElementById('substituteDateInput').disabled = true;
       }
 
-      // Apply closed
       document.getElementById('apply-closed-msg').style.display = v.apply ? 'none' : 'flex';
-      
-      // Admin sync
+
       if (window.adminMode) {
         document.getElementById('vis-apply').checked    = !!v.apply;
         document.getElementById('vis-map').checked      = !!v.map;
@@ -2049,11 +2382,11 @@ tr:hover td { background: #F8FAF9; }
         document.getElementById('set-announcement').value = c.announcement || '';
         if (c.leave_period) {
           document.getElementById('set-leave-start').value = c.leave_period.start || '';
-          document.getElementById('set-leave-end').value = c.leave_period.end || '';
+          document.getElementById('set-leave-end').value   = c.leave_period.end   || '';
         }
         if (c.substitute_period) {
           document.getElementById('set-sub-start').value = c.substitute_period.start || '';
-          document.getElementById('set-sub-end').value = c.substitute_period.end || '';
+          document.getElementById('set-sub-end').value   = c.substitute_period.end   || '';
         }
       }
     } catch(e) { console.warn('loadSystemConfig:', e); }
@@ -2063,7 +2396,6 @@ tr:hover td { background: #F8FAF9; }
     try {
       const ref = doc(db, "config", "system");
       let update = {};
-
       if (type === 'visibility') {
         update.visibility = {
           apply: document.getElementById('vis-apply').checked,
@@ -2089,11 +2421,11 @@ tr:hover td { background: #F8FAF9; }
           end:   document.getElementById('set-sub-end').value
         };
       }
-
       await setDoc(ref, update, { merge: true });
-      alert('✅ บันทึกการตั้งค่าสำเร็จ');
+      await logAction('บันทึกการตั้งค่า', `ประเภท: ${type}`);
+      window.showToast('บันทึกการตั้งค่าสำเร็จ', 'success');
       loadSystemConfig();
-    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   };
 
   /* ─── AUTOMATED TASKS ─── */
@@ -2102,27 +2434,19 @@ tr:hover td { background: #F8FAF9; }
       const todayStr = new Date().toISOString().split('T')[0];
       const q = query(collection(db, "shops"), where("applyType", "==", "substitute"), where("status", "==", "active"));
       const snap = await getDocs(q);
-      
       for (const d of snap.docs) {
         const sub = d.data();
         if (sub.substituteDate && sub.substituteDate < todayStr) {
-          // 1. ยกเลิกสิทธิ์ร้านขายแทนเพราะหมดเวลาแล้ว
           await updateDoc(doc(db, "shops", d.id), { status: 'cancelled' });
-          
-          // 2. หาร้านตัวจริงที่ลาในพื้นที่นั้น แล้วคืนสถานะให้เปิดขายปกติ
           if (sub.slots) {
-            const slotArray = sub.slots.split(',').map(s => s.trim());
-            // ค้นหาร้านทั้งหมดที่กำลังลา
-            const leaveSnap = await getDocs(query(collection(db, "shops"), where("status", "==", "leave")));
+            const slotArray  = sub.slots.split(',').map(s => s.trim());
+            const leaveSnap  = await getDocs(query(collection(db, "shops"), where("status", "==", "leave")));
             leaveSnap.forEach(async (ld) => {
               const origShop = ld.data();
               if (origShop.slots) {
-                const origSlots = origShop.slots.split(',').map(s => s.trim());
-                // ถ้าพื้นที่ทับซ้อนกัน แปลว่าเป็นร้านตัวจริง
+                const origSlots  = origShop.slots.split(',').map(s => s.trim());
                 const hasOverlap = origSlots.some(s => slotArray.includes(s));
-                if (hasOverlap) {
-                  await updateDoc(doc(db, "shops", ld.id), { status: 'active' });
-                }
+                if (hasOverlap) await updateDoc(doc(db, "shops", ld.id), { status: 'active' });
               }
             });
           }
@@ -2141,10 +2465,7 @@ tr:hover td { background: #F8FAF9; }
       document.getElementById('admin-login-wrap').style.display = 'none';
       document.getElementById('admin-panel').style.display      = 'block';
       document.getElementById('admin-email-display').innerText  = user.email;
-      
-      // ให้ระบบจัดการร้านขายแทนที่หมดอายุให้อัตโนมัติเมื่อ Admin เข้าสู่ระบบ
       await autoResetSubstitutes();
-      
       loadAdminData();
       loadSystemConfig();
     } else {
@@ -2160,24 +2481,33 @@ tr:hover td { background: #F8FAF9; }
     document.getElementById('admin-tab-' + tab).classList.add('active');
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    if (tab === 'renewals') loadRenewals();
+    if (tab === 'logs')     loadLogs();
   };
 
-  /* ─── ADMIN DATA ─── */
+  /* ══════════════════════════════════════════
+     ADMIN DATA (with resolved leave names)
+  ══════════════════════════════════════════ */
   async function loadAdminData() {
     try {
+      // Load skeleton while fetching
+      document.getElementById('tbody-pending').innerHTML = skeletonRows(6, 6);
+      document.getElementById('tbody-admin-shops').innerHTML = skeletonRows(5, 6);
+
       const snap = await getDocs(collection(db, "shops"));
       let pending = '', resign = '';
       let cntActive = 0, cntPending = 0, cntLeave = 0, cntT2 = 0;
-      
       const shopsData = [];
 
-      // Pre-fetch leave slots for substitutes
+      // Build shops cache for name resolution
+      _shopsCache = {};
+      snap.forEach(d => { _shopsCache[d.id] = d.data(); });
+
       const leaveSnap = await getDocs(query(collection(db, "shops"), where("status", "==", "leave")));
       window.availableLeaveSlots = leaveSnap.docs.map(doc => doc.data().slots).filter(s => s).join(', ');
 
       snap.forEach(d => {
-        const a = d.data(); 
-        a.id = d.id;
+        const a = d.data(); a.id = d.id;
         shopsData.push(a);
 
         if (a.status === 'active')  cntActive++;
@@ -2195,7 +2525,7 @@ tr:hover td { background: #F8FAF9; }
               <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}','${a.shopName}', false)">พิจารณา</button></td>
             </tr>`;
           } else {
-            const isSub = a.applyType === 'substitute';
+            const isSub   = a.applyType === 'substitute';
             const subDate = isSub && a.substituteDate ? `<br><small style="color:var(--amber);">ขายแทนวันที่: ${a.substituteDate}</small>` : '';
             pending += `<tr>
               <td>${a.createdAt?.toDate().toLocaleDateString('th-TH') || '—'}</td>
@@ -2208,28 +2538,26 @@ tr:hover td { background: #F8FAF9; }
           }
         }
       });
-      
-      // Sort shops by slot number (numerically)
+
+      // Sort by slot
       shopsData.sort((a, b) => {
-        const getFirstSlot = (slots) => {
-          if (!slots) return 9999;
-          const first = String(slots).split(',')[0].trim();
-          return parseInt(first) || 9999;
-        };
-        return getFirstSlot(a.slots) - getFirstSlot(b.slots);
+        const fn = s => { if (!s) return 9999; const f = String(s).split(',')[0].trim(); return parseInt(f) || 9999; };
+        return fn(a.slots) - fn(b.slots);
       });
 
+      // Store for filter
+      window._allShopsRows = [];
       let shopsHtml = '';
       shopsData.forEach(a => {
         const statusLabel = {
-          active: '<span class="badge badge-active">เปิดขายปกติ</span>',
-          pending: '<span class="badge badge-pending">รออนุมัติ</span>',
-          leave: '<span class="badge badge-leave">แจ้งลา</span>',
-          T2: '<span class="badge badge-t2">ระงับ T2</span>',
+          active:    '<span class="badge badge-active">เปิดขายปกติ</span>',
+          pending:   '<span class="badge badge-pending">รออนุมัติ</span>',
+          leave:     '<span class="badge badge-leave">แจ้งลา</span>',
+          T2:        '<span class="badge badge-t2">ระงับ T2</span>',
           cancelled: '<span class="badge badge-cancelled">ยกเลิก</span>'
         }[a.status] || `<span class="badge">${a.status}</span>`;
 
-        shopsHtml += `<tr class="shop-row">
+        const row = `<tr class="shop-row" data-status="${a.status}" data-name="${(a.shopName||'').toLowerCase()}" data-phone="${(a.phone||'').toLowerCase()}">
           <td class="shop-name-col"><strong>${a.shopName}</strong></td>
           <td>${a.slots || '—'}</td>
           <td>${a.category || '—'}</td>
@@ -2237,29 +2565,16 @@ tr:hover td { background: #F8FAF9; }
           <td class="shop-phone-col">${a.phone || '—'}</td>
           <td><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${a.id}')">แก้ไข</button></td>
         </tr>`;
+        shopsHtml += row;
+        window._allShopsRows.push({ status: a.status, name: (a.shopName||'').toLowerCase(), phone: (a.phone||'').toLowerCase(), html: row });
       });
 
-      document.getElementById('tbody-pending').innerHTML      = pending || '<tr><td colspan="6" class="td-empty">ไม่มีคำขอรออนุมัติ</td></tr>';
-      document.getElementById('tbody-admin-resign').innerHTML = resign  || '<tr><td colspan="5" class="td-empty">ไม่มีคำขอสละสิทธิ์</td></tr>';
-      document.getElementById('tbody-admin-shops').innerHTML  = shopsHtml   || '<tr><td colspan="6" class="td-empty">ไม่มีข้อมูล</td></tr>';
+      document.getElementById('tbody-pending').innerHTML      = pending  || '<tr><td colspan="6" class="td-empty">ไม่มีคำขอรออนุมัติ</td></tr>';
+      document.getElementById('tbody-admin-resign').innerHTML = resign   || '<tr><td colspan="5" class="td-empty">ไม่มีคำขอสละสิทธิ์</td></tr>';
+      document.getElementById('tbody-admin-shops').innerHTML  = shopsHtml|| '<tr><td colspan="6" class="td-empty">ไม่มีข้อมูล</td></tr>';
 
-      // Attach search listener
-      const searchInput = document.getElementById('search-shop-admin');
-      if (searchInput) {
-        searchInput.addEventListener('input', function() {
-          const filter = this.value.toLowerCase();
-          const rows = document.querySelectorAll('#tbody-admin-shops .shop-row');
-          rows.forEach(row => {
-            const name = row.querySelector('.shop-name-col').textContent.toLowerCase();
-            const phone = row.querySelector('.shop-phone-col').textContent.toLowerCase();
-            if (name.includes(filter) || phone.includes(filter)) {
-              row.style.display = '';
-            } else {
-              row.style.display = 'none';
-            }
-          });
-        });
-      }
+      // Update filter count
+      document.getElementById('filter-count').textContent = `ทั้งหมด ${shopsData.length} ร้าน`;
 
       // Admin quick stats
       document.getElementById('adm-st-active').innerText  = cntActive;
@@ -2267,31 +2582,141 @@ tr:hover td { background: #F8FAF9; }
       document.getElementById('adm-st-leave').innerText   = cntLeave;
       document.getElementById('adm-st-t2').innerText      = cntT2;
 
-      // Leaves
+      // Leaves — resolved shop names
       const lSnap = await getDocs(query(collection(db, "leaves"), where("status", "==", "pending")));
       document.getElementById('tbody-admin-leaves').innerHTML = lSnap.docs.map(d => {
         const l = d.data();
+        const shopData = _shopsCache[l.shopId] || {};
+        const shopName = shopData.shopName || l.shopId;
+        const shopSlots = shopData.slots || '—';
         return `<tr>
-          <td>${l.shopId}</td>
+          <td><strong>${shopName}</strong><br><small style="color:var(--muted);">ล็อก: ${shopSlots}</small></td>
           <td>${l.marketDate}</td>
           <td>${l.reason}</td>
-          <td><button class="btn btn-primary btn-sm" onclick="window.approveLeave('${d.id}','${l.shopId}')">อนุมัติ</button></td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="window.approveLeave('${d.id}','${l.shopId}')">อนุมัติ</button>
+            <button class="btn btn-danger btn-sm" style="margin-top:4px;" onclick="window.rejectLeave('${d.id}')">ปฏิเสธ</button>
+          </td>
         </tr>`;
       }).join('') || '<tr><td colspan="4" class="td-empty">ไม่มีคำขอแจ้งลา</td></tr>';
 
     } catch(e) { console.warn('loadAdminData:', e); }
   }
 
+  // Skeleton row helper
+  function skeletonRows(cols, n = 4) {
+    return Array(n).fill(null).map(() =>
+      `<tr class="skeleton-row">${Array(cols).fill(`<td><div class="skeleton skeleton-cell"></div></td>`).join('')}</tr>`
+    ).join('');
+  }
+
+  /* ══════════════════════════════════════════
+     SHOP FILTER (Admin)
+  ══════════════════════════════════════════ */
+  window.applyShopFilter = () => {
+    const statusFilter = document.getElementById('filter-status-admin').value;
+    const textFilter   = (document.getElementById('search-shop-admin').value || '').toLowerCase();
+    const rows = window._allShopsRows || [];
+    let visible = 0;
+    const tbody = document.getElementById('tbody-admin-shops');
+    tbody.innerHTML = '';
+    rows.forEach(r => {
+      const matchStatus = !statusFilter || r.status === statusFilter;
+      const matchText   = !textFilter   || r.name.includes(textFilter) || r.phone.includes(textFilter);
+      if (matchStatus && matchText) { tbody.innerHTML += r.html; visible++; }
+    });
+    if (visible === 0) tbody.innerHTML = '<tr><td colspan="6" class="td-empty">ไม่พบร้านค้าที่ตรงกับเงื่อนไข</td></tr>';
+    document.getElementById('filter-count').textContent = `แสดง ${visible} / ${rows.length} ร้าน`;
+  };
+
+  document.getElementById('search-shop-admin').addEventListener('input', window.applyShopFilter);
+
+  /* ══════════════════════════════════════════
+     RENEWALS (Admin Tab)
+  ══════════════════════════════════════════ */
+  async function loadRenewals() {
+    const list = document.getElementById('renewals-list');
+    list.innerHTML = '<div class="td-empty">⏳ กำลังโหลด...</div>';
+    try {
+      const snap = await getDocs(query(collection(db, "renewals"), orderBy("createdAt", "desc")));
+      if (snap.empty) {
+        list.innerHTML = '<div class="td-empty">ยังไม่มีร้านค้ายืนยันสิทธิ์</div>';
+        document.getElementById('renewal-stats').textContent = '';
+        return;
+      }
+
+      // Resolve shop names
+      const shopIds = [...new Set(snap.docs.map(d => d.data().shopId).filter(Boolean))];
+      const nameMap = {};
+      for (const id of shopIds) {
+        if (_shopsCache[id]) { nameMap[id] = _shopsCache[id].shopName; }
+        else {
+          try { const s = await getDoc(doc(db, "shops", id)); if (s.exists()) nameMap[id] = s.data().shopName; } catch {}
+        }
+      }
+
+      let yes = 0, no = 0;
+      const html = snap.docs.map(d => {
+        const r      = d.data();
+        const name   = nameMap[r.shopId] || r.shopId;
+        const isYes  = r.response === 'yes';
+        const date   = r.createdAt?.toDate().toLocaleDateString('th-TH') || '—';
+        if (isYes) yes++; else no++;
+        return `<div class="renewal-card ${isYes ? 'confirmed' : 'resigned'}">
+          <div>
+            <div style="font-weight:700; font-size:14px;">${name}</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">ยืนยันวันที่ ${date}</div>
+          </div>
+          <span class="badge ${isYes ? 'badge-active' : 'badge-t2'}">${isYes ? '✅ ขายต่อ' : '❌ สละสิทธิ์'}</span>
+        </div>`;
+      }).join('');
+
+      list.innerHTML = html;
+      document.getElementById('renewal-stats').textContent = `✅ ขายต่อ ${yes} ร้าน · ❌ สละสิทธิ์ ${no} ร้าน`;
+    } catch(e) {
+      list.innerHTML = '<div class="td-empty">เกิดข้อผิดพลาดในการโหลด</div>';
+      console.warn('loadRenewals:', e);
+    }
+  }
+
+  /* ══════════════════════════════════════════
+     AUDIT LOGS (Admin Tab)
+  ══════════════════════════════════════════ */
+  async function loadLogs() {
+    const tbody = document.getElementById('tbody-admin-logs');
+    tbody.innerHTML = skeletonRows(4, 5);
+    try {
+      const snap = await getDocs(query(collection(db, "logs"), orderBy("timestamp", "desc"), limit(100)));
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="4" class="td-empty">ยังไม่มีบันทึกกิจกรรม</td></tr>';
+        return;
+      }
+      tbody.innerHTML = snap.docs.map(d => {
+        const l   = d.data();
+        const ts  = l.timestamp?.toDate().toLocaleString('th-TH') || '—';
+        const isDelete = l.action?.includes('ลบ');
+        const isWarn   = l.action?.includes('ปฏิเสธ') || l.action?.includes('ระงับ');
+        const cls  = isDelete ? 'del' : isWarn ? 'warn' : '';
+        return `<tr>
+          <td style="white-space:nowrap; font-size:12px;">${ts}</td>
+          <td style="font-size:12px;">${l.admin || '—'}</td>
+          <td><span class="log-action-badge ${cls}">${l.action || '—'}</span></td>
+          <td style="font-size:13px; color:var(--muted);">${l.detail || '—'}</td>
+        </tr>`;
+      }).join('');
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="4" class="td-empty">เกิดข้อผิดพลาดในการโหลด</td></tr>';
+    }
+  }
+
   /* ─── APPROVE APPLICATION ─── */
   window.openApprove = (id, name, isSubstitute) => {
     currentId = id;
     let detailHtml = `<strong>${name}</strong>`;
-    
     if (isSubstitute) {
       const availSlots = window.availableLeaveSlots || 'ไม่มีพื้นที่ที่แจ้งลาในขณะนี้';
       detailHtml += `<br><span style="color:var(--amber); font-weight:600; font-size:12px;">(สมัครขายแทน) พื้นที่ลาปัจจุบัน: ${availSlots}</span>`;
     }
-    
     document.getElementById('app-detail').innerHTML = detailHtml;
     document.getElementById('modal-slots').value    = '';
     document.getElementById('modal-approve').style.display = 'block';
@@ -2300,24 +2725,39 @@ tr:hover td { background: #F8FAF9; }
 
   window.actionApp = async (action) => {
     try {
-      const slots = document.getElementById('modal-slots').value;
+      const slots  = document.getElementById('modal-slots').value;
       const update = { status: action, isResign: null };
       if (action === 'approved' && slots) update.slots = slots;
+      const shopData = _shopsCache[currentId] || {};
       await updateDoc(doc(db, "shops", currentId), update);
-      alert(action === 'approved' ? '✅ อนุมัติเรียบร้อย' : '❌ ไม่อนุมัติ/ยกเลิกสิทธิ์ เรียบร้อย');
+      await logAction(action === 'approved' ? 'อนุมัติคำขอ' : 'ปฏิเสธคำขอ', `ร้าน: ${shopData.shopName || currentId}`, action === 'approved' ? 'action' : 'warn');
+      window.showToast(action === 'approved' ? 'อนุมัติเรียบร้อยแล้ว' : 'ไม่อนุมัติ/ยกเลิกสิทธิ์เรียบร้อย', action === 'approved' ? 'success' : 'warning');
       window.closeModal();
       loadAdminData();
-    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   };
 
-  /* ─── APPROVE LEAVE ─── */
+  /* ─── APPROVE / REJECT LEAVE ─── */
   window.approveLeave = async (leaveId, shopId) => {
     try {
       await updateDoc(doc(db, "leaves", leaveId), { status: 'approved' });
-      await updateDoc(doc(db, "shops", shopId), { status: 'leave' });
-      alert('✅ อนุมัติการแจ้งลาเรียบร้อย');
+      await updateDoc(doc(db, "shops",  shopId),  { status: 'leave' });
+      const shopData = _shopsCache[shopId] || {};
+      await logAction('อนุมัติการแจ้งลา', `ร้าน: ${shopData.shopName || shopId}`);
+      window.showToast('อนุมัติการแจ้งลาเรียบร้อย', 'success');
       loadAdminData();
-    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+  };
+
+  window.rejectLeave = async (leaveId) => {
+    const ok = await window.showConfirm('ต้องการปฏิเสธคำขอแจ้งลานี้ใช่หรือไม่?', 'ปฏิเสธการแจ้งลา', '🗓️', 'ปฏิเสธ', 'btn-danger');
+    if (!ok) return;
+    try {
+      await updateDoc(doc(db, "leaves", leaveId), { status: 'rejected' });
+      await logAction('ปฏิเสธการแจ้งลา', `leaveId: ${leaveId}`, 'warn');
+      window.showToast('ปฏิเสธคำขอแจ้งลาเรียบร้อย', 'warning');
+      loadAdminData();
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   };
 
   /* ─── ADD SHOP (Admin) ─── */
@@ -2336,16 +2776,16 @@ tr:hover td { background: #F8FAF9; }
     try {
       const data = Object.fromEntries(new FormData(e.target));
       data.createdAt = serverTimestamp();
-      data.items = 'เพิ่มข้อมูลโดยผู้ดูแลระบบ'; 
-      data.religion = 'ไม่ระบุ';
+      data.items     = 'เพิ่มข้อมูลโดยผู้ดูแลระบบ';
+      data.religion  = 'ไม่ระบุ';
       data.applyType = 'new';
-      
       await addDoc(collection(db, "shops"), data);
-      alert('✅ เพิ่มร้านค้าสำเร็จ');
+      await logAction('เพิ่มร้านค้าใหม่', `ร้าน: ${data.shopName}, ล็อก: ${data.slots || 'ยังไม่กำหนด'}`);
+      window.showToast('เพิ่มร้านค้าสำเร็จ', 'success');
       window.closeModal();
       loadAdminData();
     } catch(err) {
-      alert('เกิดข้อผิดพลาด: ' + err.message);
+      window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
     } finally {
       btn.disabled = false;
       btn.textContent = '💾 บันทึกเพิ่มร้านค้า';
@@ -2364,26 +2804,34 @@ tr:hover td { background: #F8FAF9; }
       document.getElementById('edit-status').value   = d.status   || 'active';
       document.getElementById('modal-edit-shop').style.display = 'block';
       document.getElementById('modal-bg').style.display        = 'block';
-    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   };
 
   window.updateShopData = async () => {
     try {
       const data = Object.fromEntries(new FormData(document.getElementById('form-edit-shop')));
       await updateDoc(doc(db, "shops", currentId), data);
-      alert('✅ บันทึกสำเร็จ');
+      await logAction('แก้ไขข้อมูลร้าน', `ร้าน: ${data.shopName}, สถานะ: ${data.status}, ล็อก: ${data.slots || '—'}`);
+      window.showToast('บันทึกข้อมูลร้านค้าสำเร็จ', 'success');
       window.closeModal();
       loadAdminData();
-    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   };
 
   window.deleteShop = async () => {
-    if (!confirm('⚠️ ยืนยันการลบร้านค้า? การกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+    const shopName = document.getElementById('edit-shopName').value;
+    const ok = await window.showConfirm(
+      `ต้องการลบร้าน <strong>"${shopName}"</strong> ออกจากระบบ?<br>การกระทำนี้ <strong>ไม่สามารถย้อนกลับได้</strong>`,
+      'ยืนยันการลบร้านค้า', '🗑️', 'ลบเลย', 'btn-danger'
+    );
+    if (!ok) return;
     try {
       await deleteDoc(doc(db, "shops", currentId));
+      await logAction('ลบร้านค้า', `ร้าน: ${shopName}`, 'del');
+      window.showToast(`ลบร้าน "${shopName}" ออกจากระบบแล้ว`, 'warning');
       window.closeModal();
       loadAdminData();
-    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   };
 
   /* ─── EXPORT (CSV) ─── */
@@ -2391,42 +2839,26 @@ tr:hover td { background: #F8FAF9; }
     try {
       const snap = await getDocs(collection(db, "shops"));
       let csv = "ชื่อร้าน,พื้นที่,สถานะ,เบอร์โทร,หมวดหมู่\n";
-      
       const shopsData = [];
       snap.forEach(d => shopsData.push(d.data()));
-      
-      // Sort before exporting
       shopsData.sort((a, b) => {
-        const getFirstSlot = (slots) => {
-          if (!slots) return 9999;
-          const first = String(slots).split(',')[0].trim();
-          return parseInt(first) || 9999;
-        };
-        return getFirstSlot(a.slots) - getFirstSlot(b.slots);
+        const fn = s => { if (!s) return 9999; const f = String(s).split(',')[0].trim(); return parseInt(f) || 9999; };
+        return fn(a.slots) - fn(b.slots);
       });
-
       shopsData.forEach(a => {
         const slotsStr = a.slots ? `"${a.slots}"` : '""';
-        const nameStr = a.shopName ? `"${a.shopName}"` : '""';
-        const phoneStr = a.phone ? `="${a.phone}"` : '""'; // Force Excel to treat as text
+        const nameStr  = a.shopName ? `"${a.shopName}"` : '""';
+        const phoneStr = a.phone ? `="${a.phone}"` : '""';
         csv += `${nameStr},${slotsStr},"${a.status}",${phoneStr},"${a.category || ''}"\n`;
       });
-      
       const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = `shops_export_${new Date().toISOString().split('T')[0]}.csv`;
       link.click();
-    } catch(e) { alert('เกิดข้อผิดพลาด: ' + e.message); }
+      window.showToast('Export CSV สำเร็จ', 'success');
+    } catch(e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
   };
-
-  /* ─── SEARCH SHOPS (admin) ─── */
-  document.getElementById('search-shop-admin').addEventListener('input', function() {
-    const q = this.value.toLowerCase();
-    document.querySelectorAll('#tbody-admin-shops tr').forEach(row => {
-      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-    });
-  });
 
   /* ─── INIT ─── */
   loadStats();
@@ -2434,6 +2866,3 @@ tr:hover td { background: #F8FAF9; }
 </script>
 </body>
 </html>
- 
- 
- 
