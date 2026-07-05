@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/fireba
 import {
   getFirestore, collection, addDoc, getDocs, doc,
   updateDoc, query, where, serverTimestamp, orderBy,
-  limit, deleteDoc, getDoc, setDoc
+  limit, deleteDoc, getDoc, setDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 import {
   getAuth, signInWithPopup, GoogleAuthProvider,
@@ -29,6 +29,11 @@ const ADMIN_EMAIL = "rutswalkingstreet@gmail.com";
 let currentId = null;
 // Cache of shops for leave table name resolution
 let _shopsCache = {};
+// Store unsubscribe functions for real-time listeners
+let _unsubShops = null;
+let _unsubConfig = null;
+let _unsubStats = null;
+let _unsubLeaves = null;
 
 /* ══════════════════════════════════════════
    TOAST NOTIFICATION SYSTEM
@@ -116,17 +121,19 @@ window.openCheckStatusModal = () => {
   document.getElementById('check-phone').value = '';
 };
 
-/* ─── STATS (PUBLIC) ─── */
-async function loadStats() {
-  try {
-    const snap = await getDocs(collection(db, "shops"));
-    const shops = snap.docs.map(d => d.data());
-    const active = shops.filter(s => s.status === 'active').length;
-    const leave = shops.filter(s => s.status === 'leave').length;
-    document.getElementById('st-active').innerText = active + leave;
-    document.getElementById('st-pending').innerText = shops.filter(s => s.status === 'pending').length;
-    document.getElementById('st-empty').innerText = 185 - active - leave;
-  } catch (e) { console.warn('loadStats:', e); }
+/* ─── STATS (PUBLIC) — Real-time ─── */
+function loadStats() {
+  if (_unsubStats) _unsubStats();
+  _unsubStats = onSnapshot(collection(db, "shops"), (snap) => {
+    try {
+      const shops = snap.docs.map(d => d.data());
+      const active = shops.filter(s => s.status === 'active').length;
+      const leave = shops.filter(s => s.status === 'leave').length;
+      document.getElementById('st-active').innerText = active + leave;
+      document.getElementById('st-pending').innerText = shops.filter(s => s.status === 'pending').length;
+      document.getElementById('st-empty').innerText = 185 - active - leave;
+    } catch (e) { console.warn('loadStats:', e); }
+  });
 }
 
 /* ─── SHOP DROPDOWN ─── */
@@ -603,81 +610,83 @@ window.exportPaymentPDF = () => {
   html2pdf().set(opt).from(tempDiv).save();
 };
 
-/* ─── SYSTEM CONFIG ─── */
-async function loadSystemConfig() {
-  try {
-    const snap = await getDoc(doc(db, "config", "system"));
-    if (!snap.exists()) return;
-    const c = snap.data();
-    const v = c.visibility || {};
+/* ─── SYSTEM CONFIG — Real-time ─── */
+function loadSystemConfig() {
+  if (_unsubConfig) _unsubConfig();
+  _unsubConfig = onSnapshot(doc(db, "config", "system"), (snap) => {
+    try {
+      if (!snap.exists()) return;
+      const c = snap.data();
+      const v = c.visibility || {};
 
-    const applyBtn = document.getElementById('btn-m-apply');
-    const mapBtn = document.getElementById('btn-m-map');
-    if (applyBtn) applyBtn.style.display = v.apply ? '' : 'none';
-    if (mapBtn) mapBtn.style.display = v.map ? '' : 'none';
+      const applyBtn = document.getElementById('btn-m-apply');
+      const mapBtn = document.getElementById('btn-m-map');
+      if (applyBtn) applyBtn.style.display = v.apply ? '' : 'none';
+      if (mapBtn) mapBtn.style.display = v.map ? '' : 'none';
 
-    const statsGrid = document.getElementById('public-stats-grid');
-    if (statsGrid) statsGrid.style.display = v.stats ? 'grid' : 'none';
+      const statsGrid = document.getElementById('public-stats-grid');
+      if (statsGrid) statsGrid.style.display = v.stats ? 'grid' : 'none';
 
-    document.querySelectorAll('.service-card').forEach(card => {
-      const oc = card.getAttribute('onclick') || '';
-      if (oc.includes("showPage('apply'")) card.style.display = v.apply ? '' : 'none';
-      if (oc.includes("showPage('map'")) card.style.display = v.map ? '' : 'none';
-    });
+      document.querySelectorAll('.service-card').forEach(card => {
+        const oc = card.getAttribute('onclick') || '';
+        if (oc.includes("showPage('apply'")) card.style.display = v.apply ? '' : 'none';
+        if (oc.includes("showPage('map'")) card.style.display = v.map ? '' : 'none';
+      });
 
-    const banner = document.getElementById('announcement-banner');
-    const annText = document.getElementById('announcement-text');
-    if (c.announcement) {
-      annText.innerText = c.announcement;
-      banner.style.display = 'block';
-    } else {
-      banner.style.display = 'none';
-    }
-
-    const r = c.renew_period || {};
-    document.getElementById('renew-box-open').style.display = r.open ? 'block' : 'none';
-    document.getElementById('renew-box-closed').style.display = r.open ? 'none' : 'block';
-    if (r.open) {
-      document.getElementById('renew-sem-label').innerText = r.semester || '';
-      document.getElementById('renew-deadline-label').innerText = r.deadline || '';
-    }
-
-    const sub = c.substitute_period || {};
-    const subMsg = document.getElementById('substitute-schedule-msg');
-    if (sub.start && sub.end) {
-      subMsg.innerHTML = `เปิดรับลงทะเบียนขายแทน:<br>ตั้งแต่วันที่ ${new Date(sub.start).toLocaleDateString('th-TH')} ถึง ${new Date(sub.end).toLocaleDateString('th-TH')}`;
-      const now = new Date();
-      if (now >= new Date(sub.start) && now <= new Date(sub.end)) {
-        document.getElementById('substituteDateInput').disabled = false;
+      const banner = document.getElementById('announcement-banner');
+      const annText = document.getElementById('announcement-text');
+      if (c.announcement) {
+        annText.innerText = c.announcement;
+        banner.style.display = 'block';
       } else {
+        banner.style.display = 'none';
+      }
+
+      const r = c.renew_period || {};
+      document.getElementById('renew-box-open').style.display = r.open ? 'block' : 'none';
+      document.getElementById('renew-box-closed').style.display = r.open ? 'none' : 'block';
+      if (r.open) {
+        document.getElementById('renew-sem-label').innerText = r.semester || '';
+        document.getElementById('renew-deadline-label').innerText = r.deadline || '';
+      }
+
+      const sub = c.substitute_period || {};
+      const subMsg = document.getElementById('substitute-schedule-msg');
+      if (sub.start && sub.end) {
+        subMsg.innerHTML = `เปิดรับลงทะเบียนขายแทน:<br>ตั้งแต่วันที่ ${new Date(sub.start).toLocaleDateString('th-TH')} ถึง ${new Date(sub.end).toLocaleDateString('th-TH')}`;
+        const now = new Date();
+        if (now >= new Date(sub.start) && now <= new Date(sub.end)) {
+          document.getElementById('substituteDateInput').disabled = false;
+        } else {
+          document.getElementById('substituteDateInput').disabled = true;
+          subMsg.innerHTML += '<br><span style="color:red;">(ขณะนี้อยู่นอกช่วงเวลาลงทะเบียน)</span>';
+        }
+      } else {
+        subMsg.innerHTML = 'ยังไม่มีการกำหนดช่วงเวลาลงทะเบียนขายแทน';
         document.getElementById('substituteDateInput').disabled = true;
-        subMsg.innerHTML += '<br><span style="color:red;">(ขณะนี้อยู่นอกช่วงเวลาลงทะเบียน)</span>';
       }
-    } else {
-      subMsg.innerHTML = 'ยังไม่มีการกำหนดช่วงเวลาลงทะเบียนขายแทน';
-      document.getElementById('substituteDateInput').disabled = true;
-    }
 
-    document.getElementById('apply-closed-msg').style.display = v.apply ? 'none' : 'flex';
+      document.getElementById('apply-closed-msg').style.display = v.apply ? 'none' : 'flex';
 
-    if (window.adminMode) {
-      document.getElementById('vis-apply').checked = !!v.apply;
-      document.getElementById('vis-map').checked = !!v.map;
-      document.getElementById('vis-stats').checked = !!v.stats;
-      document.getElementById('set-renew-sem').value = r.semester || '';
-      document.getElementById('set-renew-end').value = r.deadline || '';
-      document.getElementById('set-renew-open').checked = !!r.open;
-      document.getElementById('set-announcement').value = c.announcement || '';
-      if (c.leave_period) {
-        document.getElementById('set-leave-start').value = c.leave_period.start || '';
-        document.getElementById('set-leave-end').value = c.leave_period.end || '';
+      if (window.adminMode) {
+        document.getElementById('vis-apply').checked = !!v.apply;
+        document.getElementById('vis-map').checked = !!v.map;
+        document.getElementById('vis-stats').checked = !!v.stats;
+        document.getElementById('set-renew-sem').value = r.semester || '';
+        document.getElementById('set-renew-end').value = r.deadline || '';
+        document.getElementById('set-renew-open').checked = !!r.open;
+        document.getElementById('set-announcement').value = c.announcement || '';
+        if (c.leave_period) {
+          document.getElementById('set-leave-start').value = c.leave_period.start || '';
+          document.getElementById('set-leave-end').value = c.leave_period.end || '';
+        }
+        if (c.substitute_period) {
+          document.getElementById('set-sub-start').value = c.substitute_period.start || '';
+          document.getElementById('set-sub-end').value = c.substitute_period.end || '';
+        }
       }
-      if (c.substitute_period) {
-        document.getElementById('set-sub-start').value = c.substitute_period.start || '';
-        document.getElementById('set-sub-end').value = c.substitute_period.end || '';
-      }
-    }
-  } catch (e) { console.warn('loadSystemConfig:', e); }
+    } catch (e) { console.warn('loadSystemConfig:', e); }
+  });
 }
 
 window.saveConfig = async (type) => {
@@ -774,121 +783,144 @@ window.showAdminTab = (tab, btn) => {
 };
 
 /* ══════════════════════════════════════════
-   ADMIN DATA (with resolved leave names)
+   ADMIN DATA — Real-time (with resolved leave names)
 ══════════════════════════════════════════ */
-async function loadAdminData() {
-  try {
-    // Load skeleton while fetching
-    document.getElementById('tbody-pending').innerHTML = skeletonRows(6, 6);
-    document.getElementById('tbody-admin-shops').innerHTML = skeletonRows(5, 6);
+function loadAdminData() {
+  // Show skeleton while first data arrives
+  document.getElementById('tbody-pending').innerHTML = skeletonRows(7, 6);
+  document.getElementById('tbody-admin-shops').innerHTML = skeletonRows(5, 6);
 
-    const snap = await getDocs(collection(db, "shops"));
-    let pending = '', resign = '';
-    let cntActive = 0, cntPending = 0, cntLeave = 0, cntT2 = 0;
-    const shopsData = [];
+  // Unsubscribe previous listeners
+  if (_unsubShops) _unsubShops();
+  if (_unsubLeaves) _unsubLeaves();
 
-    // Build shops cache for name resolution
-    _shopsCache = {};
-    snap.forEach(d => { _shopsCache[d.id] = d.data(); });
+  // Real-time listener on shops collection
+  _unsubShops = onSnapshot(collection(db, "shops"), (snap) => {
+    try {
+      let pending = '', resign = '';
+      let cntActive = 0, cntPending = 0, cntLeave = 0, cntT2 = 0;
+      const shopsData = [];
 
-    const leaveSnap = await getDocs(query(collection(db, "shops"), where("status", "==", "leave")));
-    window.availableLeaveSlots = leaveSnap.docs.map(doc => doc.data().slots).filter(s => s).join(', ');
+      // Build shops cache for name resolution
+      _shopsCache = {};
+      snap.forEach(d => { _shopsCache[d.id] = d.data(); });
 
-    snap.forEach(d => {
-      const a = d.data(); a.id = d.id;
-      shopsData.push(a);
+      // Available leave slots
+      window.availableLeaveSlots = snap.docs
+        .filter(d => d.data().status === 'leave')
+        .map(d => d.data().slots).filter(s => s).join(', ');
 
-      if (a.status === 'active') cntActive++;
-      if (a.status === 'pending') cntPending++;
-      if (a.status === 'leave') cntLeave++;
-      if (a.status === 'T2') cntT2++;
+      snap.forEach(d => {
+        const a = d.data(); a.id = d.id;
+        shopsData.push(a);
 
-      if (a.status === 'pending') {
-        if (a.isResign) {
-          resign += `<tr>
-              <td><strong>${a.shopName}</strong></td>
-              <td>${a.slots || '—'}</td>
-              <td>${a.firstName} ${a.lastName}</td>
-              <td>${a.phone}</td>
-              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}','${a.shopName}', false)">พิจารณา</button></td>
-            </tr>`;
-        } else {
-          const isSub = a.applyType === 'substitute';
-          const subDate = isSub && a.substituteDate ? `<br><small style="color:var(--amber);">ขายแทนวันที่: ${a.substituteDate}</small>` : '';
-          pending += `<tr>
-              <td>${a.createdAt?.toDate().toLocaleDateString('th-TH') || '—'}</td>
-              <td><strong>${a.shopName}</strong>${subDate}</td>
-              <td>${a.firstName} ${a.lastName}</td>
-              <td>${a.phone}</td>
-              <td>${a.category || '—'}</td>
-              <td><button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}','${a.shopName}', ${isSub})">จัดการ</button></td>
-            </tr>`;
+        if (a.status === 'active') cntActive++;
+        if (a.status === 'pending') cntPending++;
+        if (a.status === 'leave') cntLeave++;
+        if (a.status === 'T2') cntT2++;
+
+        if (a.status === 'pending') {
+          const hasImages = a.fileUrls && a.fileUrls.length > 0;
+          const imgBtn = hasImages
+            ? `<button class="btn btn-ghost btn-sm" onclick="window.openGallery('${a.id}')" title="ดูรูปสินค้า" style="margin-right:4px;">🖼️</button>`
+            : '';
+
+          if (a.isResign) {
+            resign += `<tr>
+                <td><strong>${a.shopName}</strong></td>
+                <td>${a.slots || '—'}</td>
+                <td>${a.firstName} ${a.lastName}</td>
+                <td>${a.phone}</td>
+                <td>
+                  ${imgBtn}
+                  <button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}','${a.shopName}', false)">พิจารณา</button>
+                </td>
+              </tr>`;
+          } else {
+            const isSub = a.applyType === 'substitute';
+            const subDate = isSub && a.substituteDate ? `<br><small style="color:var(--amber);">ขายแทนวันที่: ${a.substituteDate}</small>` : '';
+            pending += `<tr>
+                <td>${a.createdAt?.toDate().toLocaleDateString('th-TH') || '—'}</td>
+                <td><strong>${a.shopName}</strong>${subDate}</td>
+                <td>${a.firstName} ${a.lastName}</td>
+                <td>${a.phone}</td>
+                <td>${a.category || '—'}</td>
+                <td>
+                  ${imgBtn}
+                  <button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}','${a.shopName}', ${isSub})">จัดการ</button>
+                </td>
+              </tr>`;
+          }
         }
-      }
-    });
+      });
 
-    // Sort by slot
-    shopsData.sort((a, b) => {
-      const fn = s => { if (!s) return 9999; const f = String(s).split(',')[0].trim(); return parseInt(f) || 9999; };
-      return fn(a.slots) - fn(b.slots);
-    });
+      // Sort by slot
+      shopsData.sort((a, b) => {
+        const fn = s => { if (!s) return 9999; const f = String(s).split(',')[0].trim(); return parseInt(f) || 9999; };
+        return fn(a.slots) - fn(b.slots);
+      });
 
-    // Store for filter
-    window._allShopsRows = [];
-    let shopsHtml = '';
-    shopsData.forEach(a => {
-      const statusLabel = {
-        active: '<span class="badge badge-active">เปิดขายปกติ</span>',
-        pending: '<span class="badge badge-pending">รออนุมัติ</span>',
-        leave: '<span class="badge badge-leave">แจ้งลา</span>',
-        T2: '<span class="badge badge-t2">ระงับ T2</span>',
-        cancelled: '<span class="badge badge-cancelled">ยกเลิก</span>'
-      }[a.status] || `<span class="badge">${a.status}</span>`;
+      // Store for filter
+      window._allShopsRows = [];
+      let shopsHtml = '';
+      shopsData.forEach(a => {
+        const statusLabel = {
+          active: '<span class="badge badge-active">เปิดขายปกติ</span>',
+          pending: '<span class="badge badge-pending">รออนุมัติ</span>',
+          leave: '<span class="badge badge-leave">แจ้งลา</span>',
+          T2: '<span class="badge badge-t2">ระงับ T2</span>',
+          cancelled: '<span class="badge badge-cancelled">ยกเลิก</span>'
+        }[a.status] || `<span class="badge">${a.status}</span>`;
 
-      const row = `<tr class="shop-row" data-status="${a.status}" data-name="${(a.shopName || '').toLowerCase()}" data-phone="${(a.phone || '').toLowerCase()}">
-          <td class="shop-name-col"><strong>${a.shopName}</strong></td>
-          <td>${a.slots || '—'}</td>
-          <td>${a.category || '—'}</td>
-          <td>${statusLabel}</td>
-          <td class="shop-phone-col">${a.phone || '—'}</td>
-          <td><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${a.id}')">แก้ไข</button></td>
-        </tr>`;
-      shopsHtml += row;
-      window._allShopsRows.push({ status: a.status, name: (a.shopName || '').toLowerCase(), phone: (a.phone || '').toLowerCase(), html: row });
-    });
+        const row = `<tr class="shop-row" data-status="${a.status}" data-name="${(a.shopName || '').toLowerCase()}" data-phone="${(a.phone || '').toLowerCase()}">
+            <td class="shop-name-col"><strong>${a.shopName}</strong></td>
+            <td>${a.slots || '—'}</td>
+            <td>${a.category || '—'}</td>
+            <td>${statusLabel}</td>
+            <td class="shop-phone-col">${a.phone || '—'}</td>
+            <td><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${a.id}')">แก้ไข</button></td>
+          </tr>`;
+        shopsHtml += row;
+        window._allShopsRows.push({ status: a.status, name: (a.shopName || '').toLowerCase(), phone: (a.phone || '').toLowerCase(), html: row });
+      });
 
-    document.getElementById('tbody-pending').innerHTML = pending || '<tr><td colspan="6" class="td-empty">ไม่มีคำขอรออนุมัติ</td></tr>';
-    document.getElementById('tbody-admin-resign').innerHTML = resign || '<tr><td colspan="5" class="td-empty">ไม่มีคำขอสละสิทธิ์</td></tr>';
-    document.getElementById('tbody-admin-shops').innerHTML = shopsHtml || '<tr><td colspan="6" class="td-empty">ไม่มีข้อมูล</td></tr>';
+      document.getElementById('tbody-pending').innerHTML = pending || '<tr><td colspan="6" class="td-empty">ไม่มีคำขอรออนุมัติ</td></tr>';
+      document.getElementById('tbody-admin-resign').innerHTML = resign || '<tr><td colspan="5" class="td-empty">ไม่มีคำขอสละสิทธิ์</td></tr>';
+      document.getElementById('tbody-admin-shops').innerHTML = shopsHtml || '<tr><td colspan="6" class="td-empty">ไม่มีข้อมูล</td></tr>';
 
-    // Update filter count
-    document.getElementById('filter-count').textContent = `ทั้งหมด ${shopsData.length} ร้าน`;
+      // Update filter count
+      document.getElementById('filter-count').textContent = `ทั้งหมด ${shopsData.length} ร้าน`;
 
-    // Admin quick stats
-    document.getElementById('adm-st-active').innerText = cntActive;
-    document.getElementById('adm-st-pending').innerText = cntPending;
-    document.getElementById('adm-st-leave').innerText = cntLeave;
-    document.getElementById('adm-st-t2').innerText = cntT2;
+      // Admin quick stats
+      document.getElementById('adm-st-active').innerText = cntActive;
+      document.getElementById('adm-st-pending').innerText = cntPending;
+      document.getElementById('adm-st-leave').innerText = cntLeave;
+      document.getElementById('adm-st-t2').innerText = cntT2;
 
-    // Leaves — resolved shop names
-    const lSnap = await getDocs(query(collection(db, "leaves"), where("status", "==", "pending")));
-    document.getElementById('tbody-admin-leaves').innerHTML = lSnap.docs.map(d => {
-      const l = d.data();
-      const shopData = _shopsCache[l.shopId] || {};
-      const shopName = shopData.shopName || l.shopId;
-      const shopSlots = shopData.slots || '—';
-      return `<tr>
-          <td><strong>${shopName}</strong><br><small style="color:var(--muted);">ล็อก: ${shopSlots}</small></td>
-          <td>${l.marketDate}</td>
-          <td>${l.reason}</td>
-          <td>
-            <button class="btn btn-primary btn-sm" onclick="window.approveLeave('${d.id}','${l.shopId}')">อนุมัติ</button>
-            <button class="btn btn-danger btn-sm" style="margin-top:4px;" onclick="window.rejectLeave('${d.id}')">ปฏิเสธ</button>
-          </td>
-        </tr>`;
-    }).join('') || '<tr><td colspan="4" class="td-empty">ไม่มีคำขอแจ้งลา</td></tr>';
+    } catch (e) { console.warn('loadAdminData (shops):', e); }
+  });
 
-  } catch (e) { console.warn('loadAdminData:', e); }
+  // Real-time listener on pending leaves
+  const leavesQuery = query(collection(db, "leaves"), where("status", "==", "pending"));
+  _unsubLeaves = onSnapshot(leavesQuery, (lSnap) => {
+    try {
+      document.getElementById('tbody-admin-leaves').innerHTML = lSnap.docs.map(d => {
+        const l = d.data();
+        const shopData = _shopsCache[l.shopId] || {};
+        const shopName = shopData.shopName || l.shopId;
+        const shopSlots = shopData.slots || '—';
+        return `<tr>
+            <td><strong>${shopName}</strong><br><small style="color:var(--muted);">ล็อก: ${shopSlots}</small></td>
+            <td>${l.marketDate}</td>
+            <td>${l.reason}</td>
+            <td>
+              <button class="btn btn-primary btn-sm" onclick="window.approveLeave('${d.id}','${l.shopId}')">อนุมัติ</button>
+              <button class="btn btn-danger btn-sm" style="margin-top:4px;" onclick="window.rejectLeave('${d.id}')">ปฏิเสธ</button>
+            </td>
+          </tr>`;
+      }).join('') || '<tr><td colspan="4" class="td-empty">ไม่มีคำขอแจ้งลา</td></tr>';
+    } catch (e) { console.warn('loadAdminData (leaves):', e); }
+  });
 }
 
 // Skeleton row helper
