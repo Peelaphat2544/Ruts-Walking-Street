@@ -1,748 +1,831 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RUTS Walking Street — ระบบบริหารจัดการตลาดนัดในสวน</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Mitr:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RUTS Walking Street — ระบบบริหารจัดการตลาดนัดในสวน</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Mitr:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<div id="app">
+  <div id="app">
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-logo">🏪</div>
-    <h1 id="market-title">
-      RUTS Walking Street
-      <small>ระบบบริหารจัดการตลาดนัด</small>
-    </h1>
-    <nav class="nav">
-      <button class="nav-btn active" id="btn-m-home" onclick="showPage('home',this)">🏠 หน้าหลัก</button>
-      <button class="nav-btn" id="btn-m-apply" onclick="showPage('apply',this)">📝 ลงทะเบียน</button>
-      <button class="nav-btn" id="btn-m-leave" onclick="showPage('leave',this)">🗓️ แจ้งหยุด</button>
-      <button class="nav-btn" id="btn-m-renew" onclick="showPage('renew',this)">✅ ยืนยันสิทธิ์</button>
-      <button class="nav-btn" id="btn-m-map" onclick="showPage('map',this)">🗺️ แผนผัง</button>
-      <button class="nav-btn" onclick="showPage('admin',this)">🔐 ผู้ดูแล</button>
-    </nav>
-  </header>
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-logo">🏪</div>
+      <h1 id="market-title">
+        RUTS Walking Street
+        <small>ระบบบริหารจัดการตลาดนัด</small>
+      </h1>
+      <nav class="nav">
+        <button class="nav-btn active" id="btn-m-home" onclick="showPage('home',this)">🏠 หน้าหลัก</button>
+        <button class="nav-btn" id="btn-m-apply" onclick="showPage('apply',this)">📝 ลงทะเบียน</button>
+        <button class="nav-btn" id="btn-m-leave" onclick="showPage('leave',this)">🗓️ แจ้งหยุด</button>
+        <button class="nav-btn" id="btn-m-renew" onclick="showPage('renew',this)">✅ ยืนยันสิทธิ์</button>
+        <button class="nav-btn" id="btn-m-map" onclick="showPage('map',this)">🗺️ แผนผัง</button>
+        <button class="nav-btn" onclick="showPage('admin',this)">🔐 ผู้ดูแล</button>
+      </nav>
+    </header>
 
-  <!-- TOOLTIP & ANNOUNCEMENT -->
-  <!-- TOAST CONTAINER -->
-  <div class="toast-container" id="toast-container"></div>
+    <!-- TOOLTIP & ANNOUNCEMENT -->
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
 
-  <!-- CUSTOM CONFIRM DIALOG -->
-  <div class="confirm-bg" id="confirm-bg"></div>
-  <div class="confirm-box" id="confirm-box">
-    <div class="confirm-icon" id="confirm-icon">⚠️</div>
-    <div class="confirm-title" id="confirm-title">ยืนยันการดำเนินการ</div>
-    <div class="confirm-msg" id="confirm-msg"></div>
-    <div class="confirm-actions">
-      <button class="btn btn-ghost" id="confirm-cancel-btn" onclick="window._confirmResolve(false)">ยกเลิก</button>
-      <button class="btn btn-danger" id="confirm-ok-btn" onclick="window._confirmResolve(true)">ยืนยัน</button>
+    <!-- CUSTOM CONFIRM DIALOG -->
+    <div class="confirm-bg" id="confirm-bg"></div>
+    <div class="confirm-box" id="confirm-box">
+      <div class="confirm-icon" id="confirm-icon">⚠️</div>
+      <div class="confirm-title" id="confirm-title">ยืนยันการดำเนินการ</div>
+      <div class="confirm-msg" id="confirm-msg"></div>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="confirm-cancel-btn" onclick="window._confirmResolve(false)">ยกเลิก</button>
+        <button class="btn btn-danger" id="confirm-ok-btn" onclick="window._confirmResolve(true)">ยืนยัน</button>
+      </div>
     </div>
-  </div>
 
-  <div id="slot-tooltip"></div>
-  <div id="announcement-banner" class="banner">📢 <span id="announcement-text"></span></div>
+    <div id="slot-tooltip"></div>
+    <div id="announcement-banner" class="banner">📢 <span id="announcement-text"></span></div>
 
-  <!-- ══════════════════════════════
+    <!-- ══════════════════════════════
        HOME PAGE
   ══════════════════════════════ -->
-  <div id="page-home" class="page active">
-    <div class="page-inner">
+    <div id="page-home" class="page active">
+      <div class="page-inner">
 
-      <!-- Hero -->
-      <div class="hero">
-        <div class="hero-content">
-          <div class="hero-badge">🗓️ เปิดจำหน่ายทุกวันพุธ</div>
-          <h2>ระบบบริหารจัดการตลาดนัดในสวน</h2>
-          <p>มหาวิทยาลัยเทคโนโลยีราชมงคลศรีวิชัย — ชมรมผู้ประกอบการฐานเทคโนโลยี</p>
+        <!-- Hero -->
+        <div class="hero">
+          <div class="hero-content">
+            <div class="hero-badge">🗓️ เปิดจำหน่ายทุกวันพุธ</div>
+            <h2>ระบบบริหารจัดการตลาดนัดในสวน</h2>
+            <p>มหาวิทยาลัยเทคโนโลยีราชมงคลศรีวิชัย — ชมรมผู้ประกอบการฐานเทคโนโลยี</p>
+          </div>
+          <div class="hero-emoji">🏫</div>
         </div>
-        <div class="hero-emoji">🏫</div>
-      </div>
 
-      <!-- Stats -->
-      <div class="stats-grid" id="public-stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon green">🏪</div>
-          <div class="stat-body">
-            <div id="st-active" class="stat-num">—</div>
-            <div class="stat-lbl">ร้านค้าที่เปิดจำหน่าย</div>
+        <!-- Stats -->
+        <div class="stats-grid" id="public-stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon green">🏪</div>
+            <div class="stat-body">
+              <div id="st-active" class="stat-num">—</div>
+              <div class="stat-lbl">ร้านค้าที่เปิดจำหน่าย</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue">📍</div>
+            <div class="stat-body">
+              <div id="st-empty" class="stat-num">—</div>
+              <div class="stat-lbl">พื้นที่ว่างพร้อมจอง</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber">⏳</div>
+            <div class="stat-body">
+              <div id="st-pending" class="stat-num">—</div>
+              <div class="stat-lbl">รอผลการพิจารณา</div>
+            </div>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon blue">📍</div>
-          <div class="stat-body">
-            <div id="st-empty" class="stat-num">—</div>
-            <div class="stat-lbl">พื้นที่ว่างพร้อมจอง</div>
+
+        <!-- Services -->
+        <div class="card">
+          <div class="card-title">🛎️ เมนูบริการ</div>
+          <div class="service-grid">
+            <button class="service-card primary" onclick="showPage('apply', document.getElementById('btn-m-apply'))">
+              <div class="svc-icon">✨</div>
+              <div class="svc-body">
+                <div class="svc-title">ลงทะเบียนผู้ประกอบการรายใหม่</div>
+                <div class="svc-desc">สมัครเข้าร่วมตลาดนัด RUTS</div>
+              </div>
+            </button>
+            <button class="service-card" onclick="showPage('renew', document.getElementById('btn-m-renew'))">
+              <div class="svc-icon">✅</div>
+              <div class="svc-body">
+                <div class="svc-title">ยืนยันสิทธิ์ประจำภาคการศึกษา</div>
+                <div class="svc-desc">สำหรับร้านค้าที่มีสิทธิ์อยู่แล้ว</div>
+              </div>
+            </button>
+            <button class="service-card" onclick="window.openCheckStatusModal()">
+              <div class="svc-icon">🔍</div>
+              <div class="svc-body">
+                <div class="svc-title">ตรวจสอบสถานะ / ค้นหาร้านค้า</div>
+                <div class="svc-desc">ค้นหาด้วยเบอร์โทรศัพท์</div>
+              </div>
+            </button>
+            <button class="service-card" onclick="showPage('leave', document.getElementById('btn-m-leave'))">
+              <div class="svc-icon">🗓️</div>
+              <div class="svc-body">
+                <div class="svc-title">แจ้งขอหยุดจำหน่ายชั่วคราว</div>
+                <div class="svc-desc">แจ้งลาในวันที่ไม่สะดวกจำหน่าย</div>
+              </div>
+            </button>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon amber">⏳</div>
-          <div class="stat-body">
-            <div id="st-pending" class="stat-num">—</div>
-            <div class="stat-lbl">รอผลการพิจารณา</div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Services -->
-      <div class="card">
-        <div class="card-title">🛎️ เมนูบริการ</div>
-        <div class="service-grid">
-          <button class="service-card primary" onclick="showPage('apply', document.getElementById('btn-m-apply'))">
-            <div class="svc-icon">✨</div>
-            <div class="svc-body">
-              <div class="svc-title">ลงทะเบียนผู้ประกอบการรายใหม่</div>
-              <div class="svc-desc">สมัครเข้าร่วมตลาดนัด RUTS</div>
-            </div>
-          </button>
-          <button class="service-card" onclick="showPage('renew', document.getElementById('btn-m-renew'))">
-            <div class="svc-icon">✅</div>
-            <div class="svc-body">
-              <div class="svc-title">ยืนยันสิทธิ์ประจำภาคการศึกษา</div>
-              <div class="svc-desc">สำหรับร้านค้าที่มีสิทธิ์อยู่แล้ว</div>
-            </div>
-          </button>
-          <button class="service-card" onclick="window.openCheckStatusModal()">
-            <div class="svc-icon">🔍</div>
-            <div class="svc-body">
-              <div class="svc-title">ตรวจสอบสถานะ / ค้นหาร้านค้า</div>
-              <div class="svc-desc">ค้นหาด้วยเบอร์โทรศัพท์</div>
-            </div>
-          </button>
-          <button class="service-card" onclick="showPage('leave', document.getElementById('btn-m-leave'))">
-            <div class="svc-icon">🗓️</div>
-            <div class="svc-body">
-              <div class="svc-title">แจ้งขอหยุดจำหน่ายชั่วคราว</div>
-              <div class="svc-desc">แจ้งลาในวันที่ไม่สะดวกจำหน่าย</div>
-            </div>
-          </button>
-        </div>
       </div>
-
     </div>
-  </div>
 
-  <!-- ══════════════════════════════
+    <!-- ══════════════════════════════
        APPLY PAGE
   ══════════════════════════════ -->
-  <div id="page-apply" class="page">
-    <div class="page-inner-md">
-      <div class="card">
-        <div class="card-title">📝 ลงทะเบียนผู้ประกอบการ</div>
+    <div id="page-apply" class="page">
+      <div class="page-inner-md">
+        <div class="card">
+          <div class="card-title">📝 ลงทะเบียนผู้ประกอบการ</div>
 
-        <div id="apply-closed-msg" class="info-box amber" style="display:none;">
-          ⚠️ ขออภัย ขณะนี้ระบบปิดรับลงทะเบียนชั่วคราว กรุณาติดต่อเจ้าหน้าที่
-        </div>
-
-        <form id="form-apply">
-          <div class="form-section">
-            <div class="form-section-title">ประเภทการลงทะเบียน</div>
-            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
-              <label style="display:flex; align-items:center; gap:8px; background:var(--white); padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
-                <input type="radio" name="applyType" value="new" checked onchange="document.getElementById('substitute-options').style.display='none'"> 
-                <span style="font-weight:600; color:var(--text);">✨ สมัครสิทธิ์ใหม่ถาวร</span>
-              </label>
-              <label style="display:flex; align-items:center; gap:8px; background:var(--white); padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
-                <input type="radio" name="applyType" value="substitute" onchange="document.getElementById('substitute-options').style.display='block'"> 
-                <span style="font-weight:600; color:var(--text);">🔄 สมัครขายแทนร้านที่ลา (ชั่วคราว)</span>
-              </label>
-            </div>
-            
-            <div id="substitute-options" style="display:none; margin-top:16px; background:var(--amber-l); border-left:3px solid var(--amber); padding:12px 16px; border-radius:8px;">
-              <div id="substitute-schedule-msg" style="font-size:13px; color:#7c3d0a; font-weight:600; margin-bottom:10px;"></div>
-              <div class="field">
-                <label style="color:#7c3d0a;">เลือกวันที่ต้องการขายแทน <span class="req">*</span></label>
-                <input type="date" name="substituteDate" id="substituteDateInput">
-              </div>
-            </div>
+          <div id="apply-closed-msg" class="info-box amber" style="display:none;">
+            ⚠️ ขออภัย ขณะนี้ระบบปิดรับลงทะเบียนชั่วคราว กรุณาติดต่อเจ้าหน้าที่
           </div>
 
-          <div class="form-section">
-            <div class="form-section-title">ข้อมูลส่วนตัว</div>
-            <div class="form-grid">
-              <div class="field">
-                <label>ชื่อจริง <span class="req">*</span></label>
-                <input name="firstName" required placeholder="ชื่อของคุณ">
+          <form id="form-apply">
+            <div class="form-section">
+              <div class="form-section-title">ประเภทการลงทะเบียน</div>
+              <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                <label
+                  style="display:flex; align-items:center; gap:8px; background:var(--white); padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
+                  <input type="radio" name="applyType" value="new" checked
+                    onchange="document.getElementById('substitute-options').style.display='none'">
+                  <span style="font-weight:600; color:var(--text);">✨ สมัครสิทธิ์ใหม่ถาวร</span>
+                </label>
+                <label
+                  style="display:flex; align-items:center; gap:8px; background:var(--white); padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
+                  <input type="radio" name="applyType" value="substitute"
+                    onchange="document.getElementById('substitute-options').style.display='block'">
+                  <span style="font-weight:600; color:var(--text);">🔄 สมัครขายแทนร้านที่ลา (ชั่วคราว)</span>
+                </label>
               </div>
-              <div class="field">
-                <label>นามสกุล <span class="req">*</span></label>
-                <input name="lastName" required placeholder="นามสกุลของคุณ">
-              </div>
-              <div class="field">
-                <label>เบอร์โทรศัพท์ (10 หลัก) <span class="req">*</span></label>
-                <input name="phone" maxlength="10" required placeholder="0812345678" type="tel">
-              </div>
-              <div class="field">
-                <label>ศาสนา <span class="req">*</span></label>
-                <select name="religion" required>
-                  <option value="">— เลือก —</option>
-                  <option>พุทธ</option><option>อิสลาม</option><option>คริสต์</option>
-                </select>
+
+              <div id="substitute-options"
+                style="display:none; margin-top:16px; background:var(--amber-l); border-left:3px solid var(--amber); padding:12px 16px; border-radius:8px;">
+                <div id="substitute-schedule-msg"
+                  style="font-size:13px; color:#7c3d0a; font-weight:600; margin-bottom:10px;"></div>
+                <div class="field">
+                  <label style="color:#7c3d0a;">เลือกวันที่ต้องการขายแทน <span class="req">*</span></label>
+                  <input type="date" name="substituteDate" id="substituteDateInput">
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="form-section">
-            <div class="form-section-title">ข้อมูลร้านค้า</div>
-            <div class="form-grid">
+            <div class="form-section">
+              <div class="form-section-title">ข้อมูลส่วนตัว</div>
+              <div class="form-grid">
+                <div class="field">
+                  <label>ชื่อจริง <span class="req">*</span></label>
+                  <input name="firstName" required placeholder="ชื่อของคุณ">
+                </div>
+                <div class="field">
+                  <label>นามสกุล <span class="req">*</span></label>
+                  <input name="lastName" required placeholder="นามสกุลของคุณ">
+                </div>
+                <div class="field">
+                  <label>เบอร์โทรศัพท์ (10 หลัก) <span class="req">*</span></label>
+                  <input name="phone" maxlength="10" required placeholder="0812345678" type="tel">
+                </div>
+                <div class="field">
+                  <label>ศาสนา <span class="req">*</span></label>
+                  <select name="religion" required>
+                    <option value="">— เลือก —</option>
+                    <option>พุทธ</option>
+                    <option>อิสลาม</option>
+                    <option>คริสต์</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">ข้อมูลร้านค้า</div>
+              <div class="form-grid">
+                <div class="field full">
+                  <label>ชื่อร้านค้า / สถานประกอบการ <span class="req">*</span></label>
+                  <input name="shopName" required placeholder="ชื่อร้านที่ต้องการใช้">
+                </div>
+                <div class="field full">
+                  <label>สินค้าหรือบริการที่จำหน่าย <span class="req">*</span></label>
+                  <textarea name="items" rows="2" required
+                    placeholder="ระบุรายละเอียดสินค้าหรือบริการ เช่น ข้าวผัด ก๋วยเตี๋ยว น้ำผลไม้..."></textarea>
+                </div>
+                <div class="field">
+                  <label>หมวดหมู่สินค้า <span class="req">*</span></label>
+                  <select name="category" required>
+                    <option value="">— เลือก —</option>
+                    <option>อาหาร</option>
+                    <option>เครื่องดื่ม</option>
+                    <option>เสื้อผ้าและของใช้</option>
+                    <option>รถฟู้ดทรัค (Food Truck)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>จำนวนพื้นที่ (ล็อก) ที่ต้องการ <span class="req">*</span></label>
+                  <input type="number" name="slotCount" value="1" min="1" max="3" required>
+                </div>
+                <div class="field">
+                  <label>LINE ID</label>
+                  <input name="lineId" placeholder="ระบุ LINE ID (ถ้ามี)">
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-section-title">รูปภาพสินค้า</div>
               <div class="field full">
-                <label>ชื่อร้านค้า / สถานประกอบการ <span class="req">*</span></label>
-                <input name="shopName" required placeholder="ชื่อร้านที่ต้องการใช้">
-              </div>
-              <div class="field full">
-                <label>สินค้าหรือบริการที่จำหน่าย <span class="req">*</span></label>
-                <textarea name="items" rows="2" required placeholder="ระบุรายละเอียดสินค้าหรือบริการ เช่น ข้าวผัด ก๋วยเตี๋ยว น้ำผลไม้..."></textarea>
-              </div>
-              <div class="field">
-                <label>หมวดหมู่สินค้า <span class="req">*</span></label>
-                <select name="category" required>
-                  <option value="">— เลือก —</option>
-                  <option>อาหาร</option><option>เครื่องดื่ม</option>
-                  <option>เสื้อผ้าและของใช้</option><option>รถฟู้ดทรัค (Food Truck)</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>จำนวนพื้นที่ (ล็อก) ที่ต้องการ <span class="req">*</span></label>
-                <input type="number" name="slotCount" value="1" min="1" max="3" required>
-              </div>
-              <div class="field">
-                <label>LINE ID</label>
-                <input name="lineId" placeholder="ระบุ LINE ID (ถ้ามี)">
+                <label>อัพโหลดรูปภาพสินค้า (อย่างน้อย 2 รูป, สูงสุด 3 รูป) <span class="req">*</span></label>
+                <div class="upload-zone" id="upload-zone">
+                  <div class="upload-icon">📸</div>
+                  <div class="upload-text">ลากรูปมาวางที่นี่ หรือ <strong style="color:var(--green); cursor:pointer;"
+                      onclick="document.getElementById('image-upload-input').click()">คลิกเพื่อเลือกไฟล์</strong></div>
+                  <div class="upload-hint">รับเฉพาะไฟล์ JPG, PNG ขนาดไม่เกิน 100MB</div>
+                  <input type="file" id="image-upload-input" accept="image/jpeg, image/png" multiple
+                    style="display:none;">
+                </div>
+                <div class="upload-progress-wrap" id="upload-progress-wrap"
+                  style="display:none; margin-top:12px; background:var(--border-l); border-radius:4px; overflow:hidden; height:6px;">
+                  <div class="upload-progress-bar" id="upload-progress-bar"
+                    style="width:0%; background:var(--green); height:100%; transition:width 0.2s;"></div>
+                </div>
+                <div class="preview-grid" id="preview-grid"
+                  style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:10px; margin-top:12px;">
+                </div>
+                <div class="upload-error" id="upload-error"
+                  style="color:var(--red); font-size:13px; margin-top:8px; display:none;"></div>
               </div>
             </div>
-          </div>
-          <div class="form-section">
-            <div class="form-section-title">รูปภาพสินค้า</div>
-            <div class="field full">
-              <label>อัพโหลดรูปภาพสินค้า (อย่างน้อย 2 รูป, สูงสุด 3 รูป) <span class="req">*</span></label>
-              <div class="upload-zone" id="upload-zone">
-                <div class="upload-icon">📸</div>
-                <div class="upload-text">ลากรูปมาวางที่นี่ หรือ <strong style="color:var(--green); cursor:pointer;" onclick="document.getElementById('image-upload-input').click()">คลิกเพื่อเลือกไฟล์</strong></div>
-                <div class="upload-hint">รับเฉพาะไฟล์ JPG, PNG ขนาดไม่เกิน 100MB</div>
-                <input type="file" id="image-upload-input" accept="image/jpeg, image/png" multiple style="display:none;">
-              </div>
-              <div class="upload-progress-wrap" id="upload-progress-wrap" style="display:none; margin-top:12px; background:var(--border-l); border-radius:4px; overflow:hidden; height:6px;">
-                <div class="upload-progress-bar" id="upload-progress-bar" style="width:0%; background:var(--green); height:100%; transition:width 0.2s;"></div>
-              </div>
-              <div class="preview-grid" id="preview-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:10px; margin-top:12px;"></div>
-              <div class="upload-error" id="upload-error" style="color:var(--red); font-size:13px; margin-top:8px; display:none;"></div>
-            </div>
-          </div>
 
-          <button type="submit" id="btn-submit-apply" class="btn btn-primary" style="width:100%; margin-top:8px; padding:14px;">
-            ส่งข้อมูลลงทะเบียน →
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════
-       LEAVE PAGE
-  ══════════════════════════════ -->
-  <div id="page-leave" class="page">
-    <div class="page-inner-sm">
-      <div class="card">
-        <div class="card-title">🗓️ แจ้งขอหยุดจำหน่าย (แจ้งลา)</div>
-        <div id="leave-notice" class="info-box amber" style="display:none;"></div>
-        <form id="form-leave">
-          <div class="form-grid" style="grid-template-columns:1fr;">
-            <div class="field">
-              <label>ค้นหาร้านค้าของคุณ <span class="req">*</span></label>
-              <select id="leave-shopId" name="shopId" required>
-                <option value="">— กำลังโหลดรายชื่อร้าน... —</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>วันที่ประสงค์จะหยุดจำหน่าย <span class="req">*</span></label>
-              <input type="date" name="marketDate" required>
-            </div>
-            <div class="field">
-              <label>ระบุเหตุผลความจำเป็น <span class="req">*</span></label>
-              <textarea name="reason" rows="3" required placeholder="เช่น ป่วย, ติดภารกิจสำคัญ, ติดสอบ..."></textarea>
-            </div>
-          </div>
-          <button type="submit" id="btn-submit-leave" class="btn btn-primary" style="width:100%; margin-top:8px; padding:14px;">
-            ส่งคำขอแจ้งหยุดจำหน่าย
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════
-       RENEW PAGE
-  ══════════════════════════════ -->
-  <div id="page-renew" class="page">
-    <div class="page-inner-sm">
-      <div class="card">
-        <div class="card-title">🔄 ทบทวนสิทธิ์ / ยืนยันสิทธิ์จำหน่ายต่อ</div>
-
-        <div id="renew-box-open" style="display:none;">
-          <div class="info-box blue" style="margin-bottom:20px;">
-            <div>📅 เปิดให้ยืนยันสิทธิ์ประจำภาคการศึกษา: <strong id="renew-sem-label"></strong><br>
-            สิ้นสุดวันที่: <strong id="renew-deadline-label"></strong></div>
-          </div>
-          <form id="form-renew">
-            <div class="form-grid" style="grid-template-columns:1fr;">
-              <div class="field">
-                <label>เลือกร้านค้าของคุณ <span class="req">*</span></label>
-                <select id="renew-shopId" name="shopId" required>
-                  <option value="">— กำลังโหลด... —</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>ความประสงค์ <span class="req">*</span></label>
-                <select name="response" required>
-                  <option value="yes">✅ ยืนยันขายต่อในเทอมหน้า</option>
-                  <option value="no">❌ สละสิทธิ์ ไม่ขายต่อ</option>
-                </select>
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:8px; padding:14px;">
-              ส่งผลการยืนยันสิทธิ์
+            <button type="submit" id="btn-submit-apply" class="btn btn-primary"
+              style="width:100%; margin-top:8px; padding:14px;">
+              ส่งข้อมูลลงทะเบียน →
             </button>
           </form>
         </div>
+      </div>
+    </div>
 
-        <div id="renew-box-closed" style="text-align:center; padding:48px 20px;">
-          <div style="font-size:48px; margin-bottom:16px;">🔒</div>
-          <p style="color:var(--muted); font-size:15px;">ขณะนี้ยังไม่ถึงช่วงเวลาการทบทวนสิทธิ์<br>กรุณาติดตามประกาศจากเจ้าหน้าที่</p>
+    <!-- ══════════════════════════════
+       LEAVE PAGE
+  ══════════════════════════════ -->
+    <div id="page-leave" class="page">
+      <div class="page-inner-sm">
+        <div class="card">
+          <div class="card-title">🗓️ แจ้งขอหยุดจำหน่าย (แจ้งลา)</div>
+          <div id="leave-notice" class="info-box amber" style="display:none;"></div>
+          <form id="form-leave">
+            <div class="form-grid" style="grid-template-columns:1fr;">
+              <div class="field">
+                <label>ค้นหาร้านค้าของคุณ <span class="req">*</span></label>
+                <select id="leave-shopId" name="shopId" required>
+                  <option value="">— กำลังโหลดรายชื่อร้าน... —</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>วันที่ประสงค์จะหยุดจำหน่าย <span class="req">*</span></label>
+                <input type="date" name="marketDate" required>
+              </div>
+              <div class="field">
+                <label>ระบุเหตุผลความจำเป็น <span class="req">*</span></label>
+                <textarea name="reason" rows="3" required placeholder="เช่น ป่วย, ติดภารกิจสำคัญ, ติดสอบ..."></textarea>
+              </div>
+            </div>
+            <button type="submit" id="btn-submit-leave" class="btn btn-primary"
+              style="width:100%; margin-top:8px; padding:14px;">
+              ส่งคำขอแจ้งหยุดจำหน่าย
+            </button>
+          </form>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ══════════════════════════════
+    <!-- ══════════════════════════════
+       RENEW PAGE
+  ══════════════════════════════ -->
+    <div id="page-renew" class="page">
+      <div class="page-inner-sm">
+        <div class="card">
+          <div class="card-title">🔄 ทบทวนสิทธิ์ / ยืนยันสิทธิ์จำหน่ายต่อ</div>
+
+          <div id="renew-box-open" style="display:none;">
+            <div class="info-box blue" style="margin-bottom:20px;">
+              <div>📅 เปิดให้ยืนยันสิทธิ์ประจำภาคการศึกษา: <strong id="renew-sem-label"></strong><br>
+                สิ้นสุดวันที่: <strong id="renew-deadline-label"></strong></div>
+            </div>
+            <form id="form-renew">
+              <div class="form-grid" style="grid-template-columns:1fr;">
+                <div class="field">
+                  <label>เลือกร้านค้าของคุณ <span class="req">*</span></label>
+                  <select id="renew-shopId" name="shopId" required>
+                    <option value="">— กำลังโหลด... —</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>ความประสงค์ <span class="req">*</span></label>
+                  <select name="response" required>
+                    <option value="yes">✅ ยืนยันขายต่อในเทอมหน้า</option>
+                    <option value="no">❌ สละสิทธิ์ ไม่ขายต่อ</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width:100%; margin-top:8px; padding:14px;">
+                ส่งผลการยืนยันสิทธิ์
+              </button>
+            </form>
+          </div>
+
+          <div id="renew-box-closed" style="text-align:center; padding:48px 20px;">
+            <div style="font-size:48px; margin-bottom:16px;">🔒</div>
+            <p style="color:var(--muted); font-size:15px;">
+              ขณะนี้ยังไม่ถึงช่วงเวลาการทบทวนสิทธิ์<br>กรุณาติดตามประกาศจากเจ้าหน้าที่</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
        MAP PAGE
   ══════════════════════════════ -->
-  <div id="page-map" class="page">
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
-        <div class="card-title" style="margin:0;">🗺️ แผนผังพื้นที่ RUTS Walking Street</div>
-        <div class="map-legend">
-          <span><span class="legend-dot" style="background:#F59E0B;"></span>อาหาร</span>
-          <span><span class="legend-dot" style="background:#3B82F6;"></span>เครื่องดื่ม</span>
-          <span><span class="legend-dot" style="background:#8B5CF6;"></span>เสื้อผ้า</span>
-          <span><span class="legend-dot" style="background:#22C55E;"></span>Food Truck</span>
-          <span><span class="legend-dot" style="background:#EF4444;"></span>ระงับ (T2)</span>
-          <span><span class="legend-dot" style="background:#D1D5DB;"></span>ว่าง</span>
+    <div id="page-map" class="page">
+      <div class="card">
+        <div
+          style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div class="card-title" style="margin:0;">🗺️ แผนผังพื้นที่ RUTS Walking Street</div>
+          <div class="map-legend">
+            <span><span class="legend-dot" style="background:#F59E0B;"></span>อาหาร</span>
+            <span><span class="legend-dot" style="background:#3B82F6;"></span>เครื่องดื่ม</span>
+            <span><span class="legend-dot" style="background:#8B5CF6;"></span>เสื้อผ้า</span>
+            <span><span class="legend-dot" style="background:#22C55E;"></span>Food Truck</span>
+            <span><span class="legend-dot" style="background:#EF4444;"></span>ระงับ (T2)</span>
+            <span><span class="legend-dot" style="background:#D1D5DB;"></span>ว่าง</span>
+          </div>
+        </div>
+        <div id="map-loading" style="text-align:center; padding:40px; color:var(--muted);">⏳ กำลังโหลดแผนผัง...</div>
+        <div id="map-wrap">
+          <div id="map-canvas"></div>
         </div>
       </div>
-      <div id="map-loading" style="text-align:center; padding:40px; color:var(--muted);">⏳ กำลังโหลดแผนผัง...</div>
-      <div id="map-wrap"><div id="map-canvas"></div></div>
     </div>
-  </div>
 
-  <!-- ══════════════════════════════
+    <!-- ══════════════════════════════
        ADMIN PAGE
   ══════════════════════════════ -->
-  <div id="page-admin" class="page">
+    <div id="page-admin" class="page">
 
-    <!-- LOGIN -->
-    <div id="admin-login-wrap" class="login-card">
-      <div class="lock-icon">🔐</div>
-      <h2>เข้าสู่ระบบผู้ดูแล</h2>
-      <p>เฉพาะคณะกรรมการตลาด RUTS Walking Street ที่ได้รับอนุญาต</p>
-      <button class="btn-google" onclick="window.adminLogin()">
-        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.6 2.1 30.1 0 24 0 14.7 0 6.8 5.4 2.8 13.3l7.8 6c1.9-5.6 7.1-9.8 13.4-9.8z"/><path fill="#4A90D9" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.6-4.8 7.3l7.5 5.8c4.4-4.1 7.2-10.1 7.2-17.1z"/><path fill="#FBBC05" d="M10.6 28.6A14.4 14.4 0 0 1 9.5 24c0-1.6.3-3.1.7-4.6l-7.8-6A24 24 0 0 0 0 24c0 3.8.9 7.5 2.5 10.7l8.1-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-4.2-13.5-9.9l-8 6.2C6.7 42.6 14.7 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
-        Sign in with Google
-      </button>
-    </div>
-
-    <!-- ADMIN PANEL -->
-    <div id="admin-panel" style="display:none;">
-
-      <!-- Admin Header -->
-      <div class="admin-header">
-        <div class="admin-header-info">
-          <h2>Dashboard Management</h2>
-          <div class="admin-sub" id="admin-email-display"></div>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="window.adminLogout()">🚪 ออกจากระบบ</button>
+      <!-- LOGIN -->
+      <div id="admin-login-wrap" class="login-card">
+        <div class="lock-icon">🔐</div>
+        <h2>เข้าสู่ระบบผู้ดูแล</h2>
+        <p>เฉพาะคณะกรรมการตลาด RUTS Walking Street ที่ได้รับอนุญาต</p>
+        <button class="btn-google" onclick="window.adminLogin()">
+          <svg viewBox="0 0 48 48">
+            <path fill="#EA4335"
+              d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.6 2.1 30.1 0 24 0 14.7 0 6.8 5.4 2.8 13.3l7.8 6c1.9-5.6 7.1-9.8 13.4-9.8z" />
+            <path fill="#4A90D9"
+              d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.6-4.8 7.3l7.5 5.8c4.4-4.1 7.2-10.1 7.2-17.1z" />
+            <path fill="#FBBC05"
+              d="M10.6 28.6A14.4 14.4 0 0 1 9.5 24c0-1.6.3-3.1.7-4.6l-7.8-6A24 24 0 0 0 0 24c0 3.8.9 7.5 2.5 10.7l8.1-6.1z" />
+            <path fill="#34A853"
+              d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-4.2-13.5-9.9l-8 6.2C6.7 42.6 14.7 48 24 48z" />
+            <path fill="none" d="M0 0h48v48H0z" />
+          </svg>
+          Sign in with Google
+        </button>
       </div>
 
-      <!-- Admin Quick Stats -->
-      <div class="admin-stats" id="admin-stats-row">
-        <div class="admin-stat">
-          <div class="num" id="adm-st-active">—</div>
-          <div class="lbl"><span class="indicator" style="background:#22C55E;"></span>ร้านเปิดขายปกติ</div>
-        </div>
-        <div class="admin-stat">
-          <div class="num" id="adm-st-pending">—</div>
-          <div class="lbl"><span class="indicator" style="background:#F59E0B;"></span>รออนุมัติ</div>
-        </div>
-        <div class="admin-stat">
-          <div class="num" id="adm-st-leave">—</div>
-          <div class="lbl"><span class="indicator" style="background:#CA8A04;"></span>แจ้งลา</div>
-        </div>
-        <div class="admin-stat">
-          <div class="num" id="adm-st-t2">—</div>
-          <div class="lbl"><span class="indicator" style="background:#EF4444;"></span>ระงับ (T2)</div>
-        </div>
-      </div>
+      <!-- ADMIN PANEL -->
+      <div id="admin-panel" style="display:none;">
 
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab-btn active" onclick="showAdminTab('pending',this)">📋 รออนุมัติ</button>
-        <button class="tab-btn" onclick="showAdminTab('shops',this)">🏪 ร้านค้า</button>
-        <button class="tab-btn" onclick="showAdminTab('renewals',this)">🔄 ยืนยันสิทธิ์</button>
-        <button class="tab-btn" onclick="showAdminTab('payments',this)">💰 การเงิน</button>
-        <button class="tab-btn" onclick="showAdminTab('settings',this)">⚙️ ตั้งค่าระบบ</button>
-        <button class="tab-btn" onclick="showAdminTab('logs',this)">📝 บันทึก</button>
-      </div>
-
-      <!-- TAB: PENDING -->
-      <div id="admin-tab-pending" class="tab-panel active">
-        <div class="card">
-          <div class="section-header">
-            <div class="section-title">📋 คำขอสมัครใหม่</div>
+        <!-- Admin Header -->
+        <div class="admin-header">
+          <div class="admin-header-info">
+            <h2>Dashboard Management</h2>
+            <div class="admin-sub" id="admin-email-display"></div>
           </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>วันที่สมัคร</th>
-                  <th>ร้านค้า</th>
-                  <th>ผู้สมัคร</th>
-                  <th>เบอร์โทร</th>
-                  <th>หมวดหมู่</th>
-                  <th>จัดการ</th>
-                </tr>
-              </thead>
-              <tbody id="tbody-pending">
-                <tr><td colspan="6" class="td-empty">ไม่มีคำขอรออนุมัติ</td></tr>
-              </tbody>
-            </table>
+          <button class="btn btn-ghost btn-sm" onclick="window.adminLogout()">🚪 ออกจากระบบ</button>
+        </div>
+
+        <!-- Admin Quick Stats -->
+        <div class="admin-stats" id="admin-stats-row">
+          <div class="admin-stat">
+            <div class="num" id="adm-st-active">—</div>
+            <div class="lbl"><span class="indicator" style="background:#22C55E;"></span>ร้านเปิดขายปกติ</div>
+          </div>
+          <div class="admin-stat">
+            <div class="num" id="adm-st-pending">—</div>
+            <div class="lbl"><span class="indicator" style="background:#F59E0B;"></span>รออนุมัติ</div>
+          </div>
+          <div class="admin-stat">
+            <div class="num" id="adm-st-leave">—</div>
+            <div class="lbl"><span class="indicator" style="background:#CA8A04;"></span>แจ้งลา</div>
+          </div>
+          <div class="admin-stat">
+            <div class="num" id="adm-st-t2">—</div>
+            <div class="lbl"><span class="indicator" style="background:#EF4444;"></span>ระงับ (T2)</div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="section-header">
-            <div class="section-title">⚠️ คำขอยกเลิกสิทธิ์ (สละสิทธิ์)</div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>ร้านค้า</th>
-                  <th>พื้นที่เดิม</th>
-                  <th>ผู้แจ้ง</th>
-                  <th>เบอร์โทร</th>
-                  <th>จัดการ</th>
-                </tr>
-              </thead>
-              <tbody id="tbody-admin-resign">
-                <tr><td colspan="5" class="td-empty">ไม่มีคำขอสละสิทธิ์</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab-btn active" onclick="showAdminTab('pending',this)">📋 รออนุมัติ</button>
+          <button class="tab-btn" onclick="showAdminTab('shops',this)">🏪 ร้านค้า</button>
+          <button class="tab-btn" onclick="showAdminTab('renewals',this)">🔄 ยืนยันสิทธิ์</button>
+          <button class="tab-btn" onclick="showAdminTab('payments',this)">💰 การเงิน</button>
+          <button class="tab-btn" onclick="showAdminTab('settings',this)">⚙️ ตั้งค่าระบบ</button>
+          <button class="tab-btn" onclick="showAdminTab('logs',this)">📝 บันทึก</button>
         </div>
 
-        <div class="card">
-          <div class="section-header">
-            <div class="section-title">🗓️ คำขอแจ้งลา (รออนุมัติ)</div>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead>
-                <tr><th>ร้านค้า</th><th>วันที่ลา</th><th>เหตุผล</th><th>จัดการ</th></tr>
-              </thead>
-              <tbody id="tbody-admin-leaves">
-                <tr><td colspan="4" class="td-empty">ไม่มีคำขอแจ้งลา</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB: SHOPS -->
-      <div id="admin-tab-shops" class="tab-panel">
-        <div class="card">
-          <div class="shop-filter-bar" style="margin-bottom:12px;">
-            <input type="text" id="search-shop-admin" class="search-input" placeholder="🔍 ค้นหาชื่อร้านหรือเบอร์โทร..." style="flex:1; min-width:160px;">
-            <select id="filter-status-admin" class="filter-select" onchange="window.applyShopFilter()">
-              <option value="">ทุกสถานะ</option>
-              <option value="active">เปิดขายปกติ</option>
-              <option value="leave">แจ้งลา</option>
-              <option value="T2">ระงับ (T2)</option>
-              <option value="pending">รออนุมัติ</option>
-              <option value="cancelled">ยกเลิก</option>
-            </select>
-            <span id="filter-count" class="filter-count">ทั้งหมด 0 ร้าน</span>
-            <button class="btn btn-primary" onclick="window.openAddShop()">➕ เพิ่มร้านค้าใหม่</button>
-            <button class="btn btn-ghost" onclick="window.exportShops()">📊 Export</button>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead>
-                <tr><th>ชื่อร้าน</th><th>พื้นที่</th><th>หมวดหมู่</th><th>สถานะ</th><th>เบอร์โทร</th><th>จัดการ</th></tr>
-              </thead>
-              <tbody id="tbody-admin-shops">
-                <tr><td colspan="6" class="td-empty">ไม่มีข้อมูล</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB: RENEWALS (Admin) -->
-      <div id="admin-tab-renewals" class="tab-panel">
-        <div class="card">
-          <div class="section-header">
-            <div class="section-title">🔄 รายการยืนยันสิทธิ์จากร้านค้า</div>
-            <div style="display:flex; gap:8px;">
-              <span id="renewal-stats" style="font-size:13px; color:var(--muted);"></span>
+        <!-- TAB: PENDING -->
+        <div id="admin-tab-pending" class="tab-panel active">
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">📋 คำขอสมัครใหม่</div>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>วันที่สมัคร</th>
+                    <th>ร้านค้า</th>
+                    <th>ผู้สมัคร</th>
+                    <th>เบอร์โทร</th>
+                    <th>หมวดหมู่</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-pending">
+                  <tr>
+                    <td colspan="6" class="td-empty">ไม่มีคำขอรออนุมัติ</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <div id="renewals-list"><div class="td-empty">⏳ กำลังโหลด...</div></div>
-        </div>
-      </div>
 
-      <!-- TAB: PAYMENTS -->
-      <div id="admin-tab-payments" class="tab-panel">
-        <div class="card">
-          <div class="card-title">💰 บันทึกการชำระเงิน</div>
-          <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
-            <div class="field" style="flex:1; min-width:200px;">
-              <label>เลือกวันพุธที่ต้องการบันทึก</label>
-              <input type="date" id="pay-date">
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">⚠️ คำขอยกเลิกสิทธิ์ (สละสิทธิ์)</div>
             </div>
-            <button class="btn btn-primary" onclick="window.loadPaymentGrid()">ดึงรายชื่อ →</button>
-            <button class="btn btn-ghost" onclick="window.exportPaymentPDF()">📄 Export PDF</button>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ร้านค้า</th>
+                    <th>พื้นที่เดิม</th>
+                    <th>ผู้แจ้ง</th>
+                    <th>เบอร์โทร</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-admin-resign">
+                  <tr>
+                    <td colspan="5" class="td-empty">ไม่มีคำขอสละสิทธิ์</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">🗓️ คำขอแจ้งลา (รออนุมัติ)</div>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ร้านค้า</th>
+                    <th>วันที่ลา</th>
+                    <th>เหตุผล</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-admin-leaves">
+                  <tr>
+                    <td colspan="4" class="td-empty">ไม่มีคำขอแจ้งลา</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+
+        <!-- TAB: SHOPS -->
+        <div id="admin-tab-shops" class="tab-panel">
+          <div class="card">
+            <div class="shop-filter-bar" style="margin-bottom:12px;">
+              <input type="text" id="search-shop-admin" class="search-input"
+                placeholder="🔍 ค้นหาชื่อร้านหรือเบอร์โทร..." style="flex:1; min-width:160px;">
+              <select id="filter-status-admin" class="filter-select" onchange="window.applyShopFilter()">
+                <option value="">ทุกสถานะ</option>
+                <option value="active">เปิดขายปกติ</option>
+                <option value="leave">แจ้งลา</option>
+                <option value="T2">ระงับ (T2)</option>
+                <option value="pending">รออนุมัติ</option>
+                <option value="cancelled">ยกเลิก</option>
+              </select>
+              <span id="filter-count" class="filter-count">ทั้งหมด 0 ร้าน</span>
+              <button class="btn btn-primary" onclick="window.openAddShop()">➕ เพิ่มร้านค้าใหม่</button>
+              <button class="btn btn-ghost" onclick="window.exportShops()">📊 Export</button>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ชื่อร้าน</th>
+                    <th>พื้นที่</th>
+                    <th>หมวดหมู่</th>
+                    <th>สถานะ</th>
+                    <th>เบอร์โทร</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-admin-shops">
+                  <tr>
+                    <td colspan="6" class="td-empty">ไม่มีข้อมูล</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: RENEWALS (Admin) -->
+        <div id="admin-tab-renewals" class="tab-panel">
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">🔄 รายการยืนยันสิทธิ์จากร้านค้า</div>
+              <div style="display:flex; gap:8px;">
+                <span id="renewal-stats" style="font-size:13px; color:var(--muted);"></span>
+              </div>
+            </div>
+            <div id="renewals-list">
+              <div class="td-empty">⏳ กำลังโหลด...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: PAYMENTS -->
+        <div id="admin-tab-payments" class="tab-panel">
+          <div class="card">
+            <div class="card-title">💰 บันทึกการชำระเงิน</div>
+            <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+              <div class="field" style="flex:1; min-width:200px;">
+                <label>เลือกวันพุธที่ต้องการบันทึก</label>
+                <input type="date" id="pay-date">
+              </div>
+              <button class="btn btn-primary" onclick="window.loadPaymentGrid()">ดึงรายชื่อ →</button>
+              <button class="btn btn-ghost" onclick="window.exportPaymentPDF()">📄 Export PDF</button>
+            </div>
+          </div>
           <div id="payment-stats-bar" class="payment-stats" style="display:none;"></div>
           <div id="payment-progress" class="progress-bar-wrap" style="display:none;">
             <div class="progress-bar-fill" id="payment-progress-fill" style="width:0%"></div>
           </div>
           <div id="payment-grid-wrap" class="tbl-wrap"></div>
-      </div>
-
-      <!-- TAB: SETTINGS -->
-      <div id="admin-tab-settings" class="tab-panel">
-        <div class="settings-grid">
-
-          <div class="settings-card">
-            <h3>⏰ ช่วงเวลาแจ้งลา</h3>
-            <div class="field" style="margin-bottom:12px;">
-              <label>เปิดให้แจ้งลาได้ตั้งแต่</label>
-              <input type="datetime-local" id="set-leave-start">
-            </div>
-            <div class="field" style="margin-bottom:14px;">
-              <label>ปิดรับแจ้งลาเมื่อ</label>
-              <input type="datetime-local" id="set-leave-end">
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="window.saveConfig('leave_period')">💾 บันทึกการตั้งค่า</button>
-          </div>
-
-          <div class="settings-card">
-            <h3>🔄 ลงทะเบียนขายแทนร้านที่ลา</h3>
-            <div class="field" style="margin-bottom:12px;">
-              <label>เปิดรับลงทะเบียนตั้งแต่</label>
-              <input type="datetime-local" id="set-sub-start">
-            </div>
-            <div class="field" style="margin-bottom:14px;">
-              <label>ปิดรับลงทะเบียนเมื่อ</label>
-              <input type="datetime-local" id="set-sub-end">
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="window.saveConfig('substitute_period')">💾 บันทึกการตั้งค่า</button>
-          </div>
-
-          <div class="settings-card">
-            <h3>🔄 การทบทวนสิทธิ์</h3>
-            <div class="field" style="margin-bottom:12px;">
-              <label>เทอม/ช่วงเวลา</label>
-              <input id="set-renew-sem" placeholder="เช่น 1/2567">
-            </div>
-            <div class="field" style="margin-bottom:12px;">
-              <label>สิ้นสุดวันที่</label>
-              <input type="date" id="set-renew-end">
-            </div>
-            <div class="toggle-row">
-              <div class="toggle-label">เปิดให้ร้านค้ายืนยันสิทธิ์<small>แสดงปุ่มให้ร้านค้ากด</small></div>
-              <label class="toggle">
-                <input type="checkbox" id="set-renew-open">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <button class="btn btn-primary btn-sm" style="margin-top:14px;" onclick="window.saveConfig('renew_period')">💾 บันทึกการตั้งค่า</button>
-          </div>
-
-          <div class="settings-card">
-            <h3>👁️ การแสดงเมนู</h3>
-            <div class="toggle-row">
-              <div class="toggle-label">เปิดรับลงทะเบียน<small>แสดงเมนูสมัครใหม่</small></div>
-              <label class="toggle">
-                <input type="checkbox" id="vis-apply">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <div class="toggle-row">
-              <div class="toggle-label">แผนผังตลาด<small>แสดงหน้าแผนผัง</small></div>
-              <label class="toggle">
-                <input type="checkbox" id="vis-map">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <div class="toggle-row">
-              <div class="toggle-label">สถิติร้านค้า<small>แสดงตัวเลขหน้าแรก</small></div>
-              <label class="toggle">
-                <input type="checkbox" id="vis-stats">
-                <span class="toggle-slider"></span>
-              </label>
-            </div>
-            <button class="btn btn-primary btn-sm" style="margin-top:14px;" onclick="window.saveConfig('visibility')">💾 บันทึกการตั้งค่า</button>
-          </div>
-
-          <div class="settings-card">
-            <h3>📢 ประกาศข่าวสาร</h3>
-            <div class="field" style="margin-bottom:14px;">
-              <label>ข้อความประกาศ (ทิ้งว่างเพื่อปิด)</label>
-              <textarea id="set-announcement" rows="4" placeholder="พิมพ์ข้อความที่ต้องการประกาศ..."></textarea>
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="window.saveConfig('announcement')">📣 บันทึกและประกาศ</button>
-          </div>
-
         </div>
-      </div>
 
-      <!-- TAB: LOGS -->
-      <div id="admin-tab-logs" class="tab-panel">
-        <div class="card">
-          <div class="card-title">📝 บันทึกกิจกรรมระบบ</div>
-          <div class="tbl-wrap">
-            <table>
-              <thead>
-                <tr><th>เวลา</th><th>ผู้ทำรายการ</th><th>กิจกรรม</th><th>รายละเอียด</th></tr>
-              </thead>
-              <tbody id="tbody-admin-logs">
-                <tr><td colspan="4" class="td-empty">ไม่มีบันทึกกิจกรรม</td></tr>
-              </tbody>
-            </table>
+        <!-- TAB: SETTINGS -->
+        <div id="admin-tab-settings" class="tab-panel">
+          <div class="settings-grid">
+
+            <div class="settings-card">
+              <h3>⏰ ช่วงเวลาแจ้งลา</h3>
+              <div class="field" style="margin-bottom:12px;">
+                <label>เปิดให้แจ้งลาได้ตั้งแต่</label>
+                <input type="datetime-local" id="set-leave-start">
+              </div>
+              <div class="field" style="margin-bottom:14px;">
+                <label>ปิดรับแจ้งลาเมื่อ</label>
+                <input type="datetime-local" id="set-leave-end">
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="window.saveConfig('leave_period')">💾
+                บันทึกการตั้งค่า</button>
+            </div>
+
+            <div class="settings-card">
+              <h3>🔄 ลงทะเบียนขายแทนร้านที่ลา</h3>
+              <div class="field" style="margin-bottom:12px;">
+                <label>เปิดรับลงทะเบียนตั้งแต่</label>
+                <input type="datetime-local" id="set-sub-start">
+              </div>
+              <div class="field" style="margin-bottom:14px;">
+                <label>ปิดรับลงทะเบียนเมื่อ</label>
+                <input type="datetime-local" id="set-sub-end">
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="window.saveConfig('substitute_period')">💾
+                บันทึกการตั้งค่า</button>
+            </div>
+
+            <div class="settings-card">
+              <h3>🔄 การทบทวนสิทธิ์</h3>
+              <div class="field" style="margin-bottom:12px;">
+                <label>เทอม/ช่วงเวลา</label>
+                <input id="set-renew-sem" placeholder="เช่น 1/2567">
+              </div>
+              <div class="field" style="margin-bottom:12px;">
+                <label>สิ้นสุดวันที่</label>
+                <input type="date" id="set-renew-end">
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">เปิดให้ร้านค้ายืนยันสิทธิ์<small>แสดงปุ่มให้ร้านค้ากด</small></div>
+                <label class="toggle">
+                  <input type="checkbox" id="set-renew-open">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <button class="btn btn-primary btn-sm" style="margin-top:14px;"
+                onclick="window.saveConfig('renew_period')">💾 บันทึกการตั้งค่า</button>
+            </div>
+
+            <div class="settings-card">
+              <h3>👁️ การแสดงเมนู</h3>
+              <div class="toggle-row">
+                <div class="toggle-label">เปิดรับลงทะเบียน<small>แสดงเมนูสมัครใหม่</small></div>
+                <label class="toggle">
+                  <input type="checkbox" id="vis-apply">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">แผนผังตลาด<small>แสดงหน้าแผนผัง</small></div>
+                <label class="toggle">
+                  <input type="checkbox" id="vis-map">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-label">สถิติร้านค้า<small>แสดงตัวเลขหน้าแรก</small></div>
+                <label class="toggle">
+                  <input type="checkbox" id="vis-stats">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <button class="btn btn-primary btn-sm" style="margin-top:14px;"
+                onclick="window.saveConfig('visibility')">💾 บันทึกการตั้งค่า</button>
+            </div>
+
+            <div class="settings-card">
+              <h3>📢 ประกาศข่าวสาร</h3>
+              <div class="field" style="margin-bottom:14px;">
+                <label>ข้อความประกาศ (ทิ้งว่างเพื่อปิด)</label>
+                <textarea id="set-announcement" rows="4" placeholder="พิมพ์ข้อความที่ต้องการประกาศ..."></textarea>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="window.saveConfig('announcement')">📣
+                บันทึกและประกาศ</button>
+            </div>
+
           </div>
         </div>
-      </div>
 
-    </div><!-- /admin-panel -->
-  </div><!-- /page-admin -->
+        <!-- TAB: LOGS -->
+        <div id="admin-tab-logs" class="tab-panel">
+          <div class="card">
+            <div class="card-title">📝 บันทึกกิจกรรมระบบ</div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>เวลา</th>
+                    <th>ผู้ทำรายการ</th>
+                    <th>กิจกรรม</th>
+                    <th>รายละเอียด</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-admin-logs">
+                  <tr>
+                    <td colspan="4" class="td-empty">ไม่มีบันทึกกิจกรรม</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
-  <!-- ══════════════════════════════
+      </div><!-- /admin-panel -->
+    </div><!-- /page-admin -->
+
+    <!-- ══════════════════════════════
        MODALS
   ══════════════════════════════ -->
-  <div id="modal-bg" class="modal-bg" onclick="window.closeModal()"></div>
+    <div id="modal-bg" class="modal-bg" onclick="window.closeModal()"></div>
 
-  <!-- MODAL: APPROVE -->
-  <div id="modal-approve" class="modal-box">
-    <div class="modal-title">📋 พิจารณาคำขอสมัคร</div>
-    <div id="app-detail" style="font-size:14px; margin-bottom:18px; color:var(--text-2); background:var(--surface); padding:14px; border-radius:8px;"></div>
-    <div class="field" style="margin-bottom:18px;">
-      <label>กำหนดเลขพื้นที่ (เช่น 4,5,6)</label>
-      <input id="modal-slots" placeholder="ระบุเลขล็อก คั่นด้วยจุลภาค">
-    </div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-      <button class="btn btn-primary" onclick="window.actionApp('approved')">✅ อนุมัติ</button>
-      <button class="btn btn-danger" onclick="window.actionApp('rejected')">❌ ไม่อนุมัติ</button>
-    </div>
-  </div>
-
-  <!-- MODAL: ADD SHOP -->
-  <div id="modal-add-shop" class="modal-box">
-    <div class="modal-title">➕ เพิ่มร้านค้าใหม่ (โดยผู้ดูแล)</div>
-    <form id="form-add-shop">
-      <div class="form-grid" style="margin-bottom:16px;">
-        <div class="field"><label>ชื่อจริง <span class="req">*</span></label><input name="firstName" required></div>
-        <div class="field"><label>นามสกุล <span class="req">*</span></label><input name="lastName" required></div>
-        <div class="field full"><label>ชื่อร้านค้า <span class="req">*</span></label><input name="shopName" required></div>
-        <div class="field"><label>หมวดหมู่ <span class="req">*</span></label>
-          <select name="category" required>
-            <option value="อาหาร">อาหาร</option>
-            <option value="เครื่องดื่ม">เครื่องดื่ม</option>
-            <option value="เสื้อผ้าและของใช้">เสื้อผ้าและของใช้</option>
-            <option value="รถฟู้ดทรัค (Food Truck)">รถฟู้ดทรัค (Food Truck)</option>
-          </select>
-        </div>
-        <div class="field"><label>เบอร์โทร (10 หลัก) <span class="req">*</span></label><input name="phone" required maxlength="10"></div>
-        <div class="field"><label>เลขพื้นที่ (ล็อก)</label><input name="slots" id="add-slots" placeholder="ปล่อยว่างได้"></div>
-        <div class="field"><label>สถานะ <span class="req">*</span></label>
-          <select name="status" required>
-            <option value="active">เปิดขายปกติ (Active)</option>
-            <option value="pending">รอพิจารณา (Pending)</option>
-          </select>
-        </div>
+    <!-- MODAL: APPROVE -->
+    <div id="modal-approve" class="modal-box">
+      <div class="modal-title">📋 พิจารณาคำขอสมัคร</div>
+      <div id="app-detail"
+        style="font-size:14px; margin-bottom:18px; color:var(--text-2); background:var(--surface); padding:14px; border-radius:8px;">
       </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button type="submit" class="btn btn-primary" id="btn-submit-add-shop">💾 บันทึกเพิ่มร้านค้า</button>
-        <button type="button" class="btn btn-ghost" onclick="window.closeModal()">ยกเลิก</button>
+      <div class="field" style="margin-bottom:18px;">
+        <label>กำหนดเลขพื้นที่ (เช่น 4,5,6)</label>
+        <input id="modal-slots" placeholder="ระบุเลขล็อก คั่นด้วยจุลภาค">
       </div>
-    </form>
-  </div>
-
-  <!-- MODAL: EDIT SHOP -->
-  <div id="modal-edit-shop" class="modal-box">
-    <div class="modal-title">✏️ แก้ไขข้อมูลร้านค้า</div>
-    <form id="form-edit-shop">
-      <div class="form-grid" style="margin-bottom:16px;">
-        <div class="field">
-          <label>ชื่อร้าน</label>
-          <input name="shopName" id="edit-shopName">
-        </div>
-        <div class="field">
-          <label>เลขพื้นที่</label>
-          <input name="slots" id="edit-slots">
-        </div>
-        <div class="field">
-          <label>เบอร์โทร</label>
-          <input name="phone" id="edit-phone">
-        </div>
-        <div class="field">
-          <label>สถานะ</label>
-          <select name="status" id="edit-status">
-            <option value="active">เปิดขายปกติ</option>
-            <option value="leave">แจ้งลา</option>
-            <option value="T2">ระงับ (T2)</option>
-            <option value="cancelled">ยกเลิกสิทธิ์</option>
-          </select>
-        </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button class="btn btn-primary" onclick="window.actionApp('approved')">✅ อนุมัติ</button>
+        <button class="btn btn-danger" onclick="window.actionApp('rejected')">❌ ไม่อนุมัติ</button>
       </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button type="button" class="btn btn-primary" onclick="window.updateShopData()">💾 บันทึก</button>
-        <button type="button" class="btn btn-danger" onclick="window.deleteShop()">🗑️ ลบร้าน</button>
-        <button type="button" class="btn btn-ghost" onclick="window.closeModal()">ยกเลิก</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- MODAL: CHECK STATUS -->
-  <div id="modal-check-status" class="modal-box">
-    <div class="modal-title">🔍 ตรวจสอบสถานะ / ค้นหาร้านค้า</div>
-    <div class="field" style="margin-bottom:14px;">
-      <label>เบอร์โทรศัพท์ 10 หลัก</label>
-      <input type="tel" id="check-phone" maxlength="10" placeholder="0812345678">
     </div>
-    <button class="btn btn-primary" style="width:100%;" onclick="window.checkStatus()">ค้นหา</button>
-    <div id="check-res" style="margin-top:18px;"></div>
-  </div>
-  <!-- MODAL: GALLERY -->
-  <div id="modal-gallery" class="modal-box" style="max-width:600px;">
-    <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center;">
-      <span>🖼️ รูปร้านค้า: <strong id="gallery-shop-name" style="color:var(--green);"></strong></span>
-      <button class="btn btn-ghost btn-sm" onclick="window.closeModal()">✕</button>
+
+    <!-- MODAL: ADD SHOP -->
+    <div id="modal-add-shop" class="modal-box">
+      <div class="modal-title">➕ เพิ่มร้านค้าใหม่ (โดยผู้ดูแล)</div>
+      <form id="form-add-shop">
+        <div class="form-grid" style="margin-bottom:16px;">
+          <div class="field"><label>ชื่อจริง <span class="req">*</span></label><input name="firstName" required></div>
+          <div class="field"><label>นามสกุล <span class="req">*</span></label><input name="lastName" required></div>
+          <div class="field full"><label>ชื่อร้านค้า <span class="req">*</span></label><input name="shopName" required>
+          </div>
+          <div class="field"><label>หมวดหมู่ <span class="req">*</span></label>
+            <select name="category" required>
+              <option value="อาหาร">อาหาร</option>
+              <option value="เครื่องดื่ม">เครื่องดื่ม</option>
+              <option value="เสื้อผ้าและของใช้">เสื้อผ้าและของใช้</option>
+              <option value="รถฟู้ดทรัค (Food Truck)">รถฟู้ดทรัค (Food Truck)</option>
+            </select>
+          </div>
+          <div class="field"><label>เบอร์โทร (10 หลัก) <span class="req">*</span></label><input name="phone" required
+              maxlength="10"></div>
+          <div class="field"><label>เลขพื้นที่ (ล็อก)</label><input name="slots" id="add-slots"
+              placeholder="ปล่อยว่างได้"></div>
+          <div class="field"><label>สถานะ <span class="req">*</span></label>
+            <select name="status" required>
+              <option value="active">เปิดขายปกติ (Active)</option>
+              <option value="pending">รอพิจารณา (Pending)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="submit" class="btn btn-primary" id="btn-submit-add-shop">💾 บันทึกเพิ่มร้านค้า</button>
+          <button type="button" class="btn btn-ghost" onclick="window.closeModal()">ยกเลิก</button>
+        </div>
+      </form>
     </div>
-    <div id="gallery-loading" style="text-align:center; padding:40px; color:var(--muted); font-size:15px; display:none;">⏳ กำลังโหลดรูปภาพ...</div>
-    <div class="gallery-container" id="gallery-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-top:16px;"></div>
-  </div>
 
-</div><!-- /app -->
+    <!-- MODAL: EDIT SHOP -->
+    <div id="modal-edit-shop" class="modal-box">
+      <div class="modal-title">✏️ แก้ไขข้อมูลร้านค้า</div>
+      <form id="form-edit-shop">
+        <div class="form-grid" style="margin-bottom:16px;">
+          <div class="field">
+            <label>ชื่อร้าน</label>
+            <input name="shopName" id="edit-shopName">
+          </div>
+          <div class="field">
+            <label>เลขพื้นที่</label>
+            <input name="slots" id="edit-slots">
+          </div>
+          <div class="field">
+            <label>เบอร์โทร</label>
+            <input name="phone" id="edit-phone">
+          </div>
+          <div class="field">
+            <label>สถานะ</label>
+            <select name="status" id="edit-status">
+              <option value="active">เปิดขายปกติ</option>
+              <option value="leave">แจ้งลา</option>
+              <option value="T2">ระงับ (T2)</option>
+              <option value="cancelled">ยกเลิกสิทธิ์</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary" onclick="window.updateShopData()">💾 บันทึก</button>
+          <button type="button" class="btn btn-danger" onclick="window.deleteShop()">🗑️ ลบร้าน</button>
+          <button type="button" class="btn btn-ghost" onclick="window.closeModal()">ยกเลิก</button>
+        </div>
+      </form>
+    </div>
 
-<!-- ══════════════════════════════
+    <!-- MODAL: CHECK STATUS -->
+    <div id="modal-check-status" class="modal-box">
+      <div class="modal-title">🔍 ตรวจสอบสถานะ / ค้นหาร้านค้า</div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>เบอร์โทรศัพท์ 10 หลัก</label>
+        <input type="tel" id="check-phone" maxlength="10" placeholder="0812345678">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="window.checkStatus()">ค้นหา</button>
+      <div id="check-res" style="margin-top:18px;"></div>
+    </div>
+    <!-- MODAL: GALLERY -->
+    <div id="modal-gallery" class="modal-box" style="max-width:600px;">
+      <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>🖼️ รูปร้านค้า: <strong id="gallery-shop-name" style="color:var(--green);"></strong></span>
+        <button class="btn btn-ghost btn-sm" onclick="window.closeModal()">✕</button>
+      </div>
+      <div id="gallery-loading"
+        style="text-align:center; padding:40px; color:var(--muted); font-size:15px; display:none;">⏳ กำลังโหลดรูปภาพ...
+      </div>
+      <div class="gallery-container" id="gallery-container"
+        style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-top:16px;">
+      </div>
+    </div>
+
+  </div><!-- /app -->
+
+  <!-- ══════════════════════════════
      FIREBASE SDK + APP LOGIC
 ══════════════════════════════ -->
-<script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
+
 </html>
