@@ -812,7 +812,6 @@ function loadAdminData() {
 
       snap.forEach(d => {
         const a = d.data(); a.id = d.id;
-        shopsData.push(a);
 
         if (a.status === 'active') cntActive++;
         if (a.status === 'pending') cntPending++;
@@ -822,7 +821,7 @@ function loadAdminData() {
         if (a.status === 'pending') {
           const hasImages = a.fileUrls && a.fileUrls.length > 0;
           const imgBtn = hasImages
-            ? `<button class="btn btn-ghost btn-sm" onclick="window.openGallery('${a.id}')" title="ดูรูปสินค้า" style="margin-right:4px;">🖼️</button>`
+            ? `<button class="btn btn-ghost btn-sm" onclick="window.openGallery('${a.id}')" style="margin-right:4px;">🖼️ ดูรูปสินค้าและบริการ</button>`
             : '';
 
           if (a.isResign) {
@@ -851,6 +850,9 @@ function loadAdminData() {
                 </td>
               </tr>`;
           }
+        } else {
+          // เฉพาะร้านที่ไม่ได้รอพิจารณา (pending) เท่านั้นที่จะถูกนำไปแสดงในแท็บ "ร้านค้า"
+          shopsData.push(a);
         }
       });
 
