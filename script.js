@@ -222,7 +222,7 @@ window.removeImage = (index) => {
   renderPreviews();
 };
 
-/* ─── APPLY FORM (with duplicate phone check) ─── */
+/* ─── APPLY FORM (with duplicate phone check & image upload) ─── */
 document.getElementById('form-apply').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btn-submit-apply');
@@ -249,15 +249,59 @@ document.getElementById('form-apply').addEventListener('submit', async (e) => {
       }
     }
 
-    btn.textContent = '⏳ กำลังส่งข้อมูล...';
+    // Check Images (ต้องมีอย่างน้อย 2 รูป)
+    if (selectedImages.length < 2) {
+      if (uploadError) { uploadError.innerText = 'กรุณาอัพโหลดรูปสินค้าอย่างน้อย 2 รูป'; uploadError.style.display = 'block'; }
+      btn.disabled = false;
+      btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
+      return;
+    }
+
+    // Upload Images to Apps Script → Google Drive
+    btn.textContent = '⏳ กำลังอัพโหลดรูปภาพ... (อาจใช้เวลาสักครู่)';
+    const progressWrap = document.getElementById('upload-progress-wrap');
+    const progressBar = document.getElementById('upload-progress-bar');
+    if (progressWrap) progressWrap.style.display = 'block';
+    if (progressBar) progressBar.style.width = '30%';
+
+    let uploadResult;
+    try {
+      const uploadRes = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ shopName: data.shopName, images: selectedImages })
+      });
+      if (progressBar) progressBar.style.width = '80%';
+      uploadResult = await uploadRes.json();
+    } catch (fetchErr) {
+      throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์อัพโหลดรูปได้: ' + fetchErr.message);
+    }
+
+    if (!uploadResult.success) {
+      throw new Error('อัพโหลดรูปไม่สำเร็จ: ' + (uploadResult.error || 'Unknown error'));
+    }
+    if (progressBar) progressBar.style.width = '100%';
+
+    // Save to Firestore
+    btn.textContent = '⏳ กำลังบันทึกข้อมูล...';
     data.status = 'pending';
     data.createdAt = serverTimestamp();
+    data.folderUrl = uploadResult.folderUrl || '';
+    data.fileUrls = uploadResult.fileUrls || [];
+
     await addDoc(collection(db, "shops"), data);
+
     window.showToast('ส่งข้อมูลสำเร็จ! คณะกรรมการจะพิจารณาและแจ้งผลภายหลัง', 'success', 6000);
     e.target.reset();
+    selectedImages = [];
+    renderPreviews();
+    if (progressWrap) progressWrap.style.display = 'none';
+    if (progressBar) progressBar.style.width = '0%';
     document.getElementById('substitute-options').style.display = 'none';
   } catch (err) {
     window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    const pw = document.getElementById('upload-progress-wrap');
+    if (pw) pw.style.display = 'none';
   } finally {
     btn.disabled = false;
     btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
