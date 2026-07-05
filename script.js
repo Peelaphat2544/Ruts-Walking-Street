@@ -149,7 +149,7 @@ async function loadShopDropdown(id) {
 
 
 /* ─── UPLOAD IMAGES LOGIC ─── */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcTooVdGIT8v3cpJHADvcM26EVLX4UnsLGurSbVkMbJBzKTUFBEKmlSHMiAOvudiAP2Q/exec'; // ให้ผู้ใช้ใส่ URL ตรงนี้
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqYZlLepCQ4kN9m6lRQb8KGxAqA1E-2qfeJOKdUnaYVuGdbdHo7x7oqOjJBfw13QnqLw/exec'; // ให้ผู้ใช้ใส่ URL ตรงนี้
 let selectedImages = [];
 const maxImages = 3;
 
@@ -1031,6 +1031,21 @@ async function loadLogs() {
   }
 }
 
+/* ─── HELPER: DELETE DRIVE FOLDER ─── */
+async function deleteGoogleDriveFolder(folderUrl) {
+  if (!folderUrl || !APPS_SCRIPT_URL) return;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'delete', folderUrl: folderUrl })
+    });
+    const result = await res.json();
+    if (!result.success) console.warn("Failed to delete folder:", result.error);
+  } catch (e) {
+    console.warn("Error calling delete folder:", e);
+  }
+}
+
 /* ─── APPROVE APPLICATION ─── */
 window.openApprove = (id, name, isSubstitute) => {
   currentId = id;
@@ -1051,6 +1066,12 @@ window.actionApp = async (action) => {
     const update = { status: action, isResign: null };
     if (action === 'approved' && slots) update.slots = slots;
     const shopData = _shopsCache[currentId] || {};
+
+    // ถ้าไม่อนุมัติ (ยกเลิก) ให้ลบโฟลเดอร์รูปภาพใน Google Drive ด้วย
+    if (action === 'cancelled' || action === 'rejected') {
+      if (shopData.folderUrl) await deleteGoogleDriveFolder(shopData.folderUrl);
+    }
+
     await updateDoc(doc(db, "shops", currentId), update);
     await logAction(action === 'approved' ? 'อนุมัติคำขอ' : 'ปฏิเสธคำขอ', `ร้าน: ${shopData.shopName || currentId}`, action === 'approved' ? 'action' : 'warn');
     window.showToast(action === 'approved' ? 'อนุมัติเรียบร้อยแล้ว' : 'ไม่อนุมัติ/ยกเลิกสิทธิ์เรียบร้อย', action === 'approved' ? 'success' : 'warning');
@@ -1148,6 +1169,9 @@ window.deleteShop = async () => {
   );
   if (!ok) return;
   try {
+    const shopData = _shopsCache[currentId] || {};
+    if (shopData.folderUrl) await deleteGoogleDriveFolder(shopData.folderUrl);
+
     await deleteDoc(doc(db, "shops", currentId));
     await logAction('ลบร้านค้า', `ร้าน: ${shopName}`, 'del');
     window.showToast(`ลบร้าน "${shopName}" ออกจากระบบแล้ว`, 'warning');

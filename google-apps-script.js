@@ -14,7 +14,7 @@
 
 // ใส่ ID ของโฟลเดอร์หลักที่จะเก็บรูปร้านค้าทั้งหมด (เช่น "RUTS_Shop_Images")
 // วิธีเอา ID: เข้า Google Drive เปิดโฟลเดอร์นั้น ดูที่ URL เช่น https://drive.google.com/drive/u/0/folders/1abcde... (เอาแค่ตัวอักษร 1abcde...)
-const MAIN_FOLDER_ID = "ใส่_ID_โฟลเดอร์หลักของคุณที่นี่"; 
+const MAIN_FOLDER_ID = "1P2PedGPig5gfnSB7Fbe_-KIubFaItxmv"; 
 
 function doPost(e) {
   // CORS Headers
@@ -28,35 +28,45 @@ function doPost(e) {
     if (!e || !e.postData || !e.postData.contents) {
       return ContentService.createTextOutput(JSON.stringify({ success: false, error: "No data received" }))
         .setMimeType(ContentService.MimeType.JSON)
-        .setHeaders(headers); // *Note: Apps Script standard response might override custom headers, 
-                              // but using ContentService typically works for standard web apps if deployed correctly.
+        .setHeaders(headers);
     }
 
     const data = JSON.parse(e.postData.contents);
+    const action = data.action || "upload";
+
+    if (action === "delete") {
+      const folderUrl = data.folderUrl;
+      if (!folderUrl) throw new Error("No folderUrl provided");
+
+      // Extract folder ID from URL (e.g., https://drive.google.com/drive/folders/1abc...)
+      const match = folderUrl.match(/folders\/([a-zA-Z0-9_-]+)/);
+      if (!match) throw new Error("Invalid folderUrl format");
+
+      const folderId = match[1];
+      const folder = DriveApp.getFolderById(folderId);
+      folder.setTrashed(true); // Move to trash
+
+      return ContentService.createTextOutput(JSON.stringify({ success: true, message: "Folder moved to trash" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     const shopName = data.shopName || "Unknown_Shop";
-    const images = data.images || []; // Array ของ base64 strings
+    const images = data.images || [];
 
     if (images.length === 0) {
       return ContentService.createTextOutput(JSON.stringify({ success: false, error: "No images provided" }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    // เข้าถึงโฟลเดอร์หลัก
     const mainFolder = DriveApp.getFolderById(MAIN_FOLDER_ID);
-    
-    // สร้างชื่อโฟลเดอร์ย่อยตามชื่อร้านและวันที่
     const timestamp = Utilities.formatDate(new Date(), "GMT+7", "yyyyMMdd_HHmmss");
     const subFolderName = "ร้าน_" + shopName + "_" + timestamp;
     
-    // สร้างโฟลเดอร์ใหม่
     const shopFolder = mainFolder.createFolder(subFolderName);
-    
-    // กำหนดสิทธิ์ให้ทุกคนที่มี link สามารถดูได้ (เผื่อแอดมินคนอื่นดู)
     shopFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
     const fileUrls = [];
 
-    // วนลูปอัพโหลดแต่ละไฟล์
     images.forEach(function(img, index) {
       const split = img.split(',');
       const mimeType = split[0].split(':')[1].split(';')[0]; 
