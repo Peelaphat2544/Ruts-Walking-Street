@@ -26,6 +26,7 @@
       <nav class="nav">
         <button class="nav-btn active" id="btn-m-home" onclick="showPage('home',this)">🏠 หน้าหลัก</button>
         <button class="nav-btn" id="btn-m-apply" onclick="showPage('apply',this)">📝 ลงทะเบียน</button>
+        <button class="nav-btn" id="btn-m-substitute" onclick="showPage('substitute',this)">🔄 ล็อกวิ่ง</button>
         <button class="nav-btn" id="btn-m-leave" onclick="showPage('leave',this)">🗓️ แจ้งหยุด</button>
         <button class="nav-btn" id="btn-m-renew" onclick="showPage('renew',this)">✅ ยืนยันสิทธิ์</button>
         <button class="nav-btn" id="btn-m-map" onclick="showPage('map',this)">🗺️ แผนผัง</button>
@@ -101,7 +102,14 @@
               <div class="svc-icon">✨</div>
               <div class="svc-body">
                 <div class="svc-title">ลงทะเบียนผู้ประกอบการรายใหม่</div>
-                <div class="svc-desc">สมัครเข้าร่วมตลาดนัด RUTS</div>
+                <div class="svc-desc">สมัครสิทธิ์จำหน่ายถาวรในตลาดนัด RUTS</div>
+              </div>
+            </button>
+            <button class="service-card" id="svc-card-substitute" onclick="showPage('substitute', document.getElementById('btn-m-substitute'))">
+              <div class="svc-icon">🔄</div>
+              <div class="svc-body">
+                <div class="svc-title">ลงทะเบียนล็อกวิ่ง</div>
+                <div class="svc-desc">ขายแทนผู้ประกอบการประจำที่แจ้งหยุดจำหน่าย</div>
               </div>
             </button>
             <button class="service-card" onclick="showPage('renew', document.getElementById('btn-m-renew'))">
@@ -137,7 +145,7 @@
     <div id="page-apply" class="page">
       <div class="page-inner-md">
         <div class="card">
-          <div class="card-title">📝 ลงทะเบียนผู้ประกอบการ</div>
+          <div class="card-title">📝 ลงทะเบียนผู้ประกอบการรายใหม่</div>
 
           <div id="apply-closed-msg" class="info-box amber" style="display:none;">
             <div style="font-size:28px; margin-bottom:8px;">🔒</div>
@@ -151,33 +159,7 @@
           </div>
 
           <form id="form-apply">
-            <div class="form-section">
-              <div class="form-section-title">ประเภทการลงทะเบียน</div>
-              <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
-                <label
-                  style="display:flex; align-items:center; gap:8px; background:var(--white); padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
-                  <input type="radio" name="applyType" value="new" checked
-                    onchange="document.getElementById('substitute-options').style.display='none'">
-                  <span style="font-weight:600; color:var(--text);">✨ สมัครสิทธิ์ใหม่ถาวร</span>
-                </label>
-                <label
-                  style="display:flex; align-items:center; gap:8px; background:var(--white); padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer;">
-                  <input type="radio" name="applyType" value="substitute"
-                    onchange="document.getElementById('substitute-options').style.display='block'">
-                  <span style="font-weight:600; color:var(--text);">🔄 สมัครขายแทนร้านที่ลา (ชั่วคราว)</span>
-                </label>
-              </div>
-
-              <div id="substitute-options"
-                style="display:none; margin-top:16px; background:var(--amber-l); border-left:3px solid var(--amber); padding:12px 16px; border-radius:8px;">
-                <div id="substitute-schedule-msg"
-                  style="font-size:13px; color:#7c3d0a; font-weight:600; margin-bottom:10px;"></div>
-                <div class="field">
-                  <label style="color:#7c3d0a;">เลือกวันที่ต้องการขายแทน <span class="req">*</span></label>
-                  <input type="date" name="substituteDate" id="substituteDateInput">
-                </div>
-              </div>
-            </div>
+            <input type="hidden" name="applyType" value="new">
 
             <div class="form-section">
               <div class="form-section-title">ข้อมูลส่วนตัว</div>
@@ -265,7 +247,104 @@
 
             <button type="submit" id="btn-submit-apply" class="btn btn-primary"
               style="width:100%; margin-top:8px; padding:14px;">
-              ส่งข้อมูลลงทะเบียน →
+              ส่งข้อมูลลงทะเบียนผู้ประกอบการรายใหม่ →
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+       SUBSTITUTE PAGE (ล็อกวิ่ง)
+  ══════════════════════════════ -->
+    <div id="page-substitute" class="page">
+      <div class="page-inner-md">
+        <div class="card">
+          <div class="card-title">🔄 ลงทะเบียนล็อกวิ่ง (ขายแทนผู้ประกอบการประจำ)</div>
+
+          <div id="sub-closed-msg" class="info-box amber" style="display:none;">
+            <div style="font-size:28px; margin-bottom:8px;">🔒</div>
+            <div id="sub-closed-reason" style="font-weight:600; font-size:15px;">ขณะนี้ปิดรับลงทะเบียนล็อกวิ่ง</div>
+            <div id="sub-closed-detail" style="font-size:13px; color:#7c3d0a; margin-top:6px;"></div>
+          </div>
+
+          <div id="sub-schedule-info" class="info-box blue" style="display:none; margin-bottom:16px;">
+            <div style="font-weight:600; font-size:14px;">📅 กำหนดการลงทะเบียนล็อกวิ่ง</div>
+            <div id="sub-schedule-text" style="font-size:13px; margin-top:4px;"></div>
+          </div>
+
+          <form id="form-substitute">
+            <input type="hidden" name="applyType" value="substitute">
+
+            <div class="form-section">
+              <div class="form-section-title">เลือกวันที่ต้องการขาย</div>
+              <div class="form-grid" style="grid-template-columns:1fr;">
+                <div class="field">
+                  <label>วันที่ต้องการขายแทน <span class="req">*</span></label>
+                  <input type="date" name="substituteDate" id="substituteDateInput" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">ข้อมูลส่วนตัว</div>
+              <div class="form-grid">
+                <div class="field">
+                  <label>ชื่อจริง <span class="req">*</span></label>
+                  <input name="firstName" required placeholder="ชื่อของคุณ">
+                </div>
+                <div class="field">
+                  <label>นามสกุล <span class="req">*</span></label>
+                  <input name="lastName" required placeholder="นามสกุลของคุณ">
+                </div>
+                <div class="field">
+                  <label>เบอร์โทรศัพท์ (10 หลัก) <span class="req">*</span></label>
+                  <input name="phone" maxlength="10" required placeholder="0812345678" type="tel">
+                </div>
+                <div class="field">
+                  <label>ศาสนา <span class="req">*</span></label>
+                  <select name="religion" required>
+                    <option value="">— เลือก —</option>
+                    <option>พุทธ</option>
+                    <option>อิสลาม</option>
+                    <option>คริสต์</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section-title">ข้อมูลร้านค้า</div>
+              <div class="form-grid">
+                <div class="field full">
+                  <label>ชื่อร้านค้า / สถานประกอบการ <span class="req">*</span></label>
+                  <input name="shopName" required placeholder="ชื่อร้านที่ต้องการใช้">
+                </div>
+                <div class="field full">
+                  <label>สินค้าหรือบริการที่จำหน่าย <span class="req">*</span></label>
+                  <textarea name="items" rows="2" required
+                    placeholder="ระบุรายละเอียดสินค้าหรือบริการ เช่น ข้าวผัด ก๋วยเตี๋ยว น้ำผลไม้..."></textarea>
+                </div>
+                <div class="field">
+                  <label>หมวดหมู่สินค้า <span class="req">*</span></label>
+                  <select name="category" required>
+                    <option value="">— เลือก —</option>
+                    <option>อาหาร</option>
+                    <option>เครื่องดื่ม</option>
+                    <option>เสื้อผ้าและของใช้</option>
+                    <option>รถฟู้ดทรัค (Food Truck)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>LINE ID</label>
+                  <input name="lineId" placeholder="ระบุ LINE ID (ถ้ามี)">
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" id="btn-submit-substitute" class="btn btn-primary"
+              style="width:100%; margin-top:8px; padding:14px;">
+              ส่งข้อมูลลงทะเบียนล็อกวิ่ง →
             </button>
           </form>
         </div>
@@ -611,7 +690,7 @@
             </div>
 
             <div class="settings-card">
-              <h3>🔄 ลงทะเบียนขายแทนร้านที่ลา</h3>
+              <h3>🔄 ช่วงเวลาลงทะเบียนล็อกวิ่ง</h3>
               <div class="field" style="margin-bottom:12px;">
                 <label>เปิดรับลงทะเบียนตั้งแต่</label>
                 <input type="datetime-local" id="set-sub-start">

@@ -229,7 +229,7 @@ window.removeImage = (index) => {
   renderPreviews();
 };
 
-/* ─── APPLY FORM (with duplicate phone check & image upload) ─── */
+/* ─── APPLY FORM (New vendors — with duplicate phone check & image upload) ─── */
 document.getElementById('form-apply').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -258,7 +258,7 @@ document.getElementById('form-apply').addEventListener('submit', async (e) => {
       );
       if (!ok) {
         btn.disabled = false;
-        btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
+        btn.textContent = 'ส่งข้อมูลลงทะเบียนผู้ประกอบการรายใหม่ →';
         return;
       }
     }
@@ -267,7 +267,7 @@ document.getElementById('form-apply').addEventListener('submit', async (e) => {
     if (selectedImages.length < 2) {
       if (uploadError) { uploadError.innerText = 'กรุณาอัพโหลดรูปสินค้าอย่างน้อย 2 รูป'; uploadError.style.display = 'block'; }
       btn.disabled = false;
-      btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
+      btn.textContent = 'ส่งข้อมูลลงทะเบียนผู้ประกอบการรายใหม่ →';
       return;
     }
 
@@ -311,14 +311,70 @@ document.getElementById('form-apply').addEventListener('submit', async (e) => {
     renderPreviews();
     if (progressWrap) progressWrap.style.display = 'none';
     if (progressBar) progressBar.style.width = '0%';
-    document.getElementById('substitute-options').style.display = 'none';
   } catch (err) {
     window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
     const pw = document.getElementById('upload-progress-wrap');
     if (pw) pw.style.display = 'none';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
+    btn.textContent = 'ส่งข้อมูลลงทะเบียนผู้ประกอบการรายใหม่ →';
+  }
+});
+
+/* ─── SUBSTITUTE FORM (ล็อกวิ่ง — ขายแทนผู้ประกอบการประจำ) ─── */
+document.getElementById('form-substitute').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  // Guard: ตรวจสอบว่ายังเปิดรับลงทะเบียนล็อกวิ่งอยู่หรือไม่
+  if (!window._substituteRegistrationOpen) {
+    window.showToast('ขณะนี้ปิดรับลงทะเบียนล็อกวิ่งแล้ว ไม่สามารถส่งข้อมูลได้', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit-substitute');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังตรวจสอบข้อมูล...';
+  try {
+    const data = Object.fromEntries(new FormData(e.target));
+
+    if (!data.substituteDate) {
+      window.showToast('กรุณาเลือกวันที่ต้องการขายแทน', 'warning');
+      btn.disabled = false;
+      btn.textContent = 'ส่งข้อมูลลงทะเบียนล็อกวิ่ง →';
+      return;
+    }
+
+    // Check duplicate phone
+    const dupQ = query(collection(db, "shops"), where("phone", "==", data.phone));
+    const dupSnap = await getDocs(dupQ);
+    if (!dupSnap.empty) {
+      const existing = dupSnap.docs[0].data();
+      const ok = await window.showConfirm(
+        `พบข้อมูลเบอร์โทร <strong>${data.phone}</strong> อยู่ในระบบแล้ว<br>
+          (ร้าน: <strong>${existing.shopName}</strong> สถานะ: ${existing.status})<br><br>
+          ต้องการส่งลงทะเบียนล็อกวิ่งต่อไปหรือไม่?`,
+        'พบเบอร์โทรซ้ำในระบบ', '⚠️', 'ส่งต่อไป', 'btn-primary'
+      );
+      if (!ok) {
+        btn.disabled = false;
+        btn.textContent = 'ส่งข้อมูลลงทะเบียนล็อกวิ่ง →';
+        return;
+      }
+    }
+
+    // Save to Firestore (no image upload for substitute)
+    data.status = 'pending';
+    data.createdAt = serverTimestamp();
+
+    await addDoc(collection(db, "shops"), data);
+
+    window.showToast('ส่งข้อมูลล็อกวิ่งสำเร็จ! คณะกรรมการจะพิจารณาและแจ้งผลภายหลัง', 'success', 6000);
+    e.target.reset();
+  } catch (err) {
+    window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'ส่งข้อมูลลงทะเบียนล็อกวิ่ง →';
   }
 });
 
@@ -620,6 +676,7 @@ window.exportPaymentPDF = () => {
 /* ─── SYSTEM CONFIG — Real-time ─── */
 // Track global registration open state for form guard
 window._applyRegistrationOpen = false;
+window._substituteRegistrationOpen = false;
 
 function loadSystemConfig() {
   if (_unsubConfig) _unsubConfig();
@@ -689,14 +746,64 @@ function loadSystemConfig() {
         }
       }
 
-      // Store global state for form submit guard
-      window._applyRegistrationOpen = applyOpen;
+      /* ─── SUBSTITUTE PAGE (ล็อกวิ่ง) — controlled by substitute_period ─── */
+      const sub = c.substitute_period || {};
+      const hasSubPeriod = !!(sub.start && sub.end);
+      let subOpen = false;
+
+      const subClosedMsg = document.getElementById('sub-closed-msg');
+      const subClosedReason = document.getElementById('sub-closed-reason');
+      const subClosedDetail = document.getElementById('sub-closed-detail');
+      const subScheduleInfo = document.getElementById('sub-schedule-info');
+      const subScheduleText = document.getElementById('sub-schedule-text');
+      const formSub = document.getElementById('form-substitute');
+      const subDateInput = document.getElementById('substituteDateInput');
+
+      if (hasSubPeriod) {
+        const now = new Date();
+        const subStart = new Date(sub.start);
+        const subEnd = new Date(sub.end);
+
+        if (now < subStart) {
+          subOpen = false;
+          subClosedReason.textContent = '⏳ ยังไม่ถึงช่วงเวลาเปิดรับลงทะเบียนล็อกวิ่ง';
+          subClosedDetail.innerHTML = `กำหนดเปิดรับลงทะเบียน: <strong>${fmtDate(sub.start)}</strong><br>ถึง: <strong>${fmtDate(sub.end)}</strong>`;
+          subClosedMsg.style.display = 'flex';
+          subScheduleInfo.style.display = 'none';
+          if (formSub) formSub.style.display = 'none';
+        } else if (now >= subStart && now <= subEnd) {
+          subOpen = true;
+          subClosedMsg.style.display = 'none';
+          subScheduleInfo.style.display = 'block';
+          subScheduleText.innerHTML = `เปิดรับลงทะเบียนล็อกวิ่งตั้งแต่: <strong>${fmtDate(sub.start)}</strong><br>ถึง: <strong>${fmtDate(sub.end)}</strong>`;
+          if (formSub) formSub.style.display = '';
+          if (subDateInput) subDateInput.disabled = false;
+        } else {
+          subOpen = false;
+          subClosedReason.textContent = '🚫 หมดเขตรับลงทะเบียนล็อกวิ่งแล้ว';
+          subClosedDetail.innerHTML = `ช่วงเวลาลงทะเบียนสิ้นสุดเมื่อ: <strong>${fmtDate(sub.end)}</strong><br>กรุณาติดต่อเจ้าหน้าที่หากต้องการข้อมูลเพิ่มเติม`;
+          subClosedMsg.style.display = 'flex';
+          subScheduleInfo.style.display = 'none';
+          if (formSub) formSub.style.display = 'none';
+        }
+      } else {
+        subOpen = false;
+        subClosedReason.textContent = '⚠️ ขณะนี้ยังไม่เปิดรับลงทะเบียนล็อกวิ่ง';
+        subClosedDetail.textContent = 'กรุณาติดตามประกาศจากเจ้าหน้าที่';
+        subClosedMsg.style.display = 'flex';
+        subScheduleInfo.style.display = 'none';
+        if (formSub) formSub.style.display = 'none';
+      }
+
+      window._substituteRegistrationOpen = subOpen;
 
       // Show/hide nav buttons and service cards
       const applyBtn = document.getElementById('btn-m-apply');
       const mapBtn = document.getElementById('btn-m-map');
+      const subBtn = document.getElementById('btn-m-substitute');
       if (applyBtn) applyBtn.style.display = applyOpen ? '' : 'none';
       if (mapBtn) mapBtn.style.display = v.map ? '' : 'none';
+      if (subBtn) subBtn.style.display = subOpen ? '' : 'none';
 
       const statsGrid = document.getElementById('public-stats-grid');
       if (statsGrid) statsGrid.style.display = v.stats ? 'grid' : 'none';
@@ -704,6 +811,7 @@ function loadSystemConfig() {
       document.querySelectorAll('.service-card').forEach(card => {
         const oc = card.getAttribute('onclick') || '';
         if (oc.includes("showPage('apply'")) card.style.display = applyOpen ? '' : 'none';
+        if (oc.includes("showPage('substitute'")) card.style.display = subOpen ? '' : 'none';
         if (oc.includes("showPage('map'")) card.style.display = v.map ? '' : 'none';
       });
 
@@ -722,22 +830,6 @@ function loadSystemConfig() {
       if (r.open) {
         document.getElementById('renew-sem-label').innerText = r.semester || '';
         document.getElementById('renew-deadline-label').innerText = r.deadline || '';
-      }
-
-      const sub = c.substitute_period || {};
-      const subMsg = document.getElementById('substitute-schedule-msg');
-      if (sub.start && sub.end) {
-        subMsg.innerHTML = `เปิดรับลงทะเบียนขายแทน:<br>ตั้งแต่วันที่ ${new Date(sub.start).toLocaleDateString('th-TH')} ถึง ${new Date(sub.end).toLocaleDateString('th-TH')}`;
-        const now = new Date();
-        if (now >= new Date(sub.start) && now <= new Date(sub.end)) {
-          document.getElementById('substituteDateInput').disabled = false;
-        } else {
-          document.getElementById('substituteDateInput').disabled = true;
-          subMsg.innerHTML += '<br><span style="color:red;">(ขณะนี้อยู่นอกช่วงเวลาลงทะเบียน)</span>';
-        }
-      } else {
-        subMsg.innerHTML = 'ยังไม่มีการกำหนดช่วงเวลาลงทะเบียนขายแทน';
-        document.getElementById('substituteDateInput').disabled = true;
       }
 
       if (window.adminMode) {
@@ -970,7 +1062,7 @@ function loadAdminData() {
               </tr>`;
           } else {
             const isSub = a.applyType === 'substitute';
-            const subDate = isSub && a.substituteDate ? `<br><small style="color:var(--amber);">ขายแทนวันที่: ${a.substituteDate}</small>` : '';
+            const subDate = isSub && a.substituteDate ? `<br><small style="color:var(--amber); font-weight:600;">ล็อกวิ่งวันที่: ${a.substituteDate}</small>` : '';
             pending += `<tr>
                 <td>${a.createdAt?.toDate().toLocaleDateString('th-TH') || '—'}</td>
                 <td><strong>${a.shopName}</strong>${subDate}</td>
