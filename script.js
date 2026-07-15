@@ -232,6 +232,13 @@ window.removeImage = (index) => {
 /* ─── APPLY FORM (with duplicate phone check & image upload) ─── */
 document.getElementById('form-apply').addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  // Guard: ตรวจสอบว่ายังเปิดรับลงทะเบียนอยู่หรือไม่
+  if (!window._applyRegistrationOpen) {
+    window.showToast('ขณะนี้ปิดรับลงทะเบียนแล้ว ไม่สามารถส่งข้อมูลได้', 'error');
+    return;
+  }
+
   const btn = document.getElementById('btn-submit-apply');
   btn.disabled = true;
   btn.textContent = '⏳ กำลังตรวจสอบข้อมูล...';
@@ -611,6 +618,9 @@ window.exportPaymentPDF = () => {
 };
 
 /* ─── SYSTEM CONFIG — Real-time ─── */
+// Track global registration open state for form guard
+window._applyRegistrationOpen = false;
+
 function loadSystemConfig() {
   if (_unsubConfig) _unsubConfig();
   _unsubConfig = onSnapshot(doc(db, "config", "system"), (snap) => {
@@ -619,9 +629,73 @@ function loadSystemConfig() {
       const c = snap.data();
       const v = c.visibility || {};
 
+      /* ─── APPLY PERIOD: Time-based registration open/close ─── */
+      const ap = c.apply_period || {};
+      const hasApplyPeriod = !!(ap.start && ap.end);
+      let applyOpen = false;
+
+      const fmtDate = (d) => new Date(d).toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'short' });
+
+      const applyClosedMsg = document.getElementById('apply-closed-msg');
+      const applyClosedReason = document.getElementById('apply-closed-reason');
+      const applyClosedDetail = document.getElementById('apply-closed-detail');
+      const applyScheduleInfo = document.getElementById('apply-schedule-info');
+      const applyScheduleText = document.getElementById('apply-schedule-text');
+      const formApply = document.getElementById('form-apply');
+      const btnSubmitApply = document.getElementById('btn-submit-apply');
+
+      if (hasApplyPeriod) {
+        const now = new Date();
+        const startDate = new Date(ap.start);
+        const endDate = new Date(ap.end);
+
+        if (now < startDate) {
+          // ยังไม่ถึงเวลาเปิด
+          applyOpen = false;
+          applyClosedReason.textContent = '⏳ ยังไม่ถึงช่วงเวลาเปิดรับลงทะเบียน';
+          applyClosedDetail.innerHTML = `กำหนดเปิดรับลงทะเบียน: <strong>${fmtDate(ap.start)}</strong><br>ถึง: <strong>${fmtDate(ap.end)}</strong>`;
+          applyClosedMsg.style.display = 'flex';
+          applyScheduleInfo.style.display = 'none';
+          if (formApply) formApply.style.display = 'none';
+        } else if (now >= startDate && now <= endDate) {
+          // อยู่ในช่วงเปิดลงทะเบียน
+          applyOpen = true;
+          applyClosedMsg.style.display = 'none';
+          applyScheduleInfo.style.display = 'block';
+          applyScheduleText.innerHTML = `เปิดรับลงทะเบียนตั้งแต่: <strong>${fmtDate(ap.start)}</strong><br>ถึง: <strong>${fmtDate(ap.end)}</strong>`;
+          if (formApply) formApply.style.display = '';
+          if (btnSubmitApply) btnSubmitApply.disabled = false;
+        } else {
+          // หมดเขตลงทะเบียนแล้ว
+          applyOpen = false;
+          applyClosedReason.textContent = '🚫 หมดเขตรับลงทะเบียนแล้ว';
+          applyClosedDetail.innerHTML = `ช่วงเวลาลงทะเบียนสิ้นสุดเมื่อ: <strong>${fmtDate(ap.end)}</strong><br>กรุณาติดต่อเจ้าหน้าที่หากต้องการข้อมูลเพิ่มเติม`;
+          applyClosedMsg.style.display = 'flex';
+          applyScheduleInfo.style.display = 'none';
+          if (formApply) formApply.style.display = 'none';
+        }
+      } else {
+        // ไม่มี apply_period — ใช้ toggle vis-apply เดิม
+        applyOpen = !!v.apply;
+        applyScheduleInfo.style.display = 'none';
+        if (applyOpen) {
+          applyClosedMsg.style.display = 'none';
+          if (formApply) formApply.style.display = '';
+        } else {
+          applyClosedReason.textContent = '⚠️ ขณะนี้ระบบปิดรับลงทะเบียนชั่วคราว';
+          applyClosedDetail.textContent = 'กรุณาติดต่อเจ้าหน้าที่';
+          applyClosedMsg.style.display = 'flex';
+          if (formApply) formApply.style.display = 'none';
+        }
+      }
+
+      // Store global state for form submit guard
+      window._applyRegistrationOpen = applyOpen;
+
+      // Show/hide nav buttons and service cards
       const applyBtn = document.getElementById('btn-m-apply');
       const mapBtn = document.getElementById('btn-m-map');
-      if (applyBtn) applyBtn.style.display = v.apply ? '' : 'none';
+      if (applyBtn) applyBtn.style.display = applyOpen ? '' : 'none';
       if (mapBtn) mapBtn.style.display = v.map ? '' : 'none';
 
       const statsGrid = document.getElementById('public-stats-grid');
@@ -629,7 +703,7 @@ function loadSystemConfig() {
 
       document.querySelectorAll('.service-card').forEach(card => {
         const oc = card.getAttribute('onclick') || '';
-        if (oc.includes("showPage('apply'")) card.style.display = v.apply ? '' : 'none';
+        if (oc.includes("showPage('apply'")) card.style.display = applyOpen ? '' : 'none';
         if (oc.includes("showPage('map'")) card.style.display = v.map ? '' : 'none';
       });
 
@@ -666,8 +740,6 @@ function loadSystemConfig() {
         document.getElementById('substituteDateInput').disabled = true;
       }
 
-      document.getElementById('apply-closed-msg').style.display = v.apply ? 'none' : 'flex';
-
       if (window.adminMode) {
         document.getElementById('vis-apply').checked = !!v.apply;
         document.getElementById('vis-map').checked = !!v.map;
@@ -683,6 +755,36 @@ function loadSystemConfig() {
         if (c.substitute_period) {
           document.getElementById('set-sub-start').value = c.substitute_period.start || '';
           document.getElementById('set-sub-end').value = c.substitute_period.end || '';
+        }
+        // Apply period admin fields
+        if (c.apply_period) {
+          document.getElementById('set-apply-start').value = c.apply_period.start || '';
+          document.getElementById('set-apply-end').value = c.apply_period.end || '';
+        } else {
+          document.getElementById('set-apply-start').value = '';
+          document.getElementById('set-apply-end').value = '';
+        }
+        // Show apply period status in admin
+        const statusEl = document.getElementById('apply-period-status');
+        if (statusEl) {
+          if (hasApplyPeriod) {
+            const now = new Date();
+            const startDate = new Date(ap.start);
+            const endDate = new Date(ap.end);
+            if (now < startDate) {
+              statusEl.innerHTML = '🟡 <strong>สถานะ:</strong> ยังไม่เปิด — จะเปิดเมื่อ ' + fmtDate(ap.start);
+              statusEl.style.color = '#b45309';
+            } else if (now >= startDate && now <= endDate) {
+              statusEl.innerHTML = '🟢 <strong>สถานะ:</strong> กำลังเปิดรับลงทะเบียน — ปิดเมื่อ ' + fmtDate(ap.end);
+              statusEl.style.color = '#15803d';
+            } else {
+              statusEl.innerHTML = '🔴 <strong>สถานะ:</strong> หมดเขตแล้วเมื่อ ' + fmtDate(ap.end);
+              statusEl.style.color = '#dc2626';
+            }
+          } else {
+            statusEl.innerHTML = 'ℹ️ ยังไม่ได้กำหนดช่วงเวลา (ใช้สวิตช์ด้านล่างแทน)';
+            statusEl.style.color = 'var(--muted)';
+          }
         }
       }
     } catch (e) { console.warn('loadSystemConfig:', e); }
@@ -717,11 +819,42 @@ window.saveConfig = async (type) => {
         start: document.getElementById('set-sub-start').value,
         end: document.getElementById('set-sub-end').value
       };
+    } else if (type === 'apply_period') {
+      const apStart = document.getElementById('set-apply-start').value;
+      const apEnd = document.getElementById('set-apply-end').value;
+      if (!apStart || !apEnd) {
+        window.showToast('กรุณากำหนดวันเวลาเปิดและปิดรับลงทะเบียน', 'warning');
+        return;
+      }
+      if (new Date(apStart) >= new Date(apEnd)) {
+        window.showToast('วันเวลาเปิดต้องอยู่ก่อนวันเวลาปิด', 'warning');
+        return;
+      }
+      update.apply_period = {
+        start: apStart,
+        end: apEnd
+      };
     }
     await setDoc(ref, update, { merge: true });
     await logAction('บันทึกการตั้งค่า', `ประเภท: ${type}`);
     window.showToast('บันทึกการตั้งค่าสำเร็จ', 'success');
     loadSystemConfig();
+  } catch (e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+};
+
+window.clearApplyPeriod = async () => {
+  const ok = await window.showConfirm(
+    'ต้องการล้างช่วงเวลาลงทะเบียนรายใหม่ใช่หรือไม่?<br>ระบบจะกลับไปใช้สวิตช์เปิด/ปิดด้านล่างแทน',
+    'ล้างช่วงเวลาลงทะเบียน', '🗑️', 'ล้างเลย', 'btn-danger'
+  );
+  if (!ok) return;
+  try {
+    const ref = doc(db, "config", "system");
+    await setDoc(ref, { apply_period: { start: '', end: '' } }, { merge: true });
+    document.getElementById('set-apply-start').value = '';
+    document.getElementById('set-apply-end').value = '';
+    await logAction('ล้างช่วงเวลาลงทะเบียน', 'ลบ apply_period');
+    window.showToast('ล้างช่วงเวลาลงทะเบียนเรียบร้อย', 'success');
   } catch (e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
 };
 

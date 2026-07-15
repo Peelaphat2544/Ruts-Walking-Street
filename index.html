@@ -140,7 +140,14 @@
           <div class="card-title">📝 ลงทะเบียนผู้ประกอบการ</div>
 
           <div id="apply-closed-msg" class="info-box amber" style="display:none;">
-            ⚠️ ขออภัย ขณะนี้ระบบปิดรับลงทะเบียนชั่วคราว กรุณาติดต่อเจ้าหน้าที่
+            <div style="font-size:28px; margin-bottom:8px;">🔒</div>
+            <div id="apply-closed-reason" style="font-weight:600; font-size:15px;">ขณะนี้ระบบปิดรับลงทะเบียนชั่วคราว</div>
+            <div id="apply-closed-detail" style="font-size:13px; color:#7c3d0a; margin-top:6px;"></div>
+          </div>
+
+          <div id="apply-schedule-info" class="info-box blue" style="display:none; margin-bottom:16px;">
+            <div style="font-weight:600; font-size:14px;">📅 กำหนดการลงทะเบียน</div>
+            <div id="apply-schedule-text" style="font-size:13px; margin-top:4px;"></div>
           </div>
 
           <form id="form-apply">
@@ -639,9 +646,30 @@
             </div>
 
             <div class="settings-card">
+              <h3>📝 ช่วงเวลาลงทะเบียนรายใหม่</h3>
+              <div class="info-box blue" style="margin-bottom:14px; font-size:13px;">
+                💡 เมื่อกำหนดช่วงเวลาไว้ ระบบจะเปิด-ปิดรับลงทะเบียนอัตโนมัติตามเวลาที่ตั้งไว้<br>
+                (หากไม่ได้ตั้งค่า จะใช้สวิตช์ "เปิดรับลงทะเบียน" ด้านล่างแทน)
+              </div>
+              <div class="field" style="margin-bottom:12px;">
+                <label>เปิดรับลงทะเบียนตั้งแต่</label>
+                <input type="datetime-local" id="set-apply-start">
+              </div>
+              <div class="field" style="margin-bottom:12px;">
+                <label>ปิดรับลงทะเบียนเมื่อ</label>
+                <input type="datetime-local" id="set-apply-end">
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-primary btn-sm" onclick="window.saveConfig('apply_period')">💾 บันทึกการตั้งค่า</button>
+                <button class="btn btn-ghost btn-sm" onclick="window.clearApplyPeriod()">🗑️ ล้างช่วงเวลา</button>
+              </div>
+              <div id="apply-period-status" style="margin-top:10px; font-size:12px; color:var(--muted);"></div>
+            </div>
+
+            <div class="settings-card">
               <h3>👁️ การแสดงเมนู</h3>
               <div class="toggle-row">
-                <div class="toggle-label">เปิดรับลงทะเบียน<small>แสดงเมนูสมัครใหม่</small></div>
+                <div class="toggle-label">เปิดรับลงทะเบียน<small>แสดงเมนูสมัครใหม่ (ใช้เมื่อไม่ได้ตั้งช่วงเวลา)</small></div>
                 <label class="toggle">
                   <input type="checkbox" id="vis-apply">
                   <span class="toggle-slider"></span>
