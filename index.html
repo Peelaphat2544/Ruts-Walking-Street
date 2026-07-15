@@ -27,6 +27,7 @@
         <button class="nav-btn active" id="btn-m-home" onclick="showPage('home',this)">🏠 หน้าหลัก</button>
         <button class="nav-btn" id="btn-m-apply" onclick="showPage('apply',this)">📝 ลงทะเบียน</button>
         <button class="nav-btn" id="btn-m-substitute" onclick="showPage('substitute',this)">🔄 ล็อกวิ่ง</button>
+        <button class="nav-btn" id="btn-m-swap" onclick="showPage('swap',this)">🔀 สับเปลี่ยนล็อก</button>
         <button class="nav-btn" id="btn-m-leave" onclick="showPage('leave',this)">🗓️ แจ้งหยุด</button>
         <button class="nav-btn" id="btn-m-renew" onclick="showPage('renew',this)">✅ ยืนยันสิทธิ์</button>
         <button class="nav-btn" id="btn-m-map" onclick="showPage('map',this)">🗺️ แผนผัง</button>
@@ -112,6 +113,13 @@
                 <div class="svc-desc">ขายแทนผู้ประกอบการประจำที่แจ้งหยุดจำหน่าย</div>
               </div>
             </button>
+            <button class="service-card" onclick="showPage('swap', document.getElementById('btn-m-swap'))">
+              <div class="svc-icon">🔀</div>
+              <div class="svc-body">
+                <div class="svc-title">แจ้งขอสับเปลี่ยนล็อก</div>
+                <div class="svc-desc">สำหรับร้านค้า 2 ร้านที่ต้องการสลับพื้นที่กัน</div>
+              </div>
+            </button>
             <button class="service-card" onclick="showPage('renew', document.getElementById('btn-m-renew'))">
               <div class="svc-icon">✅</div>
               <div class="svc-body">
@@ -185,6 +193,33 @@
                     <option>คริสต์</option>
                   </select>
                 </div>
+                <div class="field full">
+                  <label>ประเภทผู้สมัคร <span class="req">*</span></label>
+                  <select name="personType" onchange="window.togglePersonTypeFields('apply')" required>
+                    <option value="">— เลือกประเภทบุคคล —</option>
+                    <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
+                    <option value="บุคลากรมหาวิทยาลัย">บุคลากรมหาวิทยาลัย</option>
+                    <option value="สโมสรนักศึกษา">สโมสรนักศึกษา</option>
+                    <option value="นักศึกษา">นักศึกษา</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Conditional Fields for สโมสรนักศึกษา -->
+              <div id="apply-fields-club" class="form-grid" style="display:none; margin-top:12px; padding:16px; background:var(--blue-l); border-radius:8px;">
+                <div class="field"><label>คณะในมหาวิทยาลัย <span class="req">*</span></label><input name="clubFaculty"></div>
+                <div class="field"><label>หัวหน้างานพัฒนานักศึกษา <span class="req">*</span></label><input name="clubHeadName"></div>
+                <div class="field"><label>เบอร์โทรหัวหน้างาน <span class="req">*</span></label><input name="clubHeadPhone" maxlength="10" type="tel"></div>
+              </div>
+
+              <!-- Conditional Fields for นักศึกษา -->
+              <div id="apply-fields-student" class="form-grid" style="display:none; margin-top:12px; padding:16px; background:var(--green-l); border-radius:8px;">
+                <div class="field"><label>รหัสนักศึกษา <span class="req">*</span></label><input name="studentId"></div>
+                <div class="field"><label>แผนกวิชา/สาขาวิชา/หลักสูตร <span class="req">*</span></label><input name="studentMajor"></div>
+                <div class="field"><label>คณะในมหาวิทยาลัย <span class="req">*</span></label><input name="studentFaculty"></div>
+                <div class="field"><label>ชื่ออาจารย์ที่ปรึกษา <span class="req">*</span></label><input name="advisorName"></div>
+                <div class="field"><label>เบอร์โทรอาจารย์ที่ปรึกษา <span class="req">*</span></label><input name="advisorPhone" maxlength="10" type="tel"></div>
+                <div class="field"><label>อีเมลอาจารย์ที่ปรึกษา</label><input name="advisorEmail" type="email"></div>
               </div>
             </div>
 
@@ -310,6 +345,33 @@
                     <option>คริสต์</option>
                   </select>
                 </div>
+                <div class="field full">
+                  <label>ประเภทผู้สมัคร <span class="req">*</span></label>
+                  <select name="personType" onchange="window.togglePersonTypeFields('substitute')" required>
+                    <option value="">— เลือกประเภทบุคคล —</option>
+                    <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
+                    <option value="บุคลากรมหาวิทยาลัย">บุคลากรมหาวิทยาลัย</option>
+                    <option value="สโมสรนักศึกษา">สโมสรนักศึกษา</option>
+                    <option value="นักศึกษา">นักศึกษา</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Conditional Fields for สโมสรนักศึกษา (Substitute) -->
+              <div id="substitute-fields-club" class="form-grid" style="display:none; margin-top:12px; padding:16px; background:var(--blue-l); border-radius:8px;">
+                <div class="field"><label>คณะในมหาวิทยาลัย <span class="req">*</span></label><input name="clubFaculty"></div>
+                <div class="field"><label>หัวหน้างานพัฒนานักศึกษา <span class="req">*</span></label><input name="clubHeadName"></div>
+                <div class="field"><label>เบอร์โทรหัวหน้างาน <span class="req">*</span></label><input name="clubHeadPhone" maxlength="10" type="tel"></div>
+              </div>
+
+              <!-- Conditional Fields for นักศึกษา (Substitute) -->
+              <div id="substitute-fields-student" class="form-grid" style="display:none; margin-top:12px; padding:16px; background:var(--green-l); border-radius:8px;">
+                <div class="field"><label>รหัสนักศึกษา <span class="req">*</span></label><input name="studentId"></div>
+                <div class="field"><label>แผนกวิชา/สาขาวิชา/หลักสูตร <span class="req">*</span></label><input name="studentMajor"></div>
+                <div class="field"><label>คณะในมหาวิทยาลัย <span class="req">*</span></label><input name="studentFaculty"></div>
+                <div class="field"><label>ชื่ออาจารย์ที่ปรึกษา <span class="req">*</span></label><input name="advisorName"></div>
+                <div class="field"><label>เบอร์โทรอาจารย์ที่ปรึกษา <span class="req">*</span></label><input name="advisorPhone" maxlength="10" type="tel"></div>
+                <div class="field"><label>อีเมลอาจารย์ที่ปรึกษา</label><input name="advisorEmail" type="email"></div>
               </div>
             </div>
 
@@ -379,6 +441,44 @@
             <button type="submit" id="btn-submit-leave" class="btn btn-primary"
               style="width:100%; margin-top:8px; padding:14px;">
               ส่งคำขอแจ้งหยุดจำหน่าย
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+       SWAP PAGE
+  ══════════════════════════════ -->
+    <div id="page-swap" class="page">
+      <div class="page-inner-sm">
+        <div class="card">
+          <div class="card-title">🔀 แจ้งขอสับเปลี่ยนล็อก</div>
+          <div class="info-box blue" style="margin-bottom: 16px;">
+            <div style="font-size: 13px;">💡 <strong>เงื่อนไข:</strong> ร้านค้า 2 ร้านที่จะทำการสลับกัน จะต้องมีจำนวนล็อก (พื้นที่) เท่ากันเท่านั้น</div>
+          </div>
+          <form id="form-swap">
+            <div class="form-grid" style="grid-template-columns:1fr;">
+              <div class="field">
+                <label>ร้านค้าของคุณ <span class="req">*</span></label>
+                <select id="swap-my-shop" name="myShopId" required onchange="window.filterSwapTargets()">
+                  <option value="">— เลือกร้านค้าของคุณ —</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>ร้านค้าที่ต้องการสับเปลี่ยนด้วย <span class="req">*</span></label>
+                <select id="swap-target-shop" name="targetShopId" required>
+                  <option value="">— เลือกร้านค้าของคุณก่อน —</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>เหตุผลในการขอสับเปลี่ยน <span class="req">*</span></label>
+                <textarea name="reason" rows="2" required placeholder="ระบุเหตุผลในการขอสลับพื้นที่..."></textarea>
+              </div>
+            </div>
+            <button type="submit" id="btn-submit-swap" class="btn btn-primary"
+              style="width:100%; margin-top:8px; padding:14px;">
+              ส่งคำขอสับเปลี่ยนล็อก
             </button>
           </form>
         </div>
@@ -515,6 +615,7 @@
         <div class="tabs">
           <button class="tab-btn active" onclick="showAdminTab('pending',this)">📋 รออนุมัติ</button>
           <button class="tab-btn" onclick="showAdminTab('shops',this)">🏪 ร้านค้า</button>
+          <button class="tab-btn" onclick="showAdminTab('swaps',this)">🔀 สับเปลี่ยนล็อก</button>
           <button class="tab-btn" onclick="showAdminTab('renewals',this)">🔄 ยืนยันสิทธิ์</button>
           <button class="tab-btn" onclick="showAdminTab('payments',this)">💰 การเงิน</button>
           <button class="tab-btn" onclick="showAdminTab('settings',this)">⚙️ ตั้งค่าระบบ</button>
@@ -629,6 +730,34 @@
                 <tbody id="tbody-admin-shops">
                   <tr>
                     <td colspan="6" class="td-empty">ไม่มีข้อมูล</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: SWAPS (Admin) -->
+        <div id="admin-tab-swaps" class="tab-panel">
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">🔀 คำขอสับเปลี่ยนล็อก</div>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>วันที่ขอ</th>
+                    <th>ร้านที่ขอ</th>
+                    <th>ร้านปลายทาง</th>
+                    <th>พื้นที่สลับ</th>
+                    <th>เหตุผล</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-admin-swaps">
+                  <tr>
+                    <td colspan="6" class="td-empty">⏳ กำลังโหลด...</td>
                   </tr>
                 </tbody>
               </table>
@@ -788,7 +917,10 @@
         <!-- TAB: LOGS -->
         <div id="admin-tab-logs" class="tab-panel">
           <div class="card">
-            <div class="card-title">📝 บันทึกกิจกรรมระบบ</div>
+            <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>📝 บันทึกกิจกรรมระบบ</span>
+              <button class="btn btn-ghost btn-sm" onclick="window.clearOldLogs()">🗑️ ล้าง Log เก่า (>30 วัน)</button>
+            </div>
             <div class="tbl-wrap">
               <table>
                 <thead>
@@ -816,6 +948,26 @@
        MODALS
   ══════════════════════════════ -->
     <div id="modal-bg" class="modal-bg" onclick="window.closeModal()"></div>
+
+    <!-- MODAL: BEHAVIOR -->
+    <div id="modal-behavior" class="modal-box">
+      <div class="modal-title">📝 บันทึกพฤติกรรมร้านค้า</div>
+      <div id="behavior-shop-name" style="font-weight:bold; margin-bottom: 10px; color: var(--primary);"></div>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="display:block; font-size:12px; margin-bottom:4px; font-weight:600;">เพิ่มบันทึกใหม่:</label>
+        <textarea id="behavior-note" rows="3" class="input" style="width:100%; border:1px solid #ccc; border-radius:4px; padding:8px;" placeholder="ระบุพฤติกรรม เช่น ชำระเงินล่าช้า, มาสาย, ทะเลาะวิวาท..."></textarea>
+        <button class="btn btn-primary btn-sm" style="margin-top:8px; width:100%;" onclick="window.saveBehavior()">💾 บันทึกพฤติกรรม</button>
+      </div>
+
+      <div style="font-size:12px; font-weight:600; margin-bottom:8px;">ประวัติพฤติกรรม (30 วันล่าสุด):</div>
+      <div id="behavior-list" style="max-height: 200px; overflow-y: auto; background: var(--bg-body); padding: 10px; border-radius: 4px;">
+        <!-- Behaviors will be loaded here -->
+      </div>
+      <div style="margin-top:16px; text-align:right;">
+        <button type="button" class="btn btn-ghost" onclick="window.closeModal()">ปิด</button>
+      </div>
+    </div>
 
     <!-- MODAL: APPROVE -->
     <div id="modal-approve" class="modal-box">
