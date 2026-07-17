@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+﻿import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs, doc,
   updateDoc, query, where, serverTimestamp, orderBy,
@@ -62,17 +62,17 @@ window.showToast = (msg, type = 'success', duration = 4000) => {
 window.togglePersonTypeFields = (formType) => {
   const formId = formType === 'apply' ? 'form-apply' : 'form-substitute';
   const personType = document.querySelector(`#${formId} select[name="personType"]`).value;
-  
+
   const clubFields = document.getElementById(`${formType}-fields-club`);
   const studentFields = document.getElementById(`${formType}-fields-student`);
-  
+
   clubFields.style.display = personType === 'สโมสรนักศึกษา' ? 'grid' : 'none';
   studentFields.style.display = personType === 'นักศึกษา' ? 'grid' : 'none';
-  
+
   // Toggle required attributes
   const clubInputs = clubFields.querySelectorAll('input');
   clubInputs.forEach(input => input.required = personType === 'สโมสรนักศึกษา');
-  
+
   const studentInputs = studentFields.querySelectorAll('input');
   studentInputs.forEach(input => {
     if (input.name !== 'advisorEmail') { // Email is optional
@@ -1233,12 +1233,12 @@ async function loadRenewals() {
     const html = snap.docs.map(d => {
       const r = d.data();
       if (r.status === 'approved' || r.status === 'rejected') return ''; // ซ่อนรายการที่ประมวลผลแล้ว
-      
+
       const name = nameMap[r.shopId] || r.shopId;
       const isYes = r.response === 'yes';
       const date = r.createdAt?.toDate().toLocaleDateString('th-TH') || '—';
       if (isYes) yes++; else no++;
-      
+
       return `<div class="renewal-card ${isYes ? 'confirmed' : 'resigned'}" style="display:flex; justify-content:space-between; align-items:center;">
           <div>
             <div style="font-weight:700; font-size:14px;">${name}</div>
@@ -1266,7 +1266,7 @@ window.actionRenewal = async (renewalId, shopId, responseType, action) => {
   const isGiveUp = responseType === 'no';
   const actionText = action === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
   const responseText = isGiveUp ? 'การสละสิทธิ์' : 'การยืนยันขายต่อ';
-  
+
   let msg = `คุณต้องการ <strong>${actionText}${responseText}</strong> ใช่หรือไม่?`;
   if (isGiveUp && action === 'approved') {
     msg += `<br><br><span style="color:var(--danger);">⚠️ คำเตือน: ร้านค้าจะถูกลบออกจากระบบทันที</span>`;
@@ -1348,9 +1348,9 @@ async function deleteGoogleDriveFolder(folderUrl) {
 window.openApprove = (id, name, isSubstitute) => {
   currentId = id;
   const shopData = _shopsCache[id] || {};
-  
+
   let detailHtml = `<strong>${name}</strong>`;
-  
+
   // Add person type info if available
   if (shopData.personType) {
     detailHtml += `<div style="font-size:12px; margin-top:4px;"><strong>ประเภท:</strong> ${shopData.personType}</div>`;
@@ -1566,7 +1566,7 @@ window.loadSwapShops = async () => {
       data.slotCount = data.slots ? data.slots.split(',').length : 0;
       return data;
     });
-    swapShopsCache.sort((a,b) => (a.shopName || '').localeCompare(b.shopName || ''));
+    swapShopsCache.sort((a, b) => (a.shopName || '').localeCompare(b.shopName || ''));
 
     let html = '<option value="">— เลือกร้านค้าของคุณ —</option>';
     swapShopsCache.forEach(s => {
@@ -1664,7 +1664,7 @@ window.loadSwaps = async () => {
       tbody.innerHTML = '<tr><td colspan="6" class="td-empty">ไม่มีคำขอสับเปลี่ยนล็อก</td></tr>';
       return;
     }
-    
+
     tbody.innerHTML = snap.docs.map(d => {
       const s = d.data();
       const ts = s.createdAt?.toDate().toLocaleDateString('th-TH') || '—';
@@ -1707,180 +1707,180 @@ window.actionSwap = async (swapId, shop1, shop2, name1, name2, slots1, slots2, a
 
   try {
     await updateDoc(doc(db, "swaps", swapId), { status: action, actionAt: serverTimestamp() });
-    
+
     if (action === 'approved') {
       await updateDoc(doc(db, "shops", shop1), { slots: slots2 });
       await updateDoc(doc(db, "shops", shop2), { slots: slots1 });
       await logAction('อนุมัติสับเปลี่ยนล็อก', `${name1} (${slots1}) 🔄 ${name2} (${slots2})`);
     } else {
-/* ─── INIT ─── */
-loadStats();
-loadSystemConfig();
+      /* ─── INIT ─── */
+      loadStats();
+      loadSystemConfig();
 
-/* ─── GALLERY LOGIC ─── */
-window.openGallery = (shopId) => {
-  const shopData = _shopsCache[shopId];
-  if (!shopData) return;
-  document.getElementById('gallery-shop-name').innerText = shopData.shopName || 'ไม่มีชื่อร้าน';
-  const container = document.getElementById('gallery-container');
-  container.innerHTML = '';
+      /* ─── GALLERY LOGIC ─── */
+      window.openGallery = (shopId) => {
+        const shopData = _shopsCache[shopId];
+        if (!shopData) return;
+        document.getElementById('gallery-shop-name').innerText = shopData.shopName || 'ไม่มีชื่อร้าน';
+        const container = document.getElementById('gallery-container');
+        container.innerHTML = '';
 
-  if (shopData.fileUrls && shopData.fileUrls.length > 0) {
-    container.innerHTML = shopData.fileUrls.map(url => `
+        if (shopData.fileUrls && shopData.fileUrls.length > 0) {
+          container.innerHTML = shopData.fileUrls.map(url => `
         <div class="gallery-img-wrap">
           <img src="${url}" onclick="window.open('${url}','_blank')" alt="Shop Image">
         </div>
       `).join('');
-  } else {
-    container.innerHTML = '<div class="td-empty">ไม่มีรูปภาพสินค้า</div>';
-  }
+        } else {
+          container.innerHTML = '<div class="td-empty">ไม่มีรูปภาพสินค้า</div>';
+        }
 
-  if (shopData.folderUrl) {
-    container.innerHTML += `<div style="grid-column: 1 / -1; margin-top: 10px; text-align: center;">
+        if (shopData.folderUrl) {
+          container.innerHTML += `<div style="grid-column: 1 / -1; margin-top: 10px; text-align: center;">
         <a href="${shopData.folderUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none; display:inline-block;">📂 เปิดดูใน Google Drive</a>
       </div>`;
-  }
+        }
 
-  document.getElementById('modal-gallery').style.display = 'block';
-  document.getElementById('modal-bg').style.display = 'block';
-};
+        document.getElementById('modal-gallery').style.display = 'block';
+        document.getElementById('modal-bg').style.display = 'block';
+      };
 
-/* ══════════════════════════════════════════
-   SWAP LOGIC
-══════════════════════════════════════════ */
-let swapShopsCache = [];
+      /* ══════════════════════════════════════════
+         SWAP LOGIC
+      ══════════════════════════════════════════ */
+      let swapShopsCache = [];
 
-window.loadSwapShops = async () => {
-  const selMy = document.getElementById('swap-my-shop');
-  selMy.innerHTML = '<option value="">— กำลังโหลดรายชื่อร้าน... —</option>';
-  try {
-    const snap = await getDocs(query(collection(db, "shops"), where("status", "==", "active")));
-    swapShopsCache = snap.docs.map(d => {
-      const data = d.data();
-      data.id = d.id;
-      data.slotCount = data.slots ? data.slots.split(',').length : 0;
-      return data;
-    });
-    swapShopsCache.sort((a,b) => (a.shopName || '').localeCompare(b.shopName || ''));
+      window.loadSwapShops = async () => {
+        const selMy = document.getElementById('swap-my-shop');
+        selMy.innerHTML = '<option value="">— กำลังโหลดรายชื่อร้าน... —</option>';
+        try {
+          const snap = await getDocs(query(collection(db, "shops"), where("status", "==", "active")));
+          swapShopsCache = snap.docs.map(d => {
+            const data = d.data();
+            data.id = d.id;
+            data.slotCount = data.slots ? data.slots.split(',').length : 0;
+            return data;
+          });
+          swapShopsCache.sort((a, b) => (a.shopName || '').localeCompare(b.shopName || ''));
 
-    let html = '<option value="">— เลือกร้านค้าของคุณ —</option>';
-    swapShopsCache.forEach(s => {
-      if (s.slotCount > 0) {
-        html += `<option value="${s.id}">${s.shopName} (ล็อก: ${s.slots})</option>`;
+          let html = '<option value="">— เลือกร้านค้าของคุณ —</option>';
+          swapShopsCache.forEach(s => {
+            if (s.slotCount > 0) {
+              html += `<option value="${s.id}">${s.shopName} (ล็อก: ${s.slots})</option>`;
+            }
+          });
+          selMy.innerHTML = html;
+          window.filterSwapTargets();
+        } catch (e) {
+          selMy.innerHTML = '<option value="">— โหลดข้อมูลล้มเหลว —</option>';
+          console.warn(e);
+        }
+      };
+
+      window.filterSwapTargets = () => {
+        const selMy = document.getElementById('swap-my-shop');
+        const selTarget = document.getElementById('swap-target-shop');
+        const myId = selMy.value;
+
+        if (!myId) {
+          selTarget.innerHTML = '<option value="">— เลือกร้านค้าของคุณก่อน —</option>';
+          return;
+        }
+
+        const myShop = swapShopsCache.find(s => s.id === myId);
+        if (!myShop) return;
+
+        const targetShops = swapShopsCache.filter(s => s.id !== myId && s.slotCount === myShop.slotCount);
+
+        if (targetShops.length === 0) {
+          selTarget.innerHTML = '<option value="">— ไม่มีร้านค้าอื่นที่มีจำนวนล็อกเท่ากัน —</option>';
+          return;
+        }
+
+        let html = '<option value="">— เลือกร้านค้าที่ต้องการสับเปลี่ยนด้วย —</option>';
+        targetShops.forEach(s => {
+          html += `<option value="${s.id}">${s.shopName} (ล็อก: ${s.slots})</option>`;
+        });
+        selTarget.innerHTML = html;
+      };
+
+      const formSwap = document.getElementById('form-swap');
+      if (formSwap) {
+        formSwap.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById('btn-submit-swap');
+          const myId = document.getElementById('swap-my-shop').value;
+          const targetId = document.getElementById('swap-target-shop').value;
+          const reason = e.target.reason.value;
+
+          if (!myId || !targetId) {
+            window.showToast('กรุณาเลือกร้านค้าให้ครบถ้วน', 'warning');
+            return;
+          }
+
+          const myShop = swapShopsCache.find(s => s.id === myId);
+          const targetShop = swapShopsCache.find(s => s.id === targetId);
+
+          const ok = await window.showConfirm(`ยืนยันการขอสับเปลี่ยนล็อก<br><strong>${myShop.shopName}</strong> (${myShop.slots})<br>🔄 <strong>${targetShop.shopName}</strong> (${targetShop.slots})`, 'ยืนยัน', '🔀', 'ส่งคำขอ', 'btn-primary');
+          if (!ok) return;
+
+          btn.disabled = true;
+          btn.innerText = 'กำลังส่งคำขอ...';
+          try {
+            await addDoc(collection(db, "swaps"), {
+              myShopId: myId,
+              myShopName: myShop.shopName,
+              mySlots: myShop.slots,
+              targetShopId: targetId,
+              targetShopName: targetShop.shopName,
+              targetSlots: targetShop.slots,
+              reason: reason,
+              status: 'pending',
+              createdAt: serverTimestamp()
+            });
+            window.showToast('ส่งคำขอสับเปลี่ยนล็อกสำเร็จ', 'success');
+            e.target.reset();
+            window.showPage('home');
+          } catch (error) {
+            window.showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+          } finally {
+            btn.disabled = false;
+            btn.innerText = 'ส่งคำขอสับเปลี่ยนล็อก';
+          }
+        });
       }
-    });
-    selMy.innerHTML = html;
-    window.filterSwapTargets();
-  } catch (e) {
-    selMy.innerHTML = '<option value="">— โหลดข้อมูลล้มเหลว —</option>';
-    console.warn(e);
-  }
-};
 
-window.filterSwapTargets = () => {
-  const selMy = document.getElementById('swap-my-shop');
-  const selTarget = document.getElementById('swap-target-shop');
-  const myId = selMy.value;
+      window.loadSwaps = async () => {
+        const tbody = document.getElementById('tbody-admin-swaps');
+        tbody.innerHTML = skeletonRows(6, 6);
+        try {
+          const snap = await getDocs(query(collection(db, "swaps"), orderBy("createdAt", "desc")));
+          if (snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="6" class="td-empty">ไม่มีคำขอสับเปลี่ยนล็อก</td></tr>';
+            return;
+          }
 
-  if (!myId) {
-    selTarget.innerHTML = '<option value="">— เลือกร้านค้าของคุณก่อน —</option>';
-    return;
-  }
+          tbody.innerHTML = snap.docs.map(d => {
+            const s = d.data();
+            const ts = s.createdAt?.toDate().toLocaleDateString('th-TH') || '—';
+            const isPending = s.status === 'pending';
+            const statusLabel = {
+              'pending': '<span class="badge badge-pending">รอพิจารณา</span>',
+              'approved': '<span class="badge badge-active">อนุมัติแล้ว</span>',
+              'rejected': '<span class="badge badge-cancelled">ไม่อนุมัติ</span>'
+            }[s.status] || s.status;
 
-  const myShop = swapShopsCache.find(s => s.id === myId);
-  if (!myShop) return;
-
-  const targetShops = swapShopsCache.filter(s => s.id !== myId && s.slotCount === myShop.slotCount);
-
-  if (targetShops.length === 0) {
-    selTarget.innerHTML = '<option value="">— ไม่มีร้านค้าอื่นที่มีจำนวนล็อกเท่ากัน —</option>';
-    return;
-  }
-
-  let html = '<option value="">— เลือกร้านค้าที่ต้องการสับเปลี่ยนด้วย —</option>';
-  targetShops.forEach(s => {
-    html += `<option value="${s.id}">${s.shopName} (ล็อก: ${s.slots})</option>`;
-  });
-  selTarget.innerHTML = html;
-};
-
-const formSwap = document.getElementById('form-swap');
-if (formSwap) {
-  formSwap.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('btn-submit-swap');
-    const myId = document.getElementById('swap-my-shop').value;
-    const targetId = document.getElementById('swap-target-shop').value;
-    const reason = e.target.reason.value;
-
-    if (!myId || !targetId) {
-      window.showToast('กรุณาเลือกร้านค้าให้ครบถ้วน', 'warning');
-      return;
-    }
-
-    const myShop = swapShopsCache.find(s => s.id === myId);
-    const targetShop = swapShopsCache.find(s => s.id === targetId);
-
-    const ok = await window.showConfirm(`ยืนยันการขอสับเปลี่ยนล็อก<br><strong>${myShop.shopName}</strong> (${myShop.slots})<br>🔄 <strong>${targetShop.shopName}</strong> (${targetShop.slots})`, 'ยืนยัน', '🔀', 'ส่งคำขอ', 'btn-primary');
-    if (!ok) return;
-
-    btn.disabled = true;
-    btn.innerText = 'กำลังส่งคำขอ...';
-    try {
-      await addDoc(collection(db, "swaps"), {
-        myShopId: myId,
-        myShopName: myShop.shopName,
-        mySlots: myShop.slots,
-        targetShopId: targetId,
-        targetShopName: targetShop.shopName,
-        targetSlots: targetShop.slots,
-        reason: reason,
-        status: 'pending',
-        createdAt: serverTimestamp()
-      });
-      window.showToast('ส่งคำขอสับเปลี่ยนล็อกสำเร็จ', 'success');
-      e.target.reset();
-      window.showPage('home');
-    } catch (error) {
-      window.showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerText = 'ส่งคำขอสับเปลี่ยนล็อก';
-    }
-  });
-}
-
-window.loadSwaps = async () => {
-  const tbody = document.getElementById('tbody-admin-swaps');
-  tbody.innerHTML = skeletonRows(6, 6);
-  try {
-    const snap = await getDocs(query(collection(db, "swaps"), orderBy("createdAt", "desc")));
-    if (snap.empty) {
-      tbody.innerHTML = '<tr><td colspan="6" class="td-empty">ไม่มีคำขอสับเปลี่ยนล็อก</td></tr>';
-      return;
-    }
-    
-    tbody.innerHTML = snap.docs.map(d => {
-      const s = d.data();
-      const ts = s.createdAt?.toDate().toLocaleDateString('th-TH') || '—';
-      const isPending = s.status === 'pending';
-      const statusLabel = {
-        'pending': '<span class="badge badge-pending">รอพิจารณา</span>',
-        'approved': '<span class="badge badge-active">อนุมัติแล้ว</span>',
-        'rejected': '<span class="badge badge-cancelled">ไม่อนุมัติ</span>'
-      }[s.status] || s.status;
-
-      let actions = '';
-      if (isPending) {
-        actions = `
+            let actions = '';
+            if (isPending) {
+              actions = `
           <div style="display:flex; gap:6px;">
             <button class="btn btn-primary btn-sm" onclick="window.actionSwap('${d.id}', '${s.myShopId}', '${s.targetShopId}', '${s.myShopName}', '${s.targetShopName}', '${s.mySlots}', '${s.targetSlots}', 'approved')">อนุมัติ</button>
             <button class="btn btn-danger btn-sm" onclick="window.actionSwap('${d.id}', '${s.myShopId}', '${s.targetShopId}', '${s.myShopName}', '${s.targetShopName}', '${s.mySlots}', '${s.targetSlots}', 'rejected')">ไม่อนุมัติ</button>
           </div>
         `;
-      }
+            }
 
-      return `<tr>
+            return `<tr>
         <td style="white-space:nowrap;">${ts}</td>
         <td><strong>${s.myShopName}</strong></td>
         <td><strong>${s.targetShopName}</strong></td>
@@ -1888,130 +1888,130 @@ window.loadSwaps = async () => {
         <td>${s.reason || '-'} <br><small>${statusLabel}</small></td>
         <td>${actions}</td>
       </tr>`;
-    }).join('');
-  } catch (e) {
-    tbody.innerHTML = '<tr><td colspan="6" class="td-empty">เกิดข้อผิดพลาดในการโหลด</td></tr>';
-    console.warn(e);
-  }
-};
+          }).join('');
+        } catch (e) {
+          tbody.innerHTML = '<tr><td colspan="6" class="td-empty">เกิดข้อผิดพลาดในการโหลด</td></tr>';
+          console.warn(e);
+        }
+      };
 
-window.actionSwap = async (swapId, shop1, shop2, name1, name2, slots1, slots2, action) => {
-  const actionText = action === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
-  const ok = await window.showConfirm(`คุณต้องการ <strong>${actionText}</strong> การสลับล็อกระหว่าง<br>${name1} และ ${name2} ใช่หรือไม่?`, 'ยืนยัน', '📋', 'ยืนยัน', action === 'approved' ? 'btn-primary' : 'btn-danger');
-  if (!ok) return;
+      window.actionSwap = async (swapId, shop1, shop2, name1, name2, slots1, slots2, action) => {
+        const actionText = action === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
+        const ok = await window.showConfirm(`คุณต้องการ <strong>${actionText}</strong> การสลับล็อกระหว่าง<br>${name1} และ ${name2} ใช่หรือไม่?`, 'ยืนยัน', '📋', 'ยืนยัน', action === 'approved' ? 'btn-primary' : 'btn-danger');
+        if (!ok) return;
 
-  try {
-    await updateDoc(doc(db, "swaps", swapId), { status: action, actionAt: serverTimestamp() });
-    
-    if (action === 'approved') {
-      await updateDoc(doc(db, "shops", shop1), { slots: slots2 });
-      await updateDoc(doc(db, "shops", shop2), { slots: slots1 });
-      await logAction('อนุมัติสับเปลี่ยนล็อก', `${name1} (${slots1}) 🔄 ${name2} (${slots2})`);
-    } else {
-      await logAction('ปฏิเสธสับเปลี่ยนล็อก', `${name1} 🔄 ${name2}`);
-    }
-    window.showToast('ทำรายการสำเร็จ', 'success');
-    loadSwaps();
-  } catch (e) {
-    window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
-  }
-};
+        try {
+          await updateDoc(doc(db, "swaps", swapId), { status: action, actionAt: serverTimestamp() });
 
-/* ══════════════════════════════════════════
-   BEHAVIOR LOGIC
-══════════════════════════════════════════ */
-let currentBehaviorShopId = null;
+          if (action === 'approved') {
+            await updateDoc(doc(db, "shops", shop1), { slots: slots2 });
+            await updateDoc(doc(db, "shops", shop2), { slots: slots1 });
+            await logAction('อนุมัติสับเปลี่ยนล็อก', `${name1} (${slots1}) 🔄 ${name2} (${slots2})`);
+          } else {
+            await logAction('ปฏิเสธสับเปลี่ยนล็อก', `${name1} 🔄 ${name2}`);
+          }
+          window.showToast('ทำรายการสำเร็จ', 'success');
+          loadSwaps();
+        } catch (e) {
+          window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+        }
+      };
 
-window.openBehaviorModal = (shopId, shopName) => {
-  currentBehaviorShopId = shopId;
-  document.getElementById('behavior-shop-name').innerText = shopName;
-  document.getElementById('behavior-note').value = '';
-  document.getElementById('modal-behavior').style.display = 'block';
-  document.getElementById('modal-bg').style.display = 'block';
-  window.loadBehaviorHistory(shopId);
-};
+      /* ══════════════════════════════════════════
+         BEHAVIOR LOGIC
+      ══════════════════════════════════════════ */
+      let currentBehaviorShopId = null;
 
-window.saveBehavior = async () => {
-  const note = document.getElementById('behavior-note').value.trim();
-  if (!note) {
-    window.showToast('กรุณาระบุพฤติกรรม', 'warning');
-    return;
-  }
-  try {
-    await addDoc(collection(db, `shops/${currentBehaviorShopId}/behaviors`), {
-      note: note,
-      admin: auth.currentUser?.email || 'Unknown',
-      createdAt: serverTimestamp()
-    });
-    window.showToast('บันทึกพฤติกรรมสำเร็จ', 'success');
-    document.getElementById('behavior-note').value = '';
-    window.loadBehaviorHistory(currentBehaviorShopId);
-  } catch (e) {
-    window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
-  }
-};
+      window.openBehaviorModal = (shopId, shopName) => {
+        currentBehaviorShopId = shopId;
+        document.getElementById('behavior-shop-name').innerText = shopName;
+        document.getElementById('behavior-note').value = '';
+        document.getElementById('modal-behavior').style.display = 'block';
+        document.getElementById('modal-bg').style.display = 'block';
+        window.loadBehaviorHistory(shopId);
+      };
 
-window.loadBehaviorHistory = async (shopId) => {
-  const listEl = document.getElementById('behavior-list');
-  listEl.innerHTML = '<div style="color:var(--muted); font-size:12px;">กำลังโหลด...</div>';
-  try {
-    const d30 = new Date();
-    d30.setDate(d30.getDate() - 30);
+      window.saveBehavior = async () => {
+        const note = document.getElementById('behavior-note').value.trim();
+        if (!note) {
+          window.showToast('กรุณาระบุพฤติกรรม', 'warning');
+          return;
+        }
+        try {
+          await addDoc(collection(db, `shops/${currentBehaviorShopId}/behaviors`), {
+            note: note,
+            admin: auth.currentUser?.email || 'Unknown',
+            createdAt: serverTimestamp()
+          });
+          window.showToast('บันทึกพฤติกรรมสำเร็จ', 'success');
+          document.getElementById('behavior-note').value = '';
+          window.loadBehaviorHistory(currentBehaviorShopId);
+        } catch (e) {
+          window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+        }
+      };
 
-    const snap = await getDocs(query(
-      collection(db, `shops/${shopId}/behaviors`),
-      where("createdAt", ">=", d30),
-      orderBy("createdAt", "desc")
-    ));
+      window.loadBehaviorHistory = async (shopId) => {
+        const listEl = document.getElementById('behavior-list');
+        listEl.innerHTML = '<div style="color:var(--muted); font-size:12px;">กำลังโหลด...</div>';
+        try {
+          const d30 = new Date();
+          d30.setDate(d30.getDate() - 30);
 
-    if (snap.empty) {
-      listEl.innerHTML = '<div style="color:var(--muted); font-size:12px;">ไม่มีประวัติใน 30 วันล่าสุด</div>';
-      return;
-    }
+          const snap = await getDocs(query(
+            collection(db, `shops/${shopId}/behaviors`),
+            where("createdAt", ">=", d30),
+            orderBy("createdAt", "desc")
+          ));
 
-    listEl.innerHTML = snap.docs.map(d => {
-      const data = d.data();
-      const ts = data.createdAt?.toDate().toLocaleString('th-TH') || '—';
-      return `
+          if (snap.empty) {
+            listEl.innerHTML = '<div style="color:var(--muted); font-size:12px;">ไม่มีประวัติใน 30 วันล่าสุด</div>';
+            return;
+          }
+
+          listEl.innerHTML = snap.docs.map(d => {
+            const data = d.data();
+            const ts = data.createdAt?.toDate().toLocaleString('th-TH') || '—';
+            return `
         <div style="border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px;">
           <div style="font-size: 13px;">${data.note}</div>
           <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">🗓️ ${ts} (โดย ${data.admin})</div>
         </div>
       `;
-    }).join('');
-  } catch (e) {
-    listEl.innerHTML = '<div style="color:var(--danger); font-size:12px;">โหลดล้มเหลว: ' + e.message + '</div>';
-    console.warn(e);
-  }
-};
+          }).join('');
+        } catch (e) {
+          listEl.innerHTML = '<div style="color:var(--danger); font-size:12px;">โหลดล้มเหลว: ' + e.message + '</div>';
+          console.warn(e);
+        }
+      };
 
-/* ══════════════════════════════════════════
-   ADMIN ACTION LOG CLEANUP
-══════════════════════════════════════════ */
-window.clearOldLogs = async () => {
-  const ok = await window.showConfirm('ต้องการล้างประวัติกิจกรรมที่เก่ากว่า 30 วันใช่หรือไม่?', 'ล้างประวัติกิจกรรม', '🗑️', 'ล้างข้อมูล', 'btn-danger');
-  if (!ok) return;
-  
-  try {
-    const d30 = new Date();
-    d30.setDate(d30.getDate() - 30);
-    
-    const snap = await getDocs(query(collection(db, "logs"), where("timestamp", "<", d30)));
-    if (snap.empty) {
-      window.showToast('ไม่มีประวัติที่เก่ากว่า 30 วัน', 'info');
-      return;
-    }
-    
-    let count = 0;
-    for (const d of snap.docs) {
-      await deleteDoc(doc(db, "logs", d.id));
-      count++;
-    }
-    
-    await logAction('ล้างประวัติกิจกรรม', `ลบไป ${count} รายการ (เก่ากว่า 30 วัน)`);
-    window.showToast(`ลบประวัติไป ${count} รายการ`, 'success');
-    if (typeof loadLogs === 'function') loadLogs();
-  } catch (e) {
-    window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
-  }
-};
+      /* ══════════════════════════════════════════
+         ADMIN ACTION LOG CLEANUP
+      ══════════════════════════════════════════ */
+      window.clearOldLogs = async () => {
+        const ok = await window.showConfirm('ต้องการล้างประวัติกิจกรรมที่เก่ากว่า 30 วันใช่หรือไม่?', 'ล้างประวัติกิจกรรม', '🗑️', 'ล้างข้อมูล', 'btn-danger');
+        if (!ok) return;
+
+        try {
+          const d30 = new Date();
+          d30.setDate(d30.getDate() - 30);
+
+          const snap = await getDocs(query(collection(db, "logs"), where("timestamp", "<", d30)));
+          if (snap.empty) {
+            window.showToast('ไม่มีประวัติที่เก่ากว่า 30 วัน', 'info');
+            return;
+          }
+
+          let count = 0;
+          for (const d of snap.docs) {
+            await deleteDoc(doc(db, "logs", d.id));
+            count++;
+          }
+
+          await logAction('ล้างประวัติกิจกรรม', `ลบไป ${count} รายการ (เก่ากว่า 30 วัน)`);
+          window.showToast(`ลบประวัติไป ${count} รายการ`, 'success');
+          if (typeof loadLogs === 'function') loadLogs();
+        } catch (e) {
+          window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+        }
+      };
