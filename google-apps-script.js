@@ -14,7 +14,7 @@
 
 // ใส่ ID ของโฟลเดอร์หลักที่จะเก็บรูปร้านค้าทั้งหมด (เช่น "RUTS_Shop_Images")
 // วิธีเอา ID: เข้า Google Drive เปิดโฟลเดอร์นั้น ดูที่ URL เช่น https://drive.google.com/drive/u/0/folders/1abcde... (เอาแค่ตัวอักษร 1abcde...)
-const MAIN_FOLDER_ID = "1P2PedGPig5gfnSB7Fbe_-KIubFaItxmv"; 
+const MAIN_FOLDER_ID = "1P2PedGPig5gfnSB7Fbe_-KIubFaItxmv";
 
 function doPost(e) {
   // CORS Headers
@@ -61,36 +61,36 @@ function doPost(e) {
     const mainFolder = DriveApp.getFolderById(MAIN_FOLDER_ID);
     const timestamp = Utilities.formatDate(new Date(), "GMT+7", "yyyyMMdd_HHmmss");
     const subFolderName = "ร้าน_" + shopName + "_" + timestamp;
-    
+
     const shopFolder = mainFolder.createFolder(subFolderName);
     shopFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
     const fileUrls = [];
 
-    images.forEach(function(img, index) {
+    images.forEach(function (img, index) {
       const split = img.split(',');
-      const mimeType = split[0].split(':')[1].split(';')[0]; 
+      const mimeType = split[0].split(':')[1].split(';')[0];
       const base64Data = split[1];
-      
+
       const extension = mimeType === "image/png" ? ".png" : ".jpg";
       const fileName = shopName + "_img" + (index + 1) + extension;
-      
+
       const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), mimeType, fileName);
       const file = shopFolder.createFile(blob);
-      
+
       fileUrls.push(file.getUrl());
     });
 
-    return ContentService.createTextOutput(JSON.stringify({ 
-      success: true, 
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
       folderUrl: shopFolder.getUrl(),
       fileUrls: fileUrls
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ 
-      success: false, 
-      error: error.message 
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: error.message
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
