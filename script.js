@@ -1,4 +1,4 @@
-﻿import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs, doc,
   updateDoc, query, where, serverTimestamp, orderBy,
@@ -1736,8 +1736,8 @@ loadSystemConfig();
 
         if (shopData.fileUrls && shopData.fileUrls.length > 0) {
           container.innerHTML = shopData.fileUrls.map(url => `
-        < div class= "gallery-img-wrap" >
-        <img src="${url}" onclick="window.open('${url}','_blank')" alt="Shop Image">
+        <div class="gallery-img-wrap">
+          <img src="${url}" onclick="window.open('${url}','_blank')" alt="Shop Image">
         </div>
       `).join('');
         } else {
@@ -1745,9 +1745,10 @@ loadSystemConfig();
         }
 
         if (shopData.folderUrl) {
-          container.innerHTML += `< div style = "grid-column: 1 / -1; margin-top: 10px; text-align: center;" >
+          container.innerHTML += `<div style="grid-column: 1 / -1; margin-top: 10px; text-align: center;">
       <a href="${shopData.folderUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none; display:inline-block;">📂 เปิดดูใน Google Drive</a>
-      </div > `;
+      </div>`;
+        }
         }
 
         document.getElementById('modal-gallery').style.display = 'block';
