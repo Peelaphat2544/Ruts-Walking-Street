@@ -110,6 +110,24 @@ window.showPage = (name, btn) => {
   if (name === 'renew') loadShopDropdown('renew-shopId');
 };
 
+window.togglePersonTypeFields = (prefix) => {
+  const form = document.getElementById(`form-${prefix}`);
+  if (!form) return;
+  const personType = form.querySelector('[name="personType"]').value;
+  const clubFields = document.getElementById(`${prefix}-fields-club`);
+  const studentFields = document.getElementById(`${prefix}-fields-student`);
+  
+  if (clubFields) {
+    clubFields.style.display = personType === 'สโมสรนักศึกษา' ? 'grid' : 'none';
+    clubFields.querySelectorAll('input').forEach(input => input.required = personType === 'สโมสรนักศึกษา');
+  }
+  
+  if (studentFields) {
+    studentFields.style.display = personType === 'นักศึกษา' ? 'grid' : 'none';
+    studentFields.querySelectorAll('input').forEach(input => input.required = personType === 'นักศึกษา');
+  }
+};
+
 window.closeModal = () => {
   document.querySelectorAll('.modal-box, .modal-bg').forEach(el => el.style.display = 'none');
 };
