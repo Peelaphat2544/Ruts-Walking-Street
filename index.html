@@ -31,6 +31,7 @@
         <button class="nav-btn" id="btn-m-leave" onclick="showPage('leave',this)">🗓️ แจ้งหยุด</button>
         <button class="nav-btn" id="btn-m-renew" onclick="showPage('renew',this)">✅ ยืนยันสิทธิ์</button>
         <button class="nav-btn" id="btn-m-map" onclick="showPage('map',this)">🗺️ แผนผัง</button>
+        <button class="nav-btn" id="btn-m-complaint" onclick="showPage('complaint',this)">🗣️ ร้องเรียน</button>
         <button class="nav-btn" onclick="showPage('admin',this)">🔐 ผู้ดูแล</button>
       </nav>
     </header>
@@ -38,6 +39,17 @@
     <!-- TOOLTIP & ANNOUNCEMENT -->
     <!-- TOAST CONTAINER -->
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- ANNOUNCEMENT MODAL -->
+    <div class="modal-bg" id="modal-announcement-bg" onclick="window.closeModal()"></div>
+    <div class="modal-box" id="modal-announcement" style="max-width:400px; text-align:center;">
+      <h3 style="margin-bottom:12px; font-family:'Mitr', sans-serif; color:var(--primary);">📢 ประกาศจากคณะกรรมการ</h3>
+      <p id="announcement-modal-text" style="font-size:14px; color:var(--text); margin-bottom:20px;">
+        ประกาศผลการอนุมัติล็อกวิ่ง / ยืนยันสิทธิ์
+      </p>
+      <button class="btn btn-primary" onclick="window.viewAnnouncementPDF()" style="width:100%; margin-bottom:10px;">📄 ดูประกาศผล (PDF)</button>
+      <button class="btn btn-ghost" onclick="window.closeModal()" style="width:100%;">ปิด</button>
+    </div>
 
     <!-- CUSTOM CONFIRM DIALOG -->
     <div class="confirm-bg" id="confirm-bg"></div>
@@ -553,6 +565,40 @@
       </div>
     </div>
 
+    <div id="page-complaint" class="page">
+      <div class="page-inner-md">
+        <div class="card">
+          <div class="card-title">🗣️ ระบบร้องเรียน / เสนอแนะ</div>
+          <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">
+            หากพบปัญหาการใช้งานตลาด หรือมีข้อเสนอแนะ สามารถแจ้งได้ที่นี่ (ข้อมูลจะถูกเก็บเป็นความลับ)
+          </p>
+          <form id="form-complaint">
+            <div class="form-grid">
+              <div class="field full">
+                <label>เรื่องที่ต้องการร้องเรียน <span class="req">*</span></label>
+                <input name="title" required placeholder="เช่น ปัญหาที่จอดรถ, สินค้าซ้ำซ้อน">
+              </div>
+              <div class="field full">
+                <label>รายละเอียด <span class="req">*</span></label>
+                <textarea name="description" rows="4" required placeholder="อธิบายรายละเอียดปัญหา หรือข้อเสนอแนะ"></textarea>
+              </div>
+              <div class="field">
+                <label>ชื่อผู้ร้องเรียน (ไม่บังคับ)</label>
+                <input name="name" placeholder="ชื่อ หรือ นามแฝง">
+              </div>
+              <div class="field">
+                <label>เบอร์ติดต่อ (ไม่บังคับ)</label>
+                <input name="phone" type="tel" maxlength="10">
+              </div>
+            </div>
+            <div style="margin-top:20px;">
+              <button type="submit" class="btn btn-primary" id="btn-submit-complaint" style="width:100%; justify-content:center;">ส่งเรื่องร้องเรียน</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- ══════════════════════════════
        ADMIN PAGE
   ══════════════════════════════ -->
@@ -620,6 +666,8 @@
           <button class="tab-btn" onclick="showAdminTab('payments',this)">💰 การเงิน</button>
           <button class="tab-btn" onclick="showAdminTab('settings',this)">⚙️ ตั้งค่าระบบ</button>
           <button class="tab-btn" onclick="showAdminTab('logs',this)">📝 บันทึก</button>
+          <button class="tab-btn" onclick="showAdminTab('reports',this)">📊 รายงาน (Export)</button>
+          <button class="tab-btn" onclick="showAdminTab('complaints',this)">🗣️ ร้องเรียน</button>
         </div>
 
         <!-- TAB: PENDING -->
@@ -911,6 +959,23 @@
                 บันทึกและประกาศ</button>
             </div>
 
+            <div class="settings-card" style="border: 2px solid var(--primary); background: var(--green-l);">
+              <h3>📄 ระบบประกาศผลหน้าเว็บ (PDF)</h3>
+              <div class="toggle-row" style="margin-bottom: 12px;">
+                <div class="toggle-label">เปิดให้ดูผลสอบ/ยืนยันสิทธิ์<small>แสดงหน้าต่าง Popup บนเว็บไซต์</small></div>
+                <label class="toggle">
+                  <input type="checkbox" id="set-pdf-enabled">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="field" style="margin-bottom:12px;">
+                <label>วันที่และเวลาที่จะให้เริ่มประกาศผล</label>
+                <input type="datetime-local" id="set-pdf-datetime">
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="window.saveConfig('pdf_announcement')">💾
+                บันทึกการตั้งค่าประกาศผล</button>
+            </div>
+
           </div>
         </div>
 
@@ -934,6 +999,84 @@
                 <tbody id="tbody-admin-logs">
                   <tr>
                     <td colspan="4" class="td-empty">ไม่มีบันทึกกิจกรรม</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: REPORTS (Export) -->
+        <div id="admin-tab-reports" class="tab-panel">
+          <div class="card">
+            <div class="card-title">📊 รายงานและ Export PDF</div>
+            <div class="form-grid" style="align-items:flex-end;">
+              <div class="field">
+                <label>ข้อมูลที่ต้องการ Export</label>
+                <select id="export-type">
+                  <option value="active">ร้านค้าประจำทั้งหมด (เปิดจำหน่าย)</option>
+                  <option value="substitute">ร้านค้าล็อกวิ่ง (อนุมัติ/ไม่อนุมัติ)</option>
+                  <option value="renewed">ร้านค้าที่ยืนยันสิทธิ์แล้ว</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>ประเภทสินค้า</label>
+                <select id="export-category">
+                  <option value="all">-- ทั้งหมด --</option>
+                  <option value="อาหาร">อาหาร</option>
+                  <option value="เครื่องดื่ม">เครื่องดื่ม</option>
+                  <option value="เสื้อผ้า/เครื่องแต่งกาย">เสื้อผ้า/เครื่องแต่งกาย</option>
+                  <option value="สินค้ามือสอง">สินค้ามือสอง</option>
+                  <option value="งานคราฟ/ทำมือ">งานคราฟ/ทำมือ</option>
+                  <option value="Food Truck">Food Truck</option>
+                  <option value="อื่นๆ">อื่นๆ</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>ประเภทบุคคล</label>
+                <select id="export-person-type">
+                  <option value="all">-- ทั้งหมด --</option>
+                  <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
+                  <option value="บุคลากรมหาวิทยาลัย">บุคลากรมหาวิทยาลัย</option>
+                  <option value="สโมสรนักศึกษา">สโมสรนักศึกษา</option>
+                  <option value="นักศึกษา">นักศึกษา</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>การเรียงลำดับ</label>
+                <select id="export-sort">
+                  <option value="asc">ล็อก น้อย -> มาก</option>
+                  <option value="desc">ล็อก มาก -> น้อย</option>
+                </select>
+              </div>
+              <div style="grid-column: 1/-1;">
+                <button class="btn btn-primary" onclick="window.exportShopReport()">📄 นำข้อมูลออกเป็น PDF</button>
+              </div>
+            </div>
+          </div>
+          <div id="export-preview" class="tbl-wrap" style="display:none; padding:20px; background:white; margin-top:16px; font-family:'Sarabun', sans-serif;">
+            <h2 id="export-title" style="text-align:center; font-family:'Mitr', sans-serif; color:#1A7A52; margin-bottom:20px;"></h2>
+            <div id="export-table-container"></div>
+          </div>
+        </div>
+
+        <!-- TAB: COMPLAINTS -->
+        <div id="admin-tab-complaints" class="tab-panel">
+          <div class="card">
+            <div class="card-title">🗣️ ข้อร้องเรียน / ข้อเสนอแนะ</div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>วัน-เวลา</th>
+                    <th>เรื่อง</th>
+                    <th>รายละเอียด</th>
+                    <th>ผู้แจ้ง / เบอร์</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-admin-complaints">
+                  <tr>
+                    <td colspan="4" class="td-empty">กำลังโหลดข้อมูล...</td>
                   </tr>
                 </tbody>
               </table>

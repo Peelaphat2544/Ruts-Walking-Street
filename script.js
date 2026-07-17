@@ -59,31 +59,6 @@ window.showToast = (msg, type = 'success', duration = 4000) => {
 /* ══════════════════════════════════════════
    CUSTOM CONFIRM DIALOG
 ══════════════════════════════════════════ */
-window.togglePersonTypeFields = (formType) => {
-  const formId = formType === 'apply' ? 'form-apply' : 'form-substitute';
-  const personType = document.querySelector(`#${formId} select[name="personType"]`).value;
-
-  const clubFields = document.getElementById(`${formType}-fields-club`);
-  const studentFields = document.getElementById(`${formType}-fields-student`);
-
-  clubFields.style.display = personType === 'สโมสรนักศึกษา' ? 'grid' : 'none';
-  studentFields.style.display = personType === 'นักศึกษา' ? 'grid' : 'none';
-
-  // Toggle required attributes
-  const clubInputs = clubFields.querySelectorAll('input');
-  clubInputs.forEach(input => input.required = personType === 'สโมสรนักศึกษา');
-
-  const studentInputs = studentFields.querySelectorAll('input');
-  studentInputs.forEach(input => {
-    if (input.name !== 'advisorEmail') { // Email is optional
-      input.required = personType === 'นักศึกษา';
-    }
-  });
-};
-
-/* ══════════════════════════════════════════
-   CUSTOM CONFIRM DIALOG
-══════════════════════════════════════════ */
 window._confirmResolve = null;
 
 window.showConfirm = (msg, title = 'ยืนยันการดำเนินการ', icon = '⚠️', okLabel = 'ยืนยัน', okClass = 'btn-danger') => {
@@ -133,7 +108,6 @@ window.showPage = (name, btn) => {
   if (name === 'map') loadMap();
   if (name === 'leave') loadShopDropdown('leave-shopId');
   if (name === 'renew') loadShopDropdown('renew-shopId');
-  if (name === 'swap') window.loadSwapShops();
 };
 
 window.closeModal = () => {
@@ -255,7 +229,7 @@ window.removeImage = (index) => {
   renderPreviews();
 };
 
-/* ─── APPLY FORM (New vendors — with duplicate phone check & image upload) ─── */
+/* ─── APPLY FORM (with duplicate phone check & image upload) ─── */
 document.getElementById('form-apply').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -284,7 +258,7 @@ document.getElementById('form-apply').addEventListener('submit', async (e) => {
       );
       if (!ok) {
         btn.disabled = false;
-        btn.textContent = 'ส่งข้อมูลลงทะเบียนผู้ประกอบการรายใหม่ →';
+        btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
         return;
       }
     }
@@ -293,7 +267,7 @@ document.getElementById('form-apply').addEventListener('submit', async (e) => {
     if (selectedImages.length < 2) {
       if (uploadError) { uploadError.innerText = 'กรุณาอัพโหลดรูปสินค้าอย่างน้อย 2 รูป'; uploadError.style.display = 'block'; }
       btn.disabled = false;
-      btn.textContent = 'ส่งข้อมูลลงทะเบียนผู้ประกอบการรายใหม่ →';
+      btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
       return;
     }
 
@@ -337,70 +311,14 @@ document.getElementById('form-apply').addEventListener('submit', async (e) => {
     renderPreviews();
     if (progressWrap) progressWrap.style.display = 'none';
     if (progressBar) progressBar.style.width = '0%';
+    document.getElementById('substitute-options').style.display = 'none';
   } catch (err) {
     window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
     const pw = document.getElementById('upload-progress-wrap');
     if (pw) pw.style.display = 'none';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'ส่งข้อมูลลงทะเบียนผู้ประกอบการรายใหม่ →';
-  }
-});
-
-/* ─── SUBSTITUTE FORM (ล็อกวิ่ง — ขายแทนผู้ประกอบการประจำ) ─── */
-document.getElementById('form-substitute').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  // Guard: ตรวจสอบว่ายังเปิดรับลงทะเบียนล็อกวิ่งอยู่หรือไม่
-  if (!window._substituteRegistrationOpen) {
-    window.showToast('ขณะนี้ปิดรับลงทะเบียนล็อกวิ่งแล้ว ไม่สามารถส่งข้อมูลได้', 'error');
-    return;
-  }
-
-  const btn = document.getElementById('btn-submit-substitute');
-  btn.disabled = true;
-  btn.textContent = '⏳ กำลังตรวจสอบข้อมูล...';
-  try {
-    const data = Object.fromEntries(new FormData(e.target));
-
-    if (!data.substituteDate) {
-      window.showToast('กรุณาเลือกวันที่ต้องการขายแทน', 'warning');
-      btn.disabled = false;
-      btn.textContent = 'ส่งข้อมูลลงทะเบียนล็อกวิ่ง →';
-      return;
-    }
-
-    // Check duplicate phone
-    const dupQ = query(collection(db, "shops"), where("phone", "==", data.phone));
-    const dupSnap = await getDocs(dupQ);
-    if (!dupSnap.empty) {
-      const existing = dupSnap.docs[0].data();
-      const ok = await window.showConfirm(
-        `พบข้อมูลเบอร์โทร <strong>${data.phone}</strong> อยู่ในระบบแล้ว<br>
-          (ร้าน: <strong>${existing.shopName}</strong> สถานะ: ${existing.status})<br><br>
-          ต้องการส่งลงทะเบียนล็อกวิ่งต่อไปหรือไม่?`,
-        'พบเบอร์โทรซ้ำในระบบ', '⚠️', 'ส่งต่อไป', 'btn-primary'
-      );
-      if (!ok) {
-        btn.disabled = false;
-        btn.textContent = 'ส่งข้อมูลลงทะเบียนล็อกวิ่ง →';
-        return;
-      }
-    }
-
-    // Save to Firestore (no image upload for substitute)
-    data.status = 'pending';
-    data.createdAt = serverTimestamp();
-
-    await addDoc(collection(db, "shops"), data);
-
-    window.showToast('ส่งข้อมูลล็อกวิ่งสำเร็จ! คณะกรรมการจะพิจารณาและแจ้งผลภายหลัง', 'success', 6000);
-    e.target.reset();
-  } catch (err) {
-    window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'ส่งข้อมูลลงทะเบียนล็อกวิ่ง →';
+    btn.textContent = 'ส่งข้อมูลลงทะเบียน →';
   }
 });
 
@@ -702,7 +620,6 @@ window.exportPaymentPDF = () => {
 /* ─── SYSTEM CONFIG — Real-time ─── */
 // Track global registration open state for form guard
 window._applyRegistrationOpen = false;
-window._substituteRegistrationOpen = false;
 
 function loadSystemConfig() {
   if (_unsubConfig) _unsubConfig();
@@ -721,6 +638,31 @@ function loadSystemConfig() {
 
       const applyClosedMsg = document.getElementById('apply-closed-msg');
       const applyClosedReason = document.getElementById('apply-closed-reason');
+
+      /* ─── PDF ANNOUNCEMENT POPUP ─── */
+      if (c.pdf_announcement) {
+        const pdfA = c.pdf_announcement;
+        if (pdfA.enabled && pdfA.datetime && !window.adminMode) {
+          const now = new Date();
+          const trigger = new Date(pdfA.datetime);
+          if (now >= trigger) {
+            const bg = document.getElementById('modal-announcement-bg');
+            const bx = document.getElementById('modal-announcement');
+            if (bg && bx) {
+              bg.style.display = 'block';
+              bx.style.display = 'block';
+            }
+          }
+        }
+      }
+
+      if (window.adminMode) {
+        if (c.pdf_announcement) {
+          document.getElementById('set-pdf-enabled').checked = !!c.pdf_announcement.enabled;
+          document.getElementById('set-pdf-datetime').value = c.pdf_announcement.datetime || '';
+        }
+        document.getElementById('vis-apply').checked = !!v.apply;
+      }
       const applyClosedDetail = document.getElementById('apply-closed-detail');
       const applyScheduleInfo = document.getElementById('apply-schedule-info');
       const applyScheduleText = document.getElementById('apply-schedule-text');
@@ -772,64 +714,14 @@ function loadSystemConfig() {
         }
       }
 
-      /* ─── SUBSTITUTE PAGE (ล็อกวิ่ง) — controlled by substitute_period ─── */
-      const sub = c.substitute_period || {};
-      const hasSubPeriod = !!(sub.start && sub.end);
-      let subOpen = false;
-
-      const subClosedMsg = document.getElementById('sub-closed-msg');
-      const subClosedReason = document.getElementById('sub-closed-reason');
-      const subClosedDetail = document.getElementById('sub-closed-detail');
-      const subScheduleInfo = document.getElementById('sub-schedule-info');
-      const subScheduleText = document.getElementById('sub-schedule-text');
-      const formSub = document.getElementById('form-substitute');
-      const subDateInput = document.getElementById('substituteDateInput');
-
-      if (hasSubPeriod) {
-        const now = new Date();
-        const subStart = new Date(sub.start);
-        const subEnd = new Date(sub.end);
-
-        if (now < subStart) {
-          subOpen = false;
-          subClosedReason.textContent = '⏳ ยังไม่ถึงช่วงเวลาเปิดรับลงทะเบียนล็อกวิ่ง';
-          subClosedDetail.innerHTML = `กำหนดเปิดรับลงทะเบียน: <strong>${fmtDate(sub.start)}</strong><br>ถึง: <strong>${fmtDate(sub.end)}</strong>`;
-          subClosedMsg.style.display = 'flex';
-          subScheduleInfo.style.display = 'none';
-          if (formSub) formSub.style.display = 'none';
-        } else if (now >= subStart && now <= subEnd) {
-          subOpen = true;
-          subClosedMsg.style.display = 'none';
-          subScheduleInfo.style.display = 'block';
-          subScheduleText.innerHTML = `เปิดรับลงทะเบียนล็อกวิ่งตั้งแต่: <strong>${fmtDate(sub.start)}</strong><br>ถึง: <strong>${fmtDate(sub.end)}</strong>`;
-          if (formSub) formSub.style.display = '';
-          if (subDateInput) subDateInput.disabled = false;
-        } else {
-          subOpen = false;
-          subClosedReason.textContent = '🚫 หมดเขตรับลงทะเบียนล็อกวิ่งแล้ว';
-          subClosedDetail.innerHTML = `ช่วงเวลาลงทะเบียนสิ้นสุดเมื่อ: <strong>${fmtDate(sub.end)}</strong><br>กรุณาติดต่อเจ้าหน้าที่หากต้องการข้อมูลเพิ่มเติม`;
-          subClosedMsg.style.display = 'flex';
-          subScheduleInfo.style.display = 'none';
-          if (formSub) formSub.style.display = 'none';
-        }
-      } else {
-        subOpen = false;
-        subClosedReason.textContent = '⚠️ ขณะนี้ยังไม่เปิดรับลงทะเบียนล็อกวิ่ง';
-        subClosedDetail.textContent = 'กรุณาติดตามประกาศจากเจ้าหน้าที่';
-        subClosedMsg.style.display = 'flex';
-        subScheduleInfo.style.display = 'none';
-        if (formSub) formSub.style.display = 'none';
-      }
-
-      window._substituteRegistrationOpen = subOpen;
+      // Store global state for form submit guard
+      window._applyRegistrationOpen = applyOpen;
 
       // Show/hide nav buttons and service cards
       const applyBtn = document.getElementById('btn-m-apply');
       const mapBtn = document.getElementById('btn-m-map');
-      const subBtn = document.getElementById('btn-m-substitute');
       if (applyBtn) applyBtn.style.display = applyOpen ? '' : 'none';
       if (mapBtn) mapBtn.style.display = v.map ? '' : 'none';
-      if (subBtn) subBtn.style.display = subOpen ? '' : 'none';
 
       const statsGrid = document.getElementById('public-stats-grid');
       if (statsGrid) statsGrid.style.display = v.stats ? 'grid' : 'none';
@@ -837,7 +729,6 @@ function loadSystemConfig() {
       document.querySelectorAll('.service-card').forEach(card => {
         const oc = card.getAttribute('onclick') || '';
         if (oc.includes("showPage('apply'")) card.style.display = applyOpen ? '' : 'none';
-        if (oc.includes("showPage('substitute'")) card.style.display = subOpen ? '' : 'none';
         if (oc.includes("showPage('map'")) card.style.display = v.map ? '' : 'none';
       });
 
@@ -856,6 +747,22 @@ function loadSystemConfig() {
       if (r.open) {
         document.getElementById('renew-sem-label').innerText = r.semester || '';
         document.getElementById('renew-deadline-label').innerText = r.deadline || '';
+      }
+
+      const sub = c.substitute_period || {};
+      const subMsg = document.getElementById('substitute-schedule-msg');
+      if (sub.start && sub.end) {
+        subMsg.innerHTML = `เปิดรับลงทะเบียนขายแทน:<br>ตั้งแต่วันที่ ${new Date(sub.start).toLocaleDateString('th-TH')} ถึง ${new Date(sub.end).toLocaleDateString('th-TH')}`;
+        const now = new Date();
+        if (now >= new Date(sub.start) && now <= new Date(sub.end)) {
+          document.getElementById('substituteDateInput').disabled = false;
+        } else {
+          document.getElementById('substituteDateInput').disabled = true;
+          subMsg.innerHTML += '<br><span style="color:red;">(ขณะนี้อยู่นอกช่วงเวลาลงทะเบียน)</span>';
+        }
+      } else {
+        subMsg.innerHTML = 'ยังไม่มีการกำหนดช่วงเวลาลงทะเบียนขายแทน';
+        document.getElementById('substituteDateInput').disabled = true;
       }
 
       if (window.adminMode) {
@@ -952,6 +859,11 @@ window.saveConfig = async (type) => {
         start: apStart,
         end: apEnd
       };
+    } else if (type === 'pdf_announcement') {
+      update.pdf_announcement = {
+        enabled: document.getElementById('set-pdf-enabled').checked,
+        datetime: document.getElementById('set-pdf-datetime').value
+      };
     }
     await setDoc(ref, update, { merge: true });
     await logAction('บันทึกการตั้งค่า', `ประเภท: ${type}`);
@@ -1030,7 +942,6 @@ window.showAdminTab = (tab, btn) => {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   if (tab === 'renewals') loadRenewals();
-  if (tab === 'swaps') loadSwaps();
   if (tab === 'logs') loadLogs();
 };
 
@@ -1089,7 +1000,7 @@ function loadAdminData() {
               </tr>`;
           } else {
             const isSub = a.applyType === 'substitute';
-            const subDate = isSub && a.substituteDate ? `<br><small style="color:var(--amber); font-weight:600;">ล็อกวิ่งวันที่: ${a.substituteDate}</small>` : '';
+            const subDate = isSub && a.substituteDate ? `<br><small style="color:var(--amber);">ขายแทนวันที่: ${a.substituteDate}</small>` : '';
             pending += `<tr>
                 <td>${a.createdAt?.toDate().toLocaleDateString('th-TH') || '—'}</td>
                 <td><strong>${a.shopName}</strong>${subDate}</td>
@@ -1132,7 +1043,7 @@ function loadAdminData() {
             <td>${a.category || '—'}</td>
             <td>${statusLabel}</td>
             <td class="shop-phone-col">${a.phone || '—'}</td>
-            <td><div style="display:flex; gap:4px; flex-wrap:wrap;"><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${a.id}')">แก้ไข</button><button class="btn btn-ghost btn-sm" onclick="window.openBehaviorModal('${a.id}', '${a.shopName || ''}')">📝 พฤติกรรม</button></div></td>
+            <td><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${a.id}')">แก้ไข</button></td>
           </tr>`;
         shopsHtml += row;
         window._allShopsRows.push({ status: a.status, name: (a.shopName || '').toLowerCase(), phone: (a.phone || '').toLowerCase(), html: row });
@@ -1232,68 +1143,70 @@ async function loadRenewals() {
     let yes = 0, no = 0;
     const html = snap.docs.map(d => {
       const r = d.data();
-      if (r.status === 'approved' || r.status === 'rejected') return ''; // ซ่อนรายการที่ประมวลผลแล้ว
-
       const name = nameMap[r.shopId] || r.shopId;
       const isYes = r.response === 'yes';
       const date = r.createdAt?.toDate().toLocaleDateString('th-TH') || '—';
       if (isYes) yes++; else no++;
-
       return `<div class="renewal-card ${isYes ? 'confirmed' : 'resigned'}" style="display:flex; justify-content:space-between; align-items:center;">
           <div>
             <div style="font-weight:700; font-size:14px;">${name}</div>
             <div style="font-size:12px; color:var(--muted); margin-top:2px;">ยืนยันวันที่ ${date}</div>
           </div>
-          <div style="display:flex; align-items:center; gap:12px;">
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
             <span class="badge ${isYes ? 'badge-active' : 'badge-t2'}">${isYes ? '✅ ขายต่อ' : '❌ สละสิทธิ์'}</span>
-            <div style="display:flex; gap:6px;">
-              <button class="btn btn-primary btn-sm" onclick="window.actionRenewal('${d.id}', '${r.shopId}', '${r.response}', 'approved')">อนุมัติ</button>
-              <button class="btn btn-danger btn-sm" onclick="window.actionRenewal('${d.id}', '${r.shopId}', '${r.response}', 'rejected')">ไม่อนุมัติ</button>
+            <div style="display:flex; gap:4px;">
+              <button class="btn btn-primary btn-sm" onclick="window.processRenewal('${d.id}', '${r.shopId}', '${name}', '${isYes}', 'approve')">อนุมัติ</button>
+              <button class="btn btn-danger btn-sm" onclick="window.processRenewal('${d.id}', '${r.shopId}', '${name}', '${isYes}', 'reject')">ไม่อนุมัติ</button>
             </div>
           </div>
         </div>`;
     }).join('');
 
-    list.innerHTML = html || '<div class="td-empty">ยังไม่มีคำขอรออนุมัติ</div>';
-    document.getElementById('renewal-stats').textContent = `รออนุมัติ: ขายต่อ ${yes} ร้าน · สละสิทธิ์ ${no} ร้าน`;
+    list.innerHTML = html;
+    document.getElementById('renewal-stats').textContent = `✅ ขายต่อ ${yes} ร้าน · ❌ สละสิทธิ์ ${no} ร้าน`;
   } catch (e) {
     list.innerHTML = '<div class="td-empty">เกิดข้อผิดพลาดในการโหลด</div>';
     console.warn('loadRenewals:', e);
   }
 }
 
-window.actionRenewal = async (renewalId, shopId, responseType, action) => {
-  const isGiveUp = responseType === 'no';
-  const actionText = action === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
-  const responseText = isGiveUp ? 'การสละสิทธิ์' : 'การยืนยันขายต่อ';
+window.processRenewal = async (renewalId, shopId, shopName, isYesStr, action) => {
+  const isYes = isYesStr === 'true';
+  const actionText = action === 'approve' ? 'อนุมัติ' : 'ไม่อนุมัติ';
+  const decisionText = isYes ? 'ขายต่อ' : 'สละสิทธิ์';
 
-  let msg = `คุณต้องการ <strong>${actionText}${responseText}</strong> ใช่หรือไม่?`;
-  if (isGiveUp && action === 'approved') {
-    msg += `<br><br><span style="color:var(--danger);">⚠️ คำเตือน: ร้านค้าจะถูกลบออกจากระบบทันที</span>`;
-  } else if (!isGiveUp && action === 'approved') {
-    msg += `<br><br><span style="color:var(--active);">✅ ร้านค้าจะยังคงสถานะในระบบ</span>`;
-  }
-
-  const ok = await window.showConfirm(msg, 'ยืนยันการพิจารณา', '📋', 'ยืนยัน', action === 'approved' ? 'btn-primary' : 'btn-danger');
+  const ok = await window.showConfirm(
+    `คุณต้องการ <strong>${actionText}</strong> การยืนยันสิทธิ์ <strong>${decisionText}</strong> ของร้าน "${shopName}" ใช่หรือไม่?`,
+    'ยืนยันการทำรายการ', '⚠️', 'ยืนยัน', 'btn-primary'
+  );
   if (!ok) return;
 
   try {
-    await updateDoc(doc(db, "renewals", renewalId), { status: action, actionAt: serverTimestamp() });
+    let shouldDelete = false;
+    // Logic: 
+    // Yes + Approve = Keep
+    // Yes + Reject = Delete
+    // No + Approve = Delete
+    // No + Reject = Keep
+    if (isYes && action === 'reject') shouldDelete = true;
+    if (!isYes && action === 'approve') shouldDelete = true;
 
-    if (isGiveUp && action === 'approved') {
-      const shopData = _shopsCache[shopId];
-      if (shopData && shopData.folderUrl) {
-        await deleteGoogleDriveFolder(shopData.folderUrl);
-      }
+    if (shouldDelete) {
+      // delete shop from database
+      const shopData = _shopsCache[shopId] || {};
+      if (shopData.folderUrl) await deleteGoogleDriveFolder(shopData.folderUrl);
       await deleteDoc(doc(db, "shops", shopId));
-      await logAction('อนุมัติสละสิทธิ์', `ลบร้านค้าออกจากระบบแล้ว`);
+      await logAction('ลบร้านค้า (การยืนยันสิทธิ์)', `ร้าน: ${shopName}, ${actionText} ${decisionText}`, 'del');
+      window.showToast(`ลบร้าน "${shopName}" ออกจากระบบแล้ว`, 'warning');
     } else {
-      await logAction(`${actionText}${responseText}`, `ร้านค้า ${shopId}`);
+      await logAction('บันทึกการยืนยันสิทธิ์', `ร้าน: ${shopName}, ${actionText} ${decisionText}`);
+      window.showToast(`บันทึกการตัดสินใจสำหรับร้าน "${shopName}" สำเร็จ`, 'success');
     }
 
-    window.showToast('ทำรายการสำเร็จ', 'success');
+    // Delete the renewal document as it has been processed
+    await deleteDoc(doc(db, "renewals", renewalId));
+
     loadRenewals();
-    loadAdminData(); // Refresh shop list just in case
   } catch (e) {
     window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
   }
@@ -1347,19 +1260,16 @@ async function deleteGoogleDriveFolder(folderUrl) {
 /* ─── APPROVE APPLICATION ─── */
 window.openApprove = (id, name, isSubstitute) => {
   currentId = id;
-  const shopData = _shopsCache[id] || {};
-
   let detailHtml = `<strong>${name}</strong>`;
-
-  // Add person type info if available
+  const shopData = _shopsCache[id] || {};
   if (shopData.personType) {
-    detailHtml += `<div style="font-size:12px; margin-top:4px;"><strong>ประเภท:</strong> ${shopData.personType}</div>`;
+    detailHtml += `<br><span style="font-size:12px; color:var(--text);"><br><b>ประเภทบุคคล:</b> ${shopData.personType}`;
     if (shopData.personType === 'สโมสรนักศึกษา') {
-      detailHtml += `<div style="font-size:12px; color:var(--text-2);">คณะ: ${shopData.clubFaculty || '-'} | หน.งานฯ: ${shopData.clubHeadName || '-'} (${shopData.clubHeadPhone || '-'})</div>`;
+      detailHtml += `<br>คณะ: ${shopData.clubFaculty || '—'}<br>หัวหน้า: ${shopData.clubHeadName || '—'} (${shopData.clubHeadPhone || '—'})`;
     } else if (shopData.personType === 'นักศึกษา') {
-      detailHtml += `<div style="font-size:12px; color:var(--text-2);">รหัสนักศึกษา: ${shopData.studentId || '-'} | สาขา: ${shopData.studentMajor || '-'} | คณะ: ${shopData.studentFaculty || '-'}</div>`;
-      detailHtml += `<div style="font-size:12px; color:var(--text-2);">อ.ที่ปรึกษา: ${shopData.advisorName || '-'} (${shopData.advisorPhone || '-'}) ${shopData.advisorEmail || ''}</div>`;
+      detailHtml += `<br>รหัส: ${shopData.studentId || '—'} สาขา: ${shopData.studentMajor || '—'} คณะ: ${shopData.studentFaculty || '—'}<br>อ.ที่ปรึกษา: ${shopData.advisorName || '—'} (${shopData.advisorPhone || '—'})`;
     }
+    detailHtml += `</span>`;
   }
 
   if (isSubstitute) {
@@ -1457,6 +1367,21 @@ window.openEditShop = async (id) => {
     document.getElementById('edit-slots').value = d.slots || '';
     document.getElementById('edit-phone').value = d.phone || '';
     document.getElementById('edit-status').value = d.status || 'active';
+
+    const extraDiv = document.getElementById('edit-extra-info');
+    if (extraDiv) {
+      if (d.personType === 'สโมสรนักศึกษา') {
+        extraDiv.style.display = 'block';
+        extraDiv.innerHTML = `<strong>ประเภทบุคคล:</strong> สโมสรนักศึกษา<br><strong>คณะ:</strong> ${d.clubFaculty || '—'}<br><strong>หัวหน้า:</strong> ${d.clubHeadName || '—'} (${d.clubHeadPhone || '—'})`;
+      } else if (d.personType === 'นักศึกษา') {
+        extraDiv.style.display = 'block';
+        extraDiv.innerHTML = `<strong>ประเภทบุคคล:</strong> นักศึกษา<br><strong>รหัส:</strong> ${d.studentId || '—'} <strong>สาขา:</strong> ${d.studentMajor || '—'} <strong>คณะ:</strong> ${d.studentFaculty || '—'}<br><strong>อ.ที่ปรึกษา:</strong> ${d.advisorName || '—'} (${d.advisorPhone || '—'})`;
+      } else {
+        extraDiv.style.display = 'none';
+        extraDiv.innerHTML = '';
+      }
+    }
+
     document.getElementById('modal-edit-shop').style.display = 'block';
     document.getElementById('modal-bg').style.display = 'block';
   } catch (e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
@@ -1550,478 +1475,177 @@ window.openGallery = (shopId) => {
   document.getElementById('modal-bg').style.display = 'block';
 };
 
-/* ══════════════════════════════════════════
-   SWAP LOGIC
-══════════════════════════════════════════ */
-let swapShopsCache = [];
-
-window.loadSwapShops = async () => {
-  const selMy = document.getElementById('swap-my-shop');
-  selMy.innerHTML = '<option value="">— กำลังโหลดรายชื่อร้าน... —</option>';
+/* ─── COMPLAINT SYSTEM ─── */
+document.getElementById('form-complaint')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-submit-complaint');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังส่งเรื่อง...';
   try {
-    const snap = await getDocs(query(collection(db, "shops"), where("status", "==", "active")));
-    swapShopsCache = snap.docs.map(d => {
-      const data = d.data();
-      data.id = d.id;
-      data.slotCount = data.slots ? data.slots.split(',').length : 0;
-      return data;
-    });
-    swapShopsCache.sort((a, b) => (a.shopName || '').localeCompare(b.shopName || ''));
-
-    let html = '<option value="">— เลือกร้านค้าของคุณ —</option>';
-    swapShopsCache.forEach(s => {
-      if (s.slotCount > 0) {
-        html += `<option value="${s.id}">${s.shopName} (ล็อก: ${s.slots})</option>`;
-      }
-    });
-    selMy.innerHTML = html;
-    window.filterSwapTargets();
-  } catch (e) {
-    selMy.innerHTML = '<option value="">— โหลดข้อมูลล้มเหลว —</option>';
-    console.warn(e);
+    const data = Object.fromEntries(new FormData(e.target));
+    data.timestamp = serverTimestamp();
+    await addDoc(collection(db, "complaints"), data);
+    window.showToast('ส่งเรื่องร้องเรียนสำเร็จ ขอบคุณสำหรับข้อเสนอแนะ', 'success');
+    e.target.reset();
+  } catch (err) {
+    window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'ส่งเรื่องร้องเรียน';
   }
-};
+});
 
-window.filterSwapTargets = () => {
-  const selMy = document.getElementById('swap-my-shop');
-  const selTarget = document.getElementById('swap-target-shop');
-  const myId = selMy.value;
-
-  if (!myId) {
-    selTarget.innerHTML = '<option value="">— เลือกร้านค้าของคุณก่อน —</option>';
-    return;
-  }
-
-  const myShop = swapShopsCache.find(s => s.id === myId);
-  if (!myShop) return;
-
-  const targetShops = swapShopsCache.filter(s => s.id !== myId && s.slotCount === myShop.slotCount);
-
-  if (targetShops.length === 0) {
-    selTarget.innerHTML = '<option value="">— ไม่มีร้านค้าอื่นที่มีจำนวนล็อกเท่ากัน —</option>';
-    return;
-  }
-
-  let html = '<option value="">— เลือกร้านค้าที่ต้องการสับเปลี่ยนด้วย —</option>';
-  targetShops.forEach(s => {
-    html += `<option value="${s.id}">${s.shopName} (ล็อก: ${s.slots})</option>`;
-  });
-  selTarget.innerHTML = html;
-};
-
-const formSwap = document.getElementById('form-swap');
-if (formSwap) {
-  formSwap.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('btn-submit-swap');
-    const myId = document.getElementById('swap-my-shop').value;
-    const targetId = document.getElementById('swap-target-shop').value;
-    const reason = e.target.reason.value;
-
-    if (!myId || !targetId) {
-      window.showToast('กรุณาเลือกร้านค้าให้ครบถ้วน', 'warning');
-      return;
-    }
-
-    const myShop = swapShopsCache.find(s => s.id === myId);
-    const targetShop = swapShopsCache.find(s => s.id === targetId);
-
-    const ok = await window.showConfirm(`ยืนยันการขอสับเปลี่ยนล็อก<br><strong>${myShop.shopName}</strong> (${myShop.slots})<br>🔄 <strong>${targetShop.shopName}</strong> (${targetShop.slots})`, 'ยืนยัน', '🔀', 'ส่งคำขอ', 'btn-primary');
-    if (!ok) return;
-
-    btn.disabled = true;
-    btn.innerText = 'กำลังส่งคำขอ...';
-    try {
-      await addDoc(collection(db, "swaps"), {
-        myShopId: myId,
-        myShopName: myShop.shopName,
-        mySlots: myShop.slots,
-        targetShopId: targetId,
-        targetShopName: targetShop.shopName,
-        targetSlots: targetShop.slots,
-        reason: reason,
-        status: 'pending',
-        createdAt: serverTimestamp()
-      });
-      window.showToast('ส่งคำขอสับเปลี่ยนล็อกสำเร็จ', 'success');
-      e.target.reset();
-      window.showPage('home');
-    } catch (error) {
-      window.showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerText = 'ส่งคำขอสับเปลี่ยนล็อก';
-    }
-  });
-}
-
-window.loadSwaps = async () => {
-  const tbody = document.getElementById('tbody-admin-swaps');
-  tbody.innerHTML = skeletonRows(6, 6);
+window.loadComplaints = async () => {
+  const tbody = document.getElementById('tbody-admin-complaints');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="4" class="td-empty">⏳ กำลังโหลด...</td></tr>';
   try {
-    const snap = await getDocs(query(collection(db, "swaps"), orderBy("createdAt", "desc")));
+    const snap = await getDocs(query(collection(db, "complaints"), orderBy("timestamp", "desc")));
     if (snap.empty) {
-      tbody.innerHTML = '<tr><td colspan="6" class="td-empty">ไม่มีคำขอสับเปลี่ยนล็อก</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="td-empty">ไม่มีเรื่องร้องเรียน</td></tr>';
       return;
     }
-
     tbody.innerHTML = snap.docs.map(d => {
-      const s = d.data();
-      const ts = s.createdAt?.toDate().toLocaleDateString('th-TH') || '—';
-      const isPending = s.status === 'pending';
-      const statusLabel = {
-        'pending': '<span class="badge badge-pending">รอพิจารณา</span>',
-        'approved': '<span class="badge badge-active">อนุมัติแล้ว</span>',
-        'rejected': '<span class="badge badge-cancelled">ไม่อนุมัติ</span>'
-      }[s.status] || s.status;
-
-      let actions = '';
-      if (isPending) {
-        actions = `
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-primary btn-sm" onclick="window.actionSwap('${d.id}', '${s.myShopId}', '${s.targetShopId}', '${s.myShopName}', '${s.targetShopName}', '${s.mySlots}', '${s.targetSlots}', 'approved')">อนุมัติ</button>
-            <button class="btn btn-danger btn-sm" onclick="window.actionSwap('${d.id}', '${s.myShopId}', '${s.targetShopId}', '${s.myShopName}', '${s.targetShopName}', '${s.mySlots}', '${s.targetSlots}', 'rejected')">ไม่อนุมัติ</button>
-          </div>
-        `;
-      }
-
+      const c = d.data();
+      const ts = c.timestamp?.toDate().toLocaleString('th-TH') || '—';
+      const name = c.name || 'ไม่ระบุ';
+      const phone = c.phone || 'ไม่ระบุ';
       return `<tr>
-        <td style="white-space:nowrap;">${ts}</td>
-        <td><strong>${s.myShopName}</strong></td>
-        <td><strong>${s.targetShopName}</strong></td>
-        <td style="color:var(--primary); font-weight:600;">${s.mySlots} 🔄 ${s.targetSlots}</td>
-        <td>${s.reason || '-'} <br><small>${statusLabel}</small></td>
-        <td>${actions}</td>
-      </tr>`;
+          <td style="white-space:nowrap; font-size:12px;">${ts}</td>
+          <td><strong>${c.title}</strong></td>
+          <td style="font-size:13px;">${c.description}</td>
+          <td style="font-size:12px;">${name}<br>${phone}</td>
+        </tr>`;
     }).join('');
   } catch (e) {
-    tbody.innerHTML = '<tr><td colspan="6" class="td-empty">เกิดข้อผิดพลาดในการโหลด</td></tr>';
-    console.warn(e);
+    tbody.innerHTML = '<tr><td colspan="4" class="td-empty">เกิดข้อผิดพลาดในการโหลด</td></tr>';
+    console.warn('loadComplaints:', e);
   }
 };
 
-window.actionSwap = async (swapId, shop1, shop2, name1, name2, slots1, slots2, action) => {
-  const actionText = action === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
-  const ok = await window.showConfirm(`คุณต้องการ <strong>${actionText}</strong> การสลับล็อกระหว่าง<br>${name1} และ ${name2} ใช่หรือไม่?`, 'ยืนยัน', '📋', 'ยืนยัน', action === 'approved' ? 'btn-primary' : 'btn-danger');
-  if (!ok) return;
+// Hook into showAdminTab for complaints
+const originalShowAdminTab = window.showAdminTab;
+window.showAdminTab = (tab, btn) => {
+  if (originalShowAdminTab) originalShowAdminTab(tab, btn);
+  if (tab === 'complaints') window.loadComplaints();
+};
+
+/* ─── PDF EXPORT / ANNOUNCEMENT ─── */
+window.exportShopReport = async () => {
+  const type = document.getElementById('export-type').value;
+  const cat = document.getElementById('export-category').value;
+  const person = document.getElementById('export-person-type').value;
+  const sort = document.getElementById('export-sort').value;
+
+  window.showToast('กำลังประมวลผลข้อมูล...', 'success');
 
   try {
-    await updateDoc(doc(db, "swaps", swapId), { status: action, actionAt: serverTimestamp() });
+    const snap = await getDocs(collection(db, "shops"));
+    let allShops = [];
+    snap.forEach(d => allShops.push({ id: d.id, ...d.data() }));
 
-    if (action === 'approved') {
-      await updateDoc(doc(db, "shops", shop1), { slots: slots2 });
-      await updateDoc(doc(db, "shops", shop2), { slots: slots1 });
-      await logAction('อนุมัติสับเปลี่ยนล็อก', `${name1} (${slots1}) 🔄 ${name2} (${slots2})`);
-    } else {
-      await logAction('ปฏิเสธสับเปลี่ยนล็อก', \`\${name1} 🔄 \${name2}\`);
+    let data = [];
+    let title = '';
+
+    if (type === 'active') {
+      title = 'รายชื่อร้านค้าประจำ (ที่เปิดจำหน่ายปัจจุบัน)';
+      data = allShops.filter(s => s.status === 'active' || s.status === 'leave');
+    } else if (type === 'substitute') {
+      title = 'รายชื่อร้านค้าล็อกวิ่ง (รอบปัจจุบัน)';
+      data = allShops.filter(s => s.applyType === 'substitute');
+    } else if (type === 'renewed') {
+      title = 'รายชื่อร้านค้าที่ยืนยันสิทธิ์แล้ว';
+      const rSnap = await getDocs(collection(db, "renewals"));
+      const rIds = rSnap.docs.map(d => d.data().shopId);
+      data = allShops.filter(s => rIds.includes(s.id));
     }
-    window.showToast('ทำรายการสำเร็จ', 'success');
-    loadSwaps();
+
+    if (cat !== 'all') data = data.filter(s => s.category === cat);
+    if (person !== 'all') data = data.filter(s => s.personType === person);
+
+    data.sort((a, b) => {
+      const fn = s => { if (!s) return 9999; const f = String(s).split(',')[0].trim(); return parseInt(f) || 9999; };
+      return sort === 'asc' ? fn(a.slots) - fn(b.slots) : fn(b.slots) - fn(a.slots);
+    });
+
+    if (data.length === 0) {
+      window.showToast('ไม่พบข้อมูลตามเงื่อนไขที่เลือก', 'warning');
+      return;
+    }
+
+    generatePDFFromData(title, data);
   } catch (e) {
-    window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+    window.showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + e.message, 'error');
   }
 };
 
-/* ─── INIT ─── */
-loadStats();
-loadSystemConfig();
-
-      /* ─── GALLERY LOGIC ─── */
-      window.openGallery = (shopId) => {
-        const shopData = _shopsCache[shopId];
-        if (!shopData) return;
-        document.getElementById('gallery-shop-name').innerText = shopData.shopName || 'ไม่มีชื่อร้าน';
-        const container = document.getElementById('gallery-container');
-        container.innerHTML = '';
-
-        if (shopData.fileUrls && shopData.fileUrls.length > 0) {
-          container.innerHTML = shopData.fileUrls.map(url => `
-        <div class="gallery-img-wrap">
-          <img src="${url}" onclick="window.open('${url}','_blank')" alt="Shop Image">
-        </div>
-      `).join('');
-        } else {
-          container.innerHTML = '<div class="td-empty">ไม่มีรูปภาพสินค้า</div>';
-        }
-
-        if (shopData.folderUrl) {
-          container.innerHTML += `<div style="grid-column: 1 / -1; margin-top: 10px; text-align: center;">
-      <a href="${shopData.folderUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none; display:inline-block;">📂 เปิดดูใน Google Drive</a>
-      </div>`;
-        }
-        }
-
-        document.getElementById('modal-gallery').style.display = 'block';
-        document.getElementById('modal-bg').style.display = 'block';
-      };
-
-      /* ══════════════════════════════════════════
-         SWAP LOGIC
-      ══════════════════════════════════════════ */
-      let swapShopsCache = [];
-
-      window.loadSwapShops = async () => {
-        const selMy = document.getElementById('swap-my-shop');
-        selMy.innerHTML = '<option value="">— กำลังโหลดรายชื่อร้าน... —</option>';
-        try {
-          const snap = await getDocs(query(collection(db, "shops"), where("status", "==", "active")));
-          swapShopsCache = snap.docs.map(d => {
-            const data = d.data();
-            data.id = d.id;
-            data.slotCount = data.slots ? data.slots.split(',').length : 0;
-            return data;
-          });
-          swapShopsCache.sort((a, b) => (a.shopName || '').localeCompare(b.shopName || ''));
-
-          let html = '<option value="">— เลือกร้านค้าของคุณ —</option>';
-          swapShopsCache.forEach(s => {
-            if (s.slotCount > 0) {
-              html += `< option value = "${s.id}" > ${ s.shopName }(ล็อก: ${ s.slots })</option > `;
-            }
-          });
-          selMy.innerHTML = html;
-          window.filterSwapTargets();
-        } catch (e) {
-          selMy.innerHTML = '<option value="">— โหลดข้อมูลล้มเหลว —</option>';
-          console.warn(e);
-        }
-      };
-
-      window.filterSwapTargets = () => {
-        const selMy = document.getElementById('swap-my-shop');
-        const selTarget = document.getElementById('swap-target-shop');
-        const myId = selMy.value;
-
-        if (!myId) {
-          selTarget.innerHTML = '<option value="">— เลือกร้านค้าของคุณก่อน —</option>';
-          return;
-        }
-
-        const myShop = swapShopsCache.find(s => s.id === myId);
-        if (!myShop) return;
-
-        const targetShops = swapShopsCache.filter(s => s.id !== myId && s.slotCount === myShop.slotCount);
-
-        if (targetShops.length === 0) {
-          selTarget.innerHTML = '<option value="">— ไม่มีร้านค้าอื่นที่มีจำนวนล็อกเท่ากัน —</option>';
-          return;
-        }
-
-        let html = '<option value="">— เลือกร้านค้าที่ต้องการสับเปลี่ยนด้วย —</option>';
-        targetShops.forEach(s => {
-          html += `< option value = "${s.id}" > ${ s.shopName }(ล็อก: ${ s.slots })</option > `;
-        });
-        selTarget.innerHTML = html;
-      };
-
-      const formSwap = document.getElementById('form-swap');
-      if (formSwap) {
-        formSwap.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const btn = document.getElementById('btn-submit-swap');
-          const myId = document.getElementById('swap-my-shop').value;
-          const targetId = document.getElementById('swap-target-shop').value;
-          const reason = e.target.reason.value;
-
-          if (!myId || !targetId) {
-            window.showToast('กรุณาเลือกร้านค้าให้ครบถ้วน', 'warning');
-            return;
-          }
-
-          const myShop = swapShopsCache.find(s => s.id === myId);
-          const targetShop = swapShopsCache.find(s => s.id === targetId);
-
-          const ok = await window.showConfirm(`ยืนยันการขอสับเปลี่ยนล็อก < br > <strong>${myShop.shopName}</strong> (${ myShop.slots }) < br >🔄 <strong>${targetShop.shopName}</strong> (${ targetShop.slots })`, 'ยืนยัน', '🔀', 'ส่งคำขอ', 'btn-primary');
-          if (!ok) return;
-
-          btn.disabled = true;
-          btn.innerText = 'กำลังส่งคำขอ...';
-          try {
-            await addDoc(collection(db, "swaps"), {
-              myShopId: myId,
-              myShopName: myShop.shopName,
-              mySlots: myShop.slots,
-              targetShopId: targetId,
-              targetShopName: targetShop.shopName,
-              targetSlots: targetShop.slots,
-              reason: reason,
-              status: 'pending',
-              createdAt: serverTimestamp()
-            });
-            window.showToast('ส่งคำขอสับเปลี่ยนล็อกสำเร็จ', 'success');
-            e.target.reset();
-            window.showPage('home');
-          } catch (error) {
-            window.showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
-          } finally {
-            btn.disabled = false;
-            btn.innerText = 'ส่งคำขอสับเปลี่ยนล็อก';
-          }
-        });
+window.viewAnnouncementPDF = async () => {
+  window.showToast('กำลังประมวลผลประกาศ...', 'success');
+  try {
+    const snap = await getDocs(collection(db, "shops"));
+    let data = [];
+    snap.forEach(d => {
+      const s = d.data();
+      if (s.status === 'active' || s.status === 'leave' || (s.applyType === 'substitute' && s.status === 'approved')) {
+        data.push(s);
       }
+    });
+    data.sort((a, b) => {
+      const fn = s => { if (!s) return 9999; const f = String(s).split(',')[0].trim(); return parseInt(f) || 9999; };
+      return fn(a.slots) - fn(b.slots);
+    });
+    generatePDFFromData('ประกาศรายชื่อร้านค้าที่มีสิทธิ์จำหน่าย', data, true);
+  } catch (e) {
+    window.showToast('เกิดข้อผิดพลาดในการเปิดประกาศ', 'error');
+  }
+};
 
-      window.loadSwaps = async () => {
-        const tbody = document.getElementById('tbody-admin-swaps');
-        tbody.innerHTML = skeletonRows(6, 6);
-        try {
-          const snap = await getDocs(query(collection(db, "swaps"), orderBy("createdAt", "desc")));
-          if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="6" class="td-empty">ไม่มีคำขอสับเปลี่ยนล็อก</td></tr>';
-            return;
-          }
+function generatePDFFromData(title, data, isPublic = false) {
+  const container = document.createElement('div');
+  container.style.padding = '20px';
+  container.style.fontFamily = "'Sarabun', sans-serif";
+  container.innerHTML = `
+    <h2 style="text-align:center; font-family:'Mitr', sans-serif; color:#1A7A52; margin-bottom:20px;">
+      ${title}
+    </h2>
+    <p style="text-align:center; font-size:14px; margin-bottom:20px;">ข้อมูล ณ วันที่: ${new Date().toLocaleDateString('th-TH')}</p>
+    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+      <thead>
+        <tr style="background:#f1f5f9; border-bottom:2px solid #cbd5e1;">
+          <th style="padding:8px; text-align:left; border:1px solid #e2e8f0;">ล็อก</th>
+          <th style="padding:8px; text-align:left; border:1px solid #e2e8f0;">ชื่อร้าน</th>
+          <th style="padding:8px; text-align:left; border:1px solid #e2e8f0;">ประเภทสินค้า</th>
+          <th style="padding:8px; text-align:left; border:1px solid #e2e8f0;">ชื่อ-สกุล</th>
+          ${!isPublic ? '<th style="padding:8px; text-align:left; border:1px solid #e2e8f0;">เบอร์โทร</th><th style="padding:8px; text-align:left; border:1px solid #e2e8f0;">ประเภทบุคคล</th>' : ''}
+          <th style="padding:8px; text-align:left; border:1px solid #e2e8f0;">สถานะ</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(s => {
+    const st = s.applyType === 'substitute' ? 'ล็อกวิ่ง' : (s.status === 'leave' ? 'แจ้งลา' : 'เปิดขาย');
+    return `
+          <tr>
+            <td style="padding:8px; border:1px solid #e2e8f0;">${s.slots || '-'}</td>
+            <td style="padding:8px; border:1px solid #e2e8f0;"><strong>${s.shopName}</strong></td>
+            <td style="padding:8px; border:1px solid #e2e8f0;">${s.category || '-'}</td>
+            <td style="padding:8px; border:1px solid #e2e8f0;">${s.firstName} ${s.lastName}</td>
+            ${!isPublic ? `<td style="padding:8px; border:1px solid #e2e8f0;">${s.phone || '-'}</td><td style="padding:8px; border:1px solid #e2e8f0;">${s.personType || '-'}</td>` : ''}
+            <td style="padding:8px; border:1px solid #e2e8f0;">${st}</td>
+          </tr>`;
+  }).join('')}
+      </tbody>
+    </table>
+  `;
 
-          tbody.innerHTML = snap.docs.map(d => {
-            const s = d.data();
-            const ts = s.createdAt?.toDate().toLocaleDateString('th-TH') || '—';
-            const isPending = s.status === 'pending';
-            const statusLabel = {
-              'pending': '<span class="badge badge-pending">รอพิจารณา</span>',
-              'approved': '<span class="badge badge-active">อนุมัติแล้ว</span>',
-              'rejected': '<span class="badge badge-cancelled">ไม่อนุมัติ</span>'
-            }[s.status] || s.status;
-
-            let actions = '';
-            if (isPending) {
-              actions = `
-        < div style = "display:flex; gap:6px;" >
-            <button class="btn btn-primary btn-sm" onclick="window.actionSwap('${d.id}', '${s.myShopId}', '${s.targetShopId}', '${s.myShopName}', '${s.targetShopName}', '${s.mySlots}', '${s.targetSlots}', 'approved')">อนุมัติ</button>
-            <button class="btn btn-danger btn-sm" onclick="window.actionSwap('${d.id}', '${s.myShopId}', '${s.targetShopId}', '${s.myShopName}', '${s.targetShopName}', '${s.mySlots}', '${s.targetSlots}', 'rejected')">ไม่อนุมัติ</button>
-          </div >
-        `;
-            }
-
-            return `< tr >
-        <td style="white-space:nowrap;">${ts}</td>
-        <td><strong>${s.myShopName}</strong></td>
-        <td><strong>${s.targetShopName}</strong></td>
-        <td style="color:var(--primary); font-weight:600;">${s.mySlots} 🔄 ${s.targetSlots}</td>
-        <td>${s.reason || '-'} <br><small>${statusLabel}</small></td>
-        <td>${actions}</td>
-      </tr > `;
-          }).join('');
-        } catch (e) {
-          tbody.innerHTML = '<tr><td colspan="6" class="td-empty">เกิดข้อผิดพลาดในการโหลด</td></tr>';
-          console.warn(e);
-        }
-      };
-
-      window.actionSwap = async (swapId, shop1, shop2, name1, name2, slots1, slots2, action) => {
-        const actionText = action === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
-        const ok = await window.showConfirm(`คุณต้องการ < strong > ${ actionText }</strong > การสลับล็อกระหว่าง < br > ${ name1 } และ ${ name2 } ใช่หรือไม่ ? `, 'ยืนยัน', '📋', 'ยืนยัน', action === 'approved' ? 'btn-primary' : 'btn-danger');
-        if (!ok) return;
-
-        try {
-          await updateDoc(doc(db, "swaps", swapId), { status: action, actionAt: serverTimestamp() });
-
-          if (action === 'approved') {
-            await updateDoc(doc(db, "shops", shop1), { slots: slots2 });
-            await updateDoc(doc(db, "shops", shop2), { slots: slots1 });
-            await logAction('อนุมัติสับเปลี่ยนล็อก', `${ name1 } (${ slots1 }) 🔄 ${ name2 } (${ slots2 })`);
-          } else {
-            await logAction('ปฏิเสธสับเปลี่ยนล็อก', `${ name1 } 🔄 ${ name2 } `);
-          }
-          window.showToast('ทำรายการสำเร็จ', 'success');
-          loadSwaps();
-        } catch (e) {
-          window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
-        }
-      };
-
-      /* ══════════════════════════════════════════
-         BEHAVIOR LOGIC
-      ══════════════════════════════════════════ */
-      let currentBehaviorShopId = null;
-
-      window.openBehaviorModal = (shopId, shopName) => {
-        currentBehaviorShopId = shopId;
-        document.getElementById('behavior-shop-name').innerText = shopName;
-        document.getElementById('behavior-note').value = '';
-        document.getElementById('modal-behavior').style.display = 'block';
-        document.getElementById('modal-bg').style.display = 'block';
-        window.loadBehaviorHistory(shopId);
-      };
-
-      window.saveBehavior = async () => {
-        const note = document.getElementById('behavior-note').value.trim();
-        if (!note) {
-          window.showToast('กรุณาระบุพฤติกรรม', 'warning');
-          return;
-        }
-        try {
-          await addDoc(collection(db, `shops / ${ currentBehaviorShopId }/behaviors`), {
-        note: note,
-          admin: auth.currentUser?.email || 'Unknown',
-            createdAt: serverTimestamp()
-      });
-      window.showToast('บันทึกพฤติกรรมสำเร็จ', 'success');
-      document.getElementById('behavior-note').value = '';
-      window.loadBehaviorHistory(currentBehaviorShopId);
-    } catch (e) {
-      window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
-    }
+  const opt = {
+    margin: 10,
+    filename: `RUTS_Shop_Report_${new Date().toISOString().split('T')[0]}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
 
-  window.loadBehaviorHistory = async (shopId) => {
-    const listEl = document.getElementById('behavior-list');
-    listEl.innerHTML = '<div style="color:var(--muted); font-size:12px;">กำลังโหลด...</div>';
-    try {
-      const d30 = new Date();
-      d30.setDate(d30.getDate() - 30);
-
-      const snap = await getDocs(query(
-        collection(db, `shops/${shopId}/behaviors`),
-        where("createdAt", ">=", d30),
-        orderBy("createdAt", "desc")
-      ));
-
-      if (snap.empty) {
-        listEl.innerHTML = '<div style="color:var(--muted); font-size:12px;">ไม่มีประวัติใน 30 วันล่าสุด</div>';
-        return;
-      }
-
-      listEl.innerHTML = snap.docs.map(d => {
-        const data = d.data();
-        const ts = data.createdAt?.toDate().toLocaleString('th-TH') || '—';
-        return `
-        <div style="border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px;">
-          <div style="font-size: 13px;">${data.note}</div>
-          <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">🗓️ ${ts} (โดย ${data.admin})</div>
-        </div>
-      `;
-      }).join('');
-    } catch (e) {
-      listEl.innerHTML = '<div style="color:var(--danger); font-size:12px;">โหลดล้มเหลว: ' + e.message + '</div>';
-      console.warn(e);
-    }
-  };
-
-  /* ══════════════════════════════════════════
-     ADMIN ACTION LOG CLEANUP
-  ══════════════════════════════════════════ */
-  window.clearOldLogs = async () => {
-    const ok = await window.showConfirm('ต้องการล้างประวัติกิจกรรมที่เก่ากว่า 30 วันใช่หรือไม่?', 'ล้างประวัติกิจกรรม', '🗑️', 'ล้างข้อมูล', 'btn-danger');
-    if (!ok) return;
-
-    try {
-      const d30 = new Date();
-      d30.setDate(d30.getDate() - 30);
-
-      const snap = await getDocs(query(collection(db, "logs"), where("timestamp", "<", d30)));
-      if (snap.empty) {
-        window.showToast('ไม่มีประวัติที่เก่ากว่า 30 วัน', 'info');
-        return;
-      }
-
-      let count = 0;
-      for (const d of snap.docs) {
-        await deleteDoc(doc(db, "logs", d.id));
-        count++;
-      }
-
-      await logAction('ล้างประวัติกิจกรรม', `ลบไป ${count} รายการ (เก่ากว่า 30 วัน)`);
-      window.showToast(`ลบประวัติไป ${count} รายการ`, 'success');
-      if (typeof loadLogs === 'function') loadLogs();
-    } catch (e) {
-      window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
-    }
-  };
+  html2pdf().set(opt).from(container).save().then(() => {
+    if (!isPublic) window.showToast('เริ่มดาวน์โหลด PDF แล้ว', 'success');
+  });
+}
