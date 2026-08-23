@@ -794,59 +794,79 @@ function loadSystemConfig() {
       const banner = document.getElementById('announcement-banner');
       const annText = document.getElementById('announcement-text');
       if (c.announcement) {
-        annText.innerText = c.announcement;
-        banner.style.display = 'block';
+        if (annText) annText.textContent = c.announcement;
+        if (banner) banner.style.display = 'block';
       } else {
-        banner.style.display = 'none';
+        if (banner) banner.style.display = 'none';
       }
 
       const r = c.renew_period || {};
-      document.getElementById('renew-box-open').style.display = r.open ? 'block' : 'none';
-      document.getElementById('renew-box-closed').style.display = r.open ? 'none' : 'block';
+      const renewOpenEl = document.getElementById('renew-box-open');
+      const renewClosedEl = document.getElementById('renew-box-closed');
+      if (renewOpenEl) renewOpenEl.style.display = r.open ? 'block' : 'none';
+      if (renewClosedEl) renewClosedEl.style.display = r.open ? 'none' : 'block';
       if (r.open) {
-        document.getElementById('renew-sem-label').innerText = r.semester || '';
-        document.getElementById('renew-deadline-label').innerText = r.deadline || '';
+        const semLbl = document.getElementById('renew-sem-label');
+        const dlLbl = document.getElementById('renew-deadline-label');
+        if (semLbl) semLbl.textContent = r.semester || '';
+        if (dlLbl) dlLbl.textContent = r.deadline || '';
       }
 
       const sub = c.substitute_period || {};
       const subMsg = document.getElementById('substitute-schedule-msg');
+      const subInput = document.getElementById('substituteDateInput');
       if (sub.start && sub.end) {
-        subMsg.innerHTML = `เปิดรับลงทะเบียนขายแทน:<br>ตั้งแต่วันที่ ${new Date(sub.start).toLocaleDateString('th-TH')} ถึง ${new Date(sub.end).toLocaleDateString('th-TH')}`;
+        if (subMsg) subMsg.innerHTML = `เปิดรับลงทะเบียนขายแทน:<br>ตั้งแต่วันที่ ${new Date(sub.start).toLocaleDateString('th-TH')} ถึง ${new Date(sub.end).toLocaleDateString('th-TH')}`;
         const now = new Date();
         if (now >= new Date(sub.start) && now <= new Date(sub.end)) {
-          document.getElementById('substituteDateInput').disabled = false;
+          if (subInput) subInput.disabled = false;
         } else {
-          document.getElementById('substituteDateInput').disabled = true;
-          subMsg.innerHTML += '<br><span style="color:red;">(ขณะนี้อยู่นอกช่วงเวลาลงทะเบียน)</span>';
+          if (subInput) subInput.disabled = true;
+          if (subMsg) subMsg.innerHTML += '<br><span style="color:red;">(ขณะนี้อยู่นอกช่วงเวลาลงทะเบียน)</span>';
         }
       } else {
-        subMsg.innerHTML = 'ยังไม่มีการกำหนดช่วงเวลาลงทะเบียนขายแทน';
-        document.getElementById('substituteDateInput').disabled = true;
+        if (subMsg) subMsg.innerHTML = 'ยังไม่มีการกำหนดช่วงเวลาลงทะเบียนขายแทน';
+        if (subInput) subInput.disabled = true;
       }
 
       if (window.adminMode) {
-        document.getElementById('vis-apply').checked = !!v.apply;
-        document.getElementById('vis-map').checked = !!v.map;
-        document.getElementById('vis-stats').checked = !!v.stats;
-        document.getElementById('set-renew-sem').value = r.semester || '';
-        document.getElementById('set-renew-end').value = r.deadline || '';
-        document.getElementById('set-renew-open').checked = !!r.open;
-        document.getElementById('set-announcement').value = c.announcement || '';
+        const visApplyEl = document.getElementById('vis-apply');
+        const visMapEl = document.getElementById('vis-map');
+        const visStatsEl = document.getElementById('vis-stats');
+        const setRenewSem = document.getElementById('set-renew-sem');
+        const setRenewEnd = document.getElementById('set-renew-end');
+        const setRenewOpen = document.getElementById('set-renew-open');
+        const setAnnouncement = document.getElementById('set-announcement');
+
+        if (visApplyEl) visApplyEl.checked = !!v.apply;
+        if (visMapEl) visMapEl.checked = !!v.map;
+        if (visStatsEl) visStatsEl.checked = !!v.stats;
+        if (setRenewSem) setRenewSem.value = r.semester || '';
+        if (setRenewEnd) setRenewEnd.value = r.deadline || '';
+        if (setRenewOpen) setRenewOpen.checked = !!r.open;
+        if (setAnnouncement) setAnnouncement.value = c.announcement || '';
+
         if (c.leave_period) {
-          document.getElementById('set-leave-start').value = c.leave_period.start || '';
-          document.getElementById('set-leave-end').value = c.leave_period.end || '';
+          const setLeaveStart = document.getElementById('set-leave-start');
+          const setLeaveEnd = document.getElementById('set-leave-end');
+          if (setLeaveStart) setLeaveStart.value = c.leave_period.start || '';
+          if (setLeaveEnd) setLeaveEnd.value = c.leave_period.end || '';
         }
         if (c.substitute_period) {
-          document.getElementById('set-sub-start').value = c.substitute_period.start || '';
-          document.getElementById('set-sub-end').value = c.substitute_period.end || '';
+          const setSubStart = document.getElementById('set-sub-start');
+          const setSubEnd = document.getElementById('set-sub-end');
+          if (setSubStart) setSubStart.value = c.substitute_period.start || '';
+          if (setSubEnd) setSubEnd.value = c.substitute_period.end || '';
         }
         // Apply period admin fields
+        const setApplyStart = document.getElementById('set-apply-start');
+        const setApplyEnd = document.getElementById('set-apply-end');
         if (c.apply_period) {
-          document.getElementById('set-apply-start').value = c.apply_period.start || '';
-          document.getElementById('set-apply-end').value = c.apply_period.end || '';
+          if (setApplyStart) setApplyStart.value = c.apply_period.start || '';
+          if (setApplyEnd) setApplyEnd.value = c.apply_period.end || '';
         } else {
-          document.getElementById('set-apply-start').value = '';
-          document.getElementById('set-apply-end').value = '';
+          if (setApplyStart) setApplyStart.value = '';
+          if (setApplyEnd) setApplyEnd.value = '';
         }
         // Show apply period status in admin
         const statusEl = document.getElementById('apply-period-status');
@@ -1040,6 +1060,17 @@ window.adminLogin = async () => {
         }
     }
     
+    // Fallback: if popup is blocked or cross-origin policy interferes, try redirect flow
+    if (error.code === 'auth/popup-blocked' || (error.message && error.message.toLowerCase().includes('cross-origin-opener-policy'))) {
+      try {
+        window.showToast('Popup ถูกบล็อกหรือมีปัญหา cross-origin — ใช้วิธี redirect แทน (จะเปลี่ยนหน้า)', 'info', 4000);
+        await signInWithRedirect(auth, provider);
+        return;
+      } catch (re) {
+        console.error('Redirect fallback failed:', re);
+      }
+    }
+
     if (showToast) {
       window.showToast(errorMsg, 'error', 7000);
     }
@@ -1063,9 +1094,12 @@ onAuthStateChanged(auth, async (user) => {
   if (user && user.email === ADMIN_EMAIL) {
     console.log('Admin access granted:', user.email);
     window.adminMode = true;
-    document.getElementById('admin-login-wrap').style.display = 'none';
-    document.getElementById('admin-panel').style.display = 'block';
-    document.getElementById('admin-email-display').innerText = user.email;
+    const adminLoginWrapEl = document.getElementById('admin-login-wrap');
+    const adminPanelEl = document.getElementById('admin-panel');
+    const adminEmailDisplayEl = document.getElementById('admin-email-display');
+    if (adminLoginWrapEl) adminLoginWrapEl.style.display = 'none';
+    if (adminPanelEl) adminPanelEl.style.display = 'block';
+    if (adminEmailDisplayEl) adminEmailDisplayEl.textContent = user.email;
     try {
       await autoResetSubstitutes();
       loadAdminData();
@@ -1078,15 +1112,19 @@ onAuthStateChanged(auth, async (user) => {
     console.warn('Non-admin user tried to access:', user.email);
     console.warn('Expected admin email:', ADMIN_EMAIL);
     window.adminMode = false;
-    document.getElementById('admin-login-wrap').style.display = 'block';
-    document.getElementById('admin-panel').style.display = 'none';
+    const adminLoginWrapEl2 = document.getElementById('admin-login-wrap');
+    const adminPanelEl2 = document.getElementById('admin-panel');
+    if (adminLoginWrapEl2) adminLoginWrapEl2.style.display = 'block';
+    if (adminPanelEl2) adminPanelEl2.style.display = 'none';
     window.showToast('⚠️ คุณไม่มีสิทธิ์เข้าถึงระบบหลังบ้าน (Email: ' + user.email + ')', 'warning', 6000);
     loadSystemConfig();
   } else {
     console.log('No user logged in');
     window.adminMode = false;
-    document.getElementById('admin-login-wrap').style.display = 'block';
-    document.getElementById('admin-panel').style.display = 'none';
+    const adminLoginWrapEl3 = document.getElementById('admin-login-wrap');
+    const adminPanelEl3 = document.getElementById('admin-panel');
+    if (adminLoginWrapEl3) adminLoginWrapEl3.style.display = 'block';
+    if (adminPanelEl3) adminPanelEl3.style.display = 'none';
     loadSystemConfig();
   }
 });
