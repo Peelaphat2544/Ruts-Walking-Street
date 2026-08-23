@@ -975,42 +975,87 @@ async function autoResetSubstitutes() {
 }
 
 /* ─── ADMIN AUTH ─── */
+let loginAttempts = 0;
+const MAX_LOGIN_ATTEMPTS = 3;
+const LOGIN_ATTEMPT_RESET = 5000; // Reset every 5 seconds
+
 window.adminLogin = async () => {
+  // Prevent rapid repeated attempts
+  loginAttempts++;
+  if (loginAttempts > MAX_LOGIN_ATTEMPTS) {
+    window.showToast('⏰ ลองมากเกินไป รอ 5 วินาทีแล้วลองใหม่', 'warning', 5000);
+    setTimeout(() => { loginAttempts = 0; }, LOGIN_ATTEMPT_RESET);
+    return;
+  }
+
+  // Reset attempt counter after delay
+  setTimeout(() => { loginAttempts = 0; }, LOGIN_ATTEMPT_RESET);
+
   try {
     const result = await signInWithPopup(auth, provider);
     console.log('Login successful:', result.user.email);
+    loginAttempts = 0;
   } catch (error) {
     console.error('Login error:', error.code, error.message);
     
     let errorMsg = 'เกิดข้อผิดพลาดในการล็อกอิน: ';
+    let showToast = true;
     
     switch(error.code) {
       case 'auth/popup-closed-by-user':
-        errorMsg = 'ยกเลิกการล็อกอิน';
+      case 'auth/cancelled-popup-request':
+        errorMsg = '⚠️ ยกเลิกการล็อกอิน\n\nอีกสักครู่ popup ปิดไป\nลองใหม่ครั้งต่อไป';
+        showToast = false;
         break;
       case 'auth/popup-blocked':
-        errorMsg = 'Popup ถูกปิดกั้น ลองอนุญาต popup ของเบราว์เซอร์';
+        errorMsg = '⚠️ Popup ถูกปิดกั้น\n\n📋 วิธีแก้:\n1. ปิด popup blocker\n2. อนุญาต popup\n3. ลองใหม่';
+        showToast = true;
         break;
       case 'auth/operation-not-allowed':
-        errorMsg = 'Google Sign-In ยังไม่ได้เปิดใช้งานใน Firebase Console';
+        errorMsg = '❌ Google Sign-In ยังไม่เปิด\n\nไปที่ Firebase Console:\n1. Authentication\n2. Sign-in method\n3. เปิด Google';
+        showToast = true;
         break;
       case 'auth/unauthorized-domain':
-        errorMsg = 'โดเมนนี้ไม่ได้รับอนุญาต ตรวจสอบ Firebase Console';
+        errorMsg = '❌ โดเมนไม่ได้รับอนุญาต\n\nไปที่ Firebase Console:\n1. Authentication\n2. Settings\n3. เพิ่ม domain';
+        showToast = true;
         break;
       case 'auth/invalid-api-key':
-        errorMsg = 'Firebase API key ไม่ถูกต้อง';
+        errorMsg = '❌ Firebase API key ไม่ถูกต้อง\n\nตรวจสอบ script.js';
+        showToast = true;
         break;
       case 'auth/network-request-failed':
-        errorMsg = 'เชื่อมต่อเน็ตเวิร์กล้มเหลว ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+        errorMsg = '❌ เน็ตเวิร์กล้มเหลว\n\nตรวจสอบ internet\nลองใหม่ใน 1-2 นาที';
+        showToast = true;
+        break;
+      case 'auth/internal-error':
+        errorMsg = '❌ ข้อผิดพลาดภายใน\n\nลองใหม่ใน 1-2 นาที';
+        showToast = true;
         break;
       default:
-        errorMsg += error.message;
+        if (error.code && error.code.includes('popup')) {
+          showToast = false;
+        } else {
+          errorMsg += (error.message || 'Unknown error');
+          showToast = true;
+        }
     }
     
-    window.showToast(errorMsg, 'error', 6000);
+    if (showToast) {
+      window.showToast(errorMsg, 'error', 7000);
+    }
   }
 };
-window.adminLogout = () => signOut(auth);
+
+window.adminLogout = async () => {
+  try {
+    await signOut(auth);
+    console.log('Logout successful');
+    window.showToast('ออกจากระบบแล้ว', 'success', 3000);
+  } catch (error) {
+    console.error('Logout error:', error);
+    window.showToast('เกิดข้อผิดพลาดในการออกจากระบบ', 'error');
+  }
+};
 
 onAuthStateChanged(auth, async (user) => {
   console.log('Auth state changed:', user ? `User: ${user.email}` : 'No user');
