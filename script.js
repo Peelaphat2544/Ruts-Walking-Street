@@ -975,19 +975,70 @@ async function autoResetSubstitutes() {
 }
 
 /* ─── ADMIN AUTH ─── */
-window.adminLogin = () => signInWithPopup(auth, provider);
+window.adminLogin = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    console.log('Login successful:', result.user.email);
+  } catch (error) {
+    console.error('Login error:', error.code, error.message);
+    
+    let errorMsg = 'เกิดข้อผิดพลาดในการล็อกอิน: ';
+    
+    switch(error.code) {
+      case 'auth/popup-closed-by-user':
+        errorMsg = 'ยกเลิกการล็อกอิน';
+        break;
+      case 'auth/popup-blocked':
+        errorMsg = 'Popup ถูกปิดกั้น ลองอนุญาต popup ของเบราว์เซอร์';
+        break;
+      case 'auth/operation-not-allowed':
+        errorMsg = 'Google Sign-In ยังไม่ได้เปิดใช้งานใน Firebase Console';
+        break;
+      case 'auth/unauthorized-domain':
+        errorMsg = 'โดเมนนี้ไม่ได้รับอนุญาต ตรวจสอบ Firebase Console';
+        break;
+      case 'auth/invalid-api-key':
+        errorMsg = 'Firebase API key ไม่ถูกต้อง';
+        break;
+      case 'auth/network-request-failed':
+        errorMsg = 'เชื่อมต่อเน็ตเวิร์กล้มเหลว ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+        break;
+      default:
+        errorMsg += error.message;
+    }
+    
+    window.showToast(errorMsg, 'error', 6000);
+  }
+};
 window.adminLogout = () => signOut(auth);
 
 onAuthStateChanged(auth, async (user) => {
+  console.log('Auth state changed:', user ? `User: ${user.email}` : 'No user');
+  
   if (user && user.email === ADMIN_EMAIL) {
+    console.log('Admin access granted:', user.email);
     window.adminMode = true;
     document.getElementById('admin-login-wrap').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     document.getElementById('admin-email-display').innerText = user.email;
-    await autoResetSubstitutes();
-    loadAdminData();
+    try {
+      await autoResetSubstitutes();
+      loadAdminData();
+      loadSystemConfig();
+    } catch (e) {
+      console.error('Error loading admin data:', e);
+      window.showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + e.message, 'error');
+    }
+  } else if (user) {
+    console.warn('Non-admin user tried to access:', user.email);
+    console.warn('Expected admin email:', ADMIN_EMAIL);
+    window.adminMode = false;
+    document.getElementById('admin-login-wrap').style.display = 'block';
+    document.getElementById('admin-panel').style.display = 'none';
+    window.showToast('⚠️ คุณไม่มีสิทธิ์เข้าถึงระบบหลังบ้าน (Email: ' + user.email + ')', 'warning', 6000);
     loadSystemConfig();
   } else {
+    console.log('No user logged in');
     window.adminMode = false;
     document.getElementById('admin-login-wrap').style.display = 'block';
     document.getElementById('admin-panel').style.display = 'none';
