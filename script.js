@@ -44,12 +44,28 @@ window.showToast = (msg, type = 'success', duration = 4000) => {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = `
-      <span class="toast-icon">${TOAST_ICONS[type]}</span>
-      <span class="toast-msg">${msg}</span>
-      <button class="toast-close" onclick="this.parentElement.classList.add('out'); setTimeout(()=>this.parentElement.remove(), 300)">✕</button>
-    `;
+  
+  const iconSpan = document.createElement('span');
+  iconSpan.className = 'toast-icon';
+  iconSpan.textContent = TOAST_ICONS[type];
+  
+  const msgSpan = document.createElement('span');
+  msgSpan.className = 'toast-msg';
+  msgSpan.textContent = msg;
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'toast-close';
+  closeBtn.textContent = '✕';
+  closeBtn.addEventListener('click', function() {
+    this.parentElement.classList.add('out');
+    setTimeout(() => this.parentElement.remove(), 300);
+  });
+  
+  toast.appendChild(iconSpan);
+  toast.appendChild(msgSpan);
+  toast.appendChild(closeBtn);
   container.appendChild(toast);
+  
   setTimeout(() => {
     toast.classList.add('out');
     setTimeout(() => toast.remove(), 320);
@@ -63,11 +79,17 @@ window._confirmResolve = null;
 
 window.showConfirm = (msg, title = 'ยืนยันการดำเนินการ', icon = '⚠️', okLabel = 'ยืนยัน', okClass = 'btn-danger') => {
   return new Promise(resolve => {
-    document.getElementById('confirm-msg').innerHTML = msg;
     document.getElementById('confirm-title').textContent = title;
     document.getElementById('confirm-icon').textContent = icon;
     document.getElementById('confirm-ok-btn').textContent = okLabel;
     document.getElementById('confirm-ok-btn').className = `btn ${okClass}`;
+    
+    const msgElement = document.getElementById('confirm-msg');
+    msgElement.innerHTML = '';
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = msg;
+    msgElement.appendChild(tempDiv);
+    
     document.getElementById('confirm-box').style.display = 'block';
     document.getElementById('confirm-bg').style.display = 'block';
     window._confirmResolve = (result) => {
@@ -195,21 +217,35 @@ function handleImageSelection(files) {
     return;
   }
 
-  newFiles.forEach(file => {
+  const validFiles = newFiles.filter(file => {
     if (file.size > 100 * 1024 * 1024) {
       if (uploadError) { uploadError.innerText = 'ขนาดไฟล์ต้องไม่เกิน 100MB'; uploadError.style.display = 'block'; }
-      return;
+      return false;
     }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      compressImage(e.target.result, 1200, (compressedBase64) => {
-        selectedImages.push(compressedBase64);
-        renderPreviews();
-      });
-    };
-    reader.readAsDataURL(file);
+    return true;
   });
+
+  const readPromises = validFiles.map(file => 
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        compressImage(e.target.result, 1200, (compressedBase64) => {
+          resolve(compressedBase64);
+        });
+      };
+      reader.onerror = () => reject(new Error('Failed to read file: ' + file.name));
+      reader.readAsDataURL(file);
+    })
+  );
+
+  Promise.all(readPromises).then(compressedImages => {
+    selectedImages.push(...compressedImages);
+    renderPreviews();
+  }).catch(err => {
+    console.error('Image processing error:', err);
+    if (uploadError) { uploadError.innerText = 'เกิดข้อผิดพลาดในการอ่านรูปภาพ'; uploadError.style.display = 'block'; }
+  });
+
   imageInput.value = '';
 }
 
@@ -300,10 +336,15 @@ document.getElementById('form-apply').addEventListener('submit', async (e) => {
     try {
       const uploadRes = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ shopName: data.shopName, images: selectedImages })
       });
       if (progressBar) progressBar.style.width = '80%';
+      
+      if (!uploadRes.ok) {
+        throw new Error(`Server returned ${uploadRes.status}: ${uploadRes.statusText}`);
+      }
+      
       uploadResult = await uploadRes.json();
     } catch (fetchErr) {
       throw new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์อัพโหลดรูปได้: ' + fetchErr.message);
@@ -963,6 +1004,25 @@ window.showAdminTab = (tab, btn) => {
   if (tab === 'logs') loadLogs();
 };
 
+/* Event delegation handler for table action buttons */
+function handleTableActionClick(e) {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+
+  const action = btn.dataset.action;
+  const shopId = btn.dataset.shopId || (btn.closest('tr') ? btn.closest('tr').dataset.shopId : null);
+
+  if (action === 'open-gallery' && shopId) {
+    window.openGallery(shopId);
+  } else if (action === 'open-approve' && shopId) {
+    const shopName = btn.dataset.shopName || '';
+    const isSubstitute = btn.dataset.isSubstitute === 'true';
+    window.openApprove(shopId, shopName, isSubstitute);
+  } else if (action === 'open-edit' && shopId) {
+    window.openEditShop(shopId);
+  }
+}
+
 /* ══════════════════════════════════════════
    ADMIN DATA — Real-time (with resolved leave names)
 ══════════════════════════════════════════ */
@@ -1002,7 +1062,7 @@ function loadAdminData() {
         if (a.status === 'pending') {
           const hasImages = a.fileUrls && a.fileUrls.length > 0;
           const imgBtn = hasImages
-            ? `<button class="btn btn-ghost btn-sm" onclick="window.openGallery('${a.id}')" style="margin-right:4px;">🖼️ ดูรูปสินค้าและบริการ</button>`
+            ? `<button class="btn btn-ghost btn-sm" data-action="open-gallery" data-shop-id="${a.id}" style="margin-right:4px;">🖼️ ดูรูปสินค้าและบริการ</button>`
             : '';
 
           if (a.isResign) {
@@ -1013,7 +1073,7 @@ function loadAdminData() {
                 <td>${a.phone}</td>
                 <td>
                   ${imgBtn}
-                  <button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}','${a.shopName}', false)">พิจารณา</button>
+                  <button class="btn btn-primary btn-sm" data-action="open-approve" data-shop-id="${a.id}" data-shop-name="${(a.shopName || '').replace(/"/g, '&quot;')}" data-is-substitute="false">พิจารณา</button>
                 </td>
               </tr>`;
           } else {
@@ -1027,7 +1087,7 @@ function loadAdminData() {
                 <td>${a.category || '—'}</td>
                 <td>
                   ${imgBtn}
-                  <button class="btn btn-primary btn-sm" onclick="window.openApprove('${a.id}','${a.shopName}', ${isSub})">จัดการ</button>
+                  <button class="btn btn-primary btn-sm" data-action="open-approve" data-shop-id="${a.id}" data-shop-name="${(a.shopName || '').replace(/"/g, '&quot;')}" data-is-substitute="${isSub}">จัดการ</button>
                 </td>
               </tr>`;
           }
@@ -1055,13 +1115,13 @@ function loadAdminData() {
           cancelled: '<span class="badge badge-cancelled">ยกเลิก</span>'
         }[a.status] || `<span class="badge">${a.status}</span>`;
 
-        const row = `<tr class="shop-row" data-status="${a.status}" data-name="${(a.shopName || '').toLowerCase()}" data-phone="${(a.phone || '').toLowerCase()}">
+        const row = `<tr class="shop-row" data-status="${a.status}" data-name="${(a.shopName || '').toLowerCase()}" data-phone="${(a.phone || '').toLowerCase()}" data-shop-id="${a.id}">
             <td class="shop-name-col"><strong>${a.shopName}</strong></td>
             <td>${a.slots || '—'}</td>
             <td>${a.category || '—'}</td>
             <td>${statusLabel}</td>
             <td class="shop-phone-col">${a.phone || '—'}</td>
-            <td><button class="btn btn-ghost btn-sm" onclick="window.openEditShop('${a.id}')">แก้ไข</button></td>
+            <td><button class="btn btn-ghost btn-sm" data-action="open-edit">แก้ไข</button></td>
           </tr>`;
         shopsHtml += row;
         window._allShopsRows.push({ status: a.status, name: (a.shopName || '').toLowerCase(), phone: (a.phone || '').toLowerCase(), html: row });
@@ -1079,6 +1139,18 @@ function loadAdminData() {
       document.getElementById('adm-st-pending').innerText = cntPending;
       document.getElementById('adm-st-leave').innerText = cntLeave;
       document.getElementById('adm-st-t2').innerText = cntT2;
+
+      // Event delegation for action buttons
+      const setupDelegation = (tableId) => {
+        const table = document.getElementById(tableId);
+        if (table) {
+          table.removeEventListener('click', handleTableActionClick);
+          table.addEventListener('click', handleTableActionClick);
+        }
+      };
+      setupDelegation('tbody-pending');
+      setupDelegation('tbody-admin-resign');
+      setupDelegation('tbody-admin-shops');
 
     } catch (e) { console.warn('loadAdminData (shops):', e); }
   });
@@ -1266,8 +1338,14 @@ async function deleteGoogleDriveFolder(folderUrl) {
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'delete', folderUrl: folderUrl })
     });
+    
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+    }
+    
     const result = await res.json();
     if (!result.success) console.warn("Failed to delete folder:", result.error);
   } catch (e) {
@@ -1388,12 +1466,17 @@ window.openEditShop = async (id) => {
 
     const extraDiv = document.getElementById('edit-extra-info');
     if (extraDiv) {
+      extraDiv.innerHTML = '';
       if (d.personType === 'สโมสรนักศึกษา') {
         extraDiv.style.display = 'block';
-        extraDiv.innerHTML = `<strong>ประเภทบุคคล:</strong> สโมสรนักศึกษา<br><strong>คณะ:</strong> ${d.clubFaculty || '—'}<br><strong>หัวหน้า:</strong> ${d.clubHeadName || '—'} (${d.clubHeadPhone || '—'})`;
+        const titleEl = document.createElement('div');
+        titleEl.innerHTML = '<strong>ประเภทบุคคล:</strong> สโมสรนักศึกษา<br><strong>คณะ:</strong> ' + (d.clubFaculty || '—') + '<br><strong>หัวหน้า:</strong> ' + (d.clubHeadName || '—') + ' (' + (d.clubHeadPhone || '—') + ')';
+        extraDiv.appendChild(titleEl);
       } else if (d.personType === 'นักศึกษา') {
         extraDiv.style.display = 'block';
-        extraDiv.innerHTML = `<strong>ประเภทบุคคล:</strong> นักศึกษา<br><strong>รหัส:</strong> ${d.studentId || '—'} <strong>สาขา:</strong> ${d.studentMajor || '—'} <strong>คณะ:</strong> ${d.studentFaculty || '—'}<br><strong>อ.ที่ปรึกษา:</strong> ${d.advisorName || '—'} (${d.advisorPhone || '—'})`;
+        const titleEl = document.createElement('div');
+        titleEl.innerHTML = '<strong>ประเภทบุคคล:</strong> นักศึกษา<br><strong>รหัส:</strong> ' + (d.studentId || '—') + ' <strong>สาขา:</strong> ' + (d.studentMajor || '—') + ' <strong>คณะ:</strong> ' + (d.studentFaculty || '—') + '<br><strong>อ.ที่ปรึกษา:</strong> ' + (d.advisorName || '—') + ' (' + (d.advisorPhone || '—') + ')';
+        extraDiv.appendChild(titleEl);
       } else {
         extraDiv.style.display = 'none';
         extraDiv.innerHTML = '';
@@ -1425,14 +1508,25 @@ window.deleteShop = async () => {
   if (!ok) return;
   try {
     const shopData = _shopsCache[currentId] || {};
-    if (shopData.folderUrl) await deleteGoogleDriveFolder(shopData.folderUrl);
+    
+    // Try to delete Google Drive folder, but don't fail if it's missing
+    if (shopData.folderUrl) {
+      try {
+        await deleteGoogleDriveFolder(shopData.folderUrl);
+      } catch (driveErr) {
+        console.warn('Warning: Could not delete Google Drive folder, but continuing with shop deletion:', driveErr);
+      }
+    }
 
+    // Delete from Firestore
     await deleteDoc(doc(db, "shops", currentId));
     await logAction('ลบร้านค้า', `ร้าน: ${shopName}`, 'del');
     window.showToast(`ลบร้าน "${shopName}" ออกจากระบบแล้ว`, 'warning');
     window.closeModal();
     loadAdminData();
-  } catch (e) { window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); }
+  } catch (e) { 
+    window.showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'); 
+  }
 };
 
 /* ─── EXPORT (CSV) ─── */
@@ -1474,19 +1568,39 @@ window.openGallery = (shopId) => {
   container.innerHTML = '';
 
   if (shopData.fileUrls && shopData.fileUrls.length > 0) {
-    container.innerHTML = shopData.fileUrls.map(url => `
-        <div class="gallery-img-wrap">
-          <img src="${url}" onclick="window.open('${url}','_blank')" alt="Shop Image">
-        </div>
-      `).join('');
+    shopData.fileUrls.forEach(url => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'gallery-img-wrap';
+      
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = 'Shop Image';
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', function() {
+        window.open(url, '_blank');
+      });
+      
+      wrapper.appendChild(img);
+      container.appendChild(wrapper);
+    });
   } else {
-    container.innerHTML = '<div class="td-empty">ไม่มีรูปภาพสินค้า</div>';
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'td-empty';
+    emptyDiv.textContent = 'ไม่มีรูปภาพสินค้า';
+    container.appendChild(emptyDiv);
   }
 
   if (shopData.folderUrl) {
-    container.innerHTML += `<div style="grid-column: 1 / -1; margin-top: 10px; text-align: center;">
-        <a href="${shopData.folderUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none; display:inline-block;">📂 เปิดดูใน Google Drive</a>
-      </div>`;
+    const driveDiv = document.createElement('div');
+    driveDiv.style.cssText = 'grid-column: 1 / -1; margin-top: 10px; text-align: center;';
+    const link = document.createElement('a');
+    link.href = shopData.folderUrl;
+    link.target = '_blank';
+    link.className = 'btn btn-primary';
+    link.style.cssText = 'text-decoration:none; display:inline-block;';
+    link.textContent = '📂 เปิดดูใน Google Drive';
+    driveDiv.appendChild(link);
+    container.appendChild(driveDiv);
   }
 
   document.getElementById('modal-gallery').style.display = 'block';
