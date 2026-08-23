@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ฟังก์ชันตรวจสอบว่าเป็น Admin (ใช้อีเมลที่กำหนด) หรือไม่
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'rutswalkingstreet@gmail.com';
+    }
+
+    // 1. ร้านค้า (Shops)
+    // - ทุกคนดูแผนผังและลงทะเบียนสมัคร/ขายแทนได้
+    // - เฉพาะ Admin เท่านั้นที่อนุมัติ, แก้ไข หรือลบร้านได้
+    match /shops/{shopId} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // 2. แจ้งขอหยุดจำหน่าย (Leaves)
+    // - ทุกคนแจ้งลาได้
+    // - เฉพาะ Admin อนุมัติการลาได้
+    match /leaves/{leaveId} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // 3. ทบทวนสิทธิ์ (Renewals)
+    // - ทุกคนส่งแบบฟอร์มยืนยันสิทธิ์ได้
+    match /renewals/{renewId} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // 4. การตั้งค่าระบบ (Config)
+    // - ทุกคนอ่านได้ (เพื่อให้หน้าเว็บรู้ว่าต้องเปิด/ปิดเมนูไหน)
+    // - เฉพาะ Admin ที่แก้การตั้งค่าได้
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 5. ข้อมูลการเงิน (Payments)
+    // - ความลับ! เฉพาะ Admin ดูและบันทึกได้เท่านั้น
+    match /payments/{paymentId} {
+      allow read, write: if isAdmin();
+    }
+
+    // 6. ประวัติการทำงานระบบ (Logs)
+    // - ความลับ! เฉพาะ Admin ดูและบันทึกได้เท่านั้น
+    match /logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
